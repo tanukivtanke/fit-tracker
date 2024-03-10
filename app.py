@@ -1,3 +1,4 @@
+import auth
 from base import app, db
 from flask import render_template, jsonify
 from objects.user import User
