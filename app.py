@@ -1,7 +1,7 @@
 import auth
 from base import app, db
 from flask import render_template, jsonify
-from objects.user import User
+from objects.user import User, Food
 
 
 @app.route('/')
@@ -18,6 +18,11 @@ def about():
 def get_users():
     users = User.query.all()
     return jsonify([{'id': user.id, 'username': user.username} for user in users])
+
+@app.route('/food')
+def get_food():
+    food = Food.query.all()
+    return jsonify([i.dict() for i in food])
 
 
 @app.route('/user/<username>')
