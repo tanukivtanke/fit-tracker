@@ -3,5 +3,5 @@ create table if not exists user (
     username text
 );
 
-insert into user (id, username) values (1, 'tanuki');
-insert into user (id, username) values (2, '2493');
+insert into user (username) values ('tanuki');
+insert into user (username) values ('2493');
