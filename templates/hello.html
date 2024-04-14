@@ -67,6 +67,10 @@ async function fetchData() {
     const foods = await _fetch('/api/foods');
     const dishes = await _fetch('/api/dishes');
 
+
+    const todayMeals = await _fetch('/api/today_meals?user=2493');
+
+
     console.log(meals);
     console.log(meal_groups);
     console.log(foods);
