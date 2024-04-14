@@ -47,10 +47,10 @@ def get_dishes():
 @app.route('/api/today_meals')
 def get_today_meals():
     username = get_argument('user')
-    user_id = User.query.filter_by(username=username).first().id
+    user_id = User.find(username=username).id
     today = date.today()
-    today_meals = MealGroup.query.filter_by(user_id=user_id, day=today).all()
-    return sorted(today_meals, key=lambda x:  MealOrder.query.filter_by(id=x.meal_order_id).first().ordering)
+    today_meals = MealGroup.all(user_id=user_id, day=today)
+    return sorted(today_meals, key=lambda x:  MealOrder.find(id=x.meal_order_id).ordering)
 
 
 @app.route('/user/<username>')
