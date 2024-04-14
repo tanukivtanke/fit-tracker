@@ -1,7 +1,8 @@
 import auth
 from base import app, db
 from flask import render_template, request
-from objects.user import Dish, Meal, MealGroup, User, Food
+from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder
+from datetime import date
 
 
 @app.route('/')
@@ -41,6 +42,15 @@ def get_meal_groups():
 @app.route('/api/dishes')
 def get_dishes():
     return Dish.all_json()
+
+
+@app.route('/api/today_meals')
+def get_today_meals():
+    username = get_argument('user')
+    user_id = User.query.filter_by(username=username).first().id
+    today = date.today()
+    today_meals = MealGroup.query.filter_by(user_id=user_id, day=today).all()
+    return sorted(today_meals, key=lambda x:  MealOrder.query.filter_by(id=x.meal_order_id).first().ordering)
 
 
 @app.route('/user/<username>')
