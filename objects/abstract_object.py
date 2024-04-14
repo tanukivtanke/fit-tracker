@@ -16,3 +16,8 @@ class AbstractObject(db.Model):
 
     def json(self):
         return jsonify(self.dict())
+
+    @classmethod
+    def all_json(cls):
+        all_objs = cls.query.all()
+        return jsonify([i.dict() for i in all_objs])

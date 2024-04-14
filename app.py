@@ -1,12 +1,12 @@
 import auth
 from base import app, db
 from flask import render_template, jsonify
-from objects.user import User, Food
+from objects.user import Dish, Meal, MealGroup, User, Food
 
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! 123'
+    return render_template('hello.html', name='qwe')
 
 
 @app.route('/about')
@@ -14,15 +14,29 @@ def about():
     return 'This is the about page'
 
 
-@app.route('/users')
+@app.route('/api/users')
 def get_users():
-    users = User.query.all()
-    return jsonify([{'id': user.id, 'username': user.username} for user in users])
+    return User.all_json()
 
-@app.route('/food')
+
+@app.route('/api/foods')
 def get_food():
-    food = Food.query.all()
-    return jsonify([i.dict() for i in food])
+    return Food.all_json()
+
+
+@app.route('/api/meals')
+def get_meals():
+    return Meal.all_json()
+
+
+@app.route('/api/meal_groups')
+def get_meal_groups():
+    return MealGroup.all_json()
+
+
+@app.route('/api/dishes')
+def get_dishes():
+    return Dish.all_json()
 
 
 @app.route('/user/<username>')
@@ -33,4 +47,4 @@ def show_user_profile(username):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
