@@ -1,6 +1,6 @@
 import auth
 from base import app, db
-from flask import render_template, jsonify
+from flask import render_template, request
 from objects.user import Dish, Meal, MealGroup, User, Food
 
 
@@ -27,6 +27,10 @@ def get_food():
 @app.route('/api/meals')
 def get_meals():
     return Meal.all_json()
+
+
+def get_argument(arg_name):
+    return request.args.get(arg_name, default="", type=str)
 
 
 @app.route('/api/meal_groups')
