@@ -26,7 +26,7 @@ def get_food():
 
 
 @app.route('/api/meals')
-def get_meals():
+def get_all_meals():
     return Meal.all_json()
 
 
@@ -44,13 +44,13 @@ def get_dishes():
     return Dish.all_json()
 
 
-@app.route('/api/today_meals')
-def get_today_meals():
+@app.route('/api/get_meals')
+def get_meals():
     username = get_argument('user')
+    meal_date = get_argument('date')
     user_id = User.find(username=username).id
-    today = date.today()
-    today_meals = MealGroup.all(user_id=user_id, day=today)
-    return sorted(today_meals, key=lambda x:  MealOrder.find(id=x.meal_order_id).ordering)
+    meals_by_date = MealGroup.all(user_id=user_id, day=meal_date)
+    return sorted(meals_by_date, key=lambda x:  MealOrder.find(id=x.meal_order_id).ordering)
 
 
 @app.route('/user/<username>')
