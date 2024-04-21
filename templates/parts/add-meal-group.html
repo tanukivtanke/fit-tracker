@@ -1,0 +1,81 @@
+
+
+
+<div id="wrapper-add-meal-group-modal"></div>
+
+<script>
+    {
+        const addMealGroupModal = new Modal('add-meal-group', 'Добавить приём пищи', false);
+
+        const customNameInput = 'meal-group-name-input';
+
+        byId('add-meal-group').addEventListener('click', () => {
+            addMealGroupModal.show();
+
+            const unsortedMealOrders = Object.values(allMealOrders);
+            const sortedMealOrders = unsortedMealOrders.sort((a, b) => a.ordering - b.ordering);
+
+            let latestMealOrderId = -1;
+            let latestMealOrderOrdering = -1;
+
+            for (let mg of currentMealsGroups) {
+                let currMoId = mg.meal_order_id;
+                let currMoOrdering =  allMealOrders[currMoId].ordering;
+                if (currMoOrdering > latestMealOrderOrdering) {
+                    latestMealOrderId = mg.id;
+                    latestMealOrderOrdering = currMoOrdering;
+                }
+            }
+
+            let nextMaxMealOrderId = -1;
+            let nextMaxMealOrderOrdering = -1;
+
+            let maxMealOrderId = -1;
+            let maxMealOrderOrdering = -1;
+
+            for (let mo of Object.values(allMealOrders)) {
+                if (mo.ordering > latestMealOrderOrdering &&
+                    (nextMaxMealOrderOrdering === -1 || mo.ordering < nextMaxMealOrderOrdering)) {
+                    nextMaxMealOrderId = mo.id;
+                    nextMaxMealOrderOrdering = mo.ordering;
+                }
+                if (maxMealOrderOrdering === -1 || maxMealOrderOrdering < mo.ordering) {
+                    maxMealOrderId = mo.id;
+                    maxMealOrderOrdering = mo.ordering;
+                }
+            }
+
+            if (nextMaxMealOrderId === -1) {
+                nextMaxMealOrderId = maxMealOrderId;
+                nextMaxMealOrderOrdering = maxMealOrderOrdering;
+            }
+
+            let selectOptions = ``;
+            for (let mo of sortedMealOrders) {
+                selectOptions += HtmlPresets.option(mo.id, mo.id === nextMaxMealOrderId, mo.name);
+            }
+
+            let selectHtml = `
+            ${HtmlPresets.select('meal-group-select', true, selectOptions, '', 'py-2')}
+            `;
+
+            addMealGroupModal.setHtml(`
+            <h6>Выберите тип приёма пищи и название</h6>
+            <div class="d-flex align-items-baseline">
+            ${selectHtml}
+            <input id="${customNameInput}" type="text" class="form-control ms-2"
+                style="max-width: 15rem"
+                placeholder="Название"
+                value="${name}">
+            </div>
+            `);
+
+            const changeName = () => {
+                byId(customNameInput).value = allMealOrders[byId('meal-group-select').value].name;
+            }
+            changeName();
+
+            byId('meal-group-select').addEventListener("change", changeName);
+        });
+    }
+</script>

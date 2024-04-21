@@ -45,6 +45,9 @@ def get_meal_groups():
 def get_dishes():
     return Dish.all_json()
 
+@app.route('/api/meal_orders')
+def get_all_meal_orders():
+    return MealOrder.all_json()
 
 @app.route('/api/get_meals_for_day')
 def get_meals_for_day():

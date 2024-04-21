@@ -1,32 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <title>Fit Tracker</title>
-
-{#  <link rel="icon" type="image/svg+xml" href="/img/logo-circle.svg">#}
-
-  <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css" crossorigin="anonymous">
-
-  <link rel="stylesheet" type="text/css" href="/static/style.css">
-
-  <script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-  <script src="https://unpkg.com/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://npmcdn.com/flatpickr/dist/l10n/ru.js"></script>
-</head>
-
-
+{% include 'head.html' with context %}
 
 <body>
 <nav class="navbar bg-dark text-white">
@@ -44,96 +18,91 @@
 <div class="container">
     <div id="under-eating" class="d-flex justify-content-between">
         <h2 class="my-3">Приёмы пищи</h2>
-        <div id="current-date">
-            <span>
-                <i class="fa-solid fa-arrow-left"></i>
-            </span>
-            <span class="fs-5 mx-2">10 июля</span>
-            <span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </span>
-        </div>
+        <div id="current-date"></div>
     </div>
-
-
     <div id="eating"></div>
+    <div id="add-meal-group"
+         class="border border-black border-2 rounded-2 text-center bg-dark text-white fs-2 fw-bold">
+        <i class="fa-solid fa-plus stretched"></i>
+    </div>
 </div>
 </body>
 
 
 <script>
-const DateTime = luxon.DateTime;
-const byId = id => document.getElementById(id);
-let currentDate = DateTime.local().setLocale('ru');
-const nowDate = currentDate;
+let allMealOrders = null;
+let allFoods = null;
+let allDishes = null;
 
-const shiftDateByOneDay = (date, forward) => {
-  if (forward) {
-    return date.plus({ days: 1 });
-  } else {
-    return date.minus({ days: 1 });
-  }
-}
+const mealGroupMap = {};
+const mealMap = {};
 
-async function _fetch(url) {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error('Failed to fetch meals');
-    }
-    return await response.json();
-}
+let currentMealsGroups;
 
 async function fetchData() {
-    const meals = await _fetch('/api/meals');
-    const meal_groups = await _fetch('/api/meal_groups');
-    const foods = await _fetch('/api/foods');
-    const dishes = await _fetch('/api/dishes');
+    if (allMealOrders == null) {
+        allMealOrders = mapToId(await _fetch('/api/meal_orders'));
+    }
+    if (allFoods == null) {
+        allFoods = mapToId(await _fetch('/api/foods'));
+    }
+    if (allDishes == null) {
+        allDishes = mapToId(await _fetch('/api/dishes'));
+    }
 
     let currDateStr = currentDate.toFormat('yyyy-MM-dd');
-    const todayMeals = await _fetch(`/api/get_meals?user=2493&date=${currDateStr}`);
-    console.log(todayMeals);
+    currentMealsGroups = await _fetch(`/api/get_meals_for_day?user=tanuki&date=${currDateStr}`);
 
-    let meals_html = ``;
+    for (let mg of currentMealsGroups) {
+        let mgId = mg.id;
+        mealGroupMap[mgId] = mg;
 
-    for (let m of meals) {
-        let showing_name = null;
-        if (m.dish_id !== null) {
-            for (let d of dishes) {
-                if (d.id === m.dish_id) {
-                    showing_name = d.name;
-                }
+        const mealsForMealGroup = await _fetch(`/api/get_meals_for_meal_group?id=${mgId}`);
+        mg.api_meals = mealsForMealGroup;
+        for (let m of mealsForMealGroup) {
+            mealMap[m.id] = m;
+        }
+    }
+
+    let allMealsGroupsHtml = ``;
+    for (let mg of currentMealsGroups) {
+        let currentMealGroupHtml = ``;
+
+        for (let m of mg.api_meals) {
+            let showing_name = null;
+            if (m.dish_id !== null) {
+                showing_name = allDishes[m.dish_id].name;
+            } else if (m.food_id !== null) {
+                showing_name = allFoods[m.food_id].name;
             }
-        } else if (m.food_id !== null) {
-            for (let d of foods) {
-                if (d.id === m.food_id) {
-                    showing_name = d.name;
-                }
+            if (showing_name === null) {
+                continue;
             }
+
+            let amount = m.amount;
+
+            currentMealGroupHtml += `
+            <div class="d-flex justify-content-between">
+                <div>${showing_name}</div>
+                <div>${amount} g</div>
+            </div>
+            `;
         }
 
-        if (showing_name === null) {
-            continue;
+        let mealName = mg.meal_name;
+        if (mealName == null) {
+            mealName = allMealOrders[mg.meal_order_id].name;
         }
 
-        let amount = m.amount;
-
-        meals_html += `
-        <div class="d-flex justify-content-between">
-            <div>${showing_name}</div>
-            <div>${amount} g</div>
+        allMealsGroupsHtml += `
+        <div class="border border-black border-2 rounded-2 py-2 px-3 fs-4 mb-4">
+            <div>${mealName}</div>
+            <hr class="my-1">
+            ${currentMealGroupHtml}
         </div>
         `;
     }
-
-
-    document.getElementById('eating').innerHTML = `
-    <div class="border border-black border-2 rounded-2 py-2 px-3 fs-4">
-        <div>${meal_groups[0].meal_name}</div>
-        <hr>
-        ${meals_html}
-
-    </div>
-    `;
+    document.getElementById('eating').innerHTML = allMealsGroupsHtml;
 }
 
 // Function to process the retrieved meals
@@ -156,7 +125,6 @@ function processMeals(meals) {
 
 
 function setupDate() {
-
     let currDateStr = currentDate.toFormat('d MMMM');
 
     let arrowBackward = `
@@ -180,21 +148,30 @@ function setupDate() {
 
     byId('go-to-prev-day')?.addEventListener('click', () => {
         currentDate = shiftDateByOneDay(currentDate, false);
-        setupDate();
+        setupWindow();
     });
 
      byId('go-to-next-day')?.addEventListener('click', () => {
         currentDate = shiftDateByOneDay(currentDate, true);
-        setupDate();
+        setupWindow();
     });
 }
 
-// Call the fetchMeals function when the page loads or when needed
-window.addEventListener('load' , e => {
+const setupWindow = () => {
     setupDate();
     fetchData();
-})
+}
+
+// Call the fetchMeals function when the page loads or when needed
+window.addEventListener('load' , setupWindow);
+
+
+const addMealGroup = () => {
+console.log(123)
+};
+
 </script>
 
+{% include 'parts/add-meal-group.html' %}
 
 </html>
