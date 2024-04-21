@@ -7,7 +7,7 @@ from datetime import date
 
 @app.route('/')
 def hello_world():
-    return render_template('hello.html', name='qwe')
+    return render_template('meals.html')
 
 
 @app.route('/about')
@@ -55,7 +55,7 @@ def get_meals():
 
 @app.route('/user/<username>')
 def show_user_profile(username):
-    return render_template('hello.html', name=username)
+    return render_template('meals.html', name=username)
 
 
 if __name__ == '__main__':

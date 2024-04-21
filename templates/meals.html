@@ -42,16 +42,38 @@
 </nav>
 
 <div class="container">
-    <h2 class="my-3">Приёмы пищи</h2>
+    <div id="under-eating" class="d-flex justify-content-between">
+        <h2 class="my-3">Приёмы пищи</h2>
+        <div id="current-date">
+            <span>
+                <i class="fa-solid fa-arrow-left"></i>
+            </span>
+            <span class="fs-5 mx-2">10 июля</span>
+            <span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </span>
+        </div>
+    </div>
+
 
     <div id="eating"></div>
 </div>
-
-
 </body>
 
 
 <script>
+const DateTime = luxon.DateTime;
+const byId = id => document.getElementById(id);
+let currentDate = DateTime.local().setLocale('ru');
+const nowDate = currentDate;
+
+const shiftDateByOneDay = (date, forward) => {
+  if (forward) {
+    return date.plus({ days: 1 });
+  } else {
+    return date.minus({ days: 1 });
+  }
+}
 
 async function _fetch(url) {
     const response = await fetch(url);
@@ -67,14 +89,9 @@ async function fetchData() {
     const foods = await _fetch('/api/foods');
     const dishes = await _fetch('/api/dishes');
 
-
-    const todayMeals = await _fetch('/api/today_meals?user=2493');
-
-
-    console.log(meals);
-    console.log(meal_groups);
-    console.log(foods);
-    console.log(dishes);
+    let currDateStr = currentDate.toFormat('yyyy-MM-dd');
+    const todayMeals = await _fetch(`/api/get_meals?user=2493&date=${currDateStr}`);
+    console.log(todayMeals);
 
     let meals_html = ``;
 
@@ -137,8 +154,44 @@ function processMeals(meals) {
   });
 }
 
+
+function setupDate() {
+
+    let currDateStr = currentDate.toFormat('d MMMM');
+
+    let arrowBackward = `
+    <span id='go-to-prev-day'>
+        <i class="fa-solid fa-arrow-left"></i>
+    </span>`;
+
+    let arrowForward = '';
+    if (!nowDate.hasSame(currentDate, 'day')) {
+        arrowForward  = `
+        <span id='go-to-next-day'>
+            <i class="fa-solid fa-arrow-right"></i>
+        </span>`;
+    }
+
+    byId('current-date').innerHTML = `
+    ${arrowBackward}
+    <span class="fs-5 mx-2">${currDateStr}</span>
+    ${arrowForward}
+    `;
+
+    byId('go-to-prev-day')?.addEventListener('click', () => {
+        currentDate = shiftDateByOneDay(currentDate, false);
+        setupDate();
+    });
+
+     byId('go-to-next-day')?.addEventListener('click', () => {
+        currentDate = shiftDateByOneDay(currentDate, true);
+        setupDate();
+    });
+}
+
 // Call the fetchMeals function when the page loads or when needed
 window.addEventListener('load' , e => {
+    setupDate();
     fetchData();
 })
 </script>
