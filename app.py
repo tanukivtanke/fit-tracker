@@ -1,6 +1,6 @@
 import auth
 from base import app, db
-from flask import render_template, request
+from flask import render_template, request, jsonify
 from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder
 from datetime import date
 
@@ -50,7 +50,8 @@ def get_meals():
     meal_date = get_argument('date')
     user_id = User.find(username=username).id
     meals_by_date = MealGroup.all(user_id=user_id, day=meal_date)
-    return sorted(meals_by_date, key=lambda x:  MealOrder.find(id=x.meal_order_id).ordering)
+    meals_by_date = sorted(meals_by_date, key=lambda x:  MealOrder.find(id=x.meal_order_id).ordering)
+    return [i.json() for i in meals_by_date]
 
 
 @app.route('/user/<username>')
