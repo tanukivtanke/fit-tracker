@@ -4,6 +4,8 @@ from flask import render_template, request, jsonify
 from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder
 from datetime import date
 
+from util import list_to_json
+
 
 @app.route('/')
 def hello_world():
@@ -44,14 +46,22 @@ def get_dishes():
     return Dish.all_json()
 
 
-@app.route('/api/get_meals')
-def get_meals():
+@app.route('/api/get_meals_for_day')
+def get_meals_for_day():
     username = get_argument('user')
     meal_date = get_argument('date')
     user_id = User.find(username=username).id
     meals_by_date = MealGroup.all(user_id=user_id, day=meal_date)
     meals_by_date = sorted(meals_by_date, key=lambda x:  MealOrder.find(id=x.meal_order_id).ordering)
-    return [i.json() for i in meals_by_date]
+    return list_to_json(meals_by_date)
+
+
+@app.route('/api/get_meals_for_meal_group')
+def get_meals_for_meal_group():
+    meal_group_id = get_argument('id')
+    meals_per_group = Meal.all(meal_group_id=meal_group_id)
+    meals_per_group = sorted(meals_per_group, key=lambda x:  x.id)
+    return list_to_json(meals_per_group)
 
 
 @app.route('/user/<username>')
