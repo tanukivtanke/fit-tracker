@@ -90,7 +90,9 @@
 
                 let result = await _post("/api/meal_groups/new", {
                     meal_order_id: parseInt(byId('meal-group-select').value),
-                    meal_custom_name: customMealName,
+                    meal_name: customMealName,
+                    user_id: currentUserId,
+                    day: currentDate.toFormat('yyyy-MM-dd'),
                 });
 
                 console.log(result);
