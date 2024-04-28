@@ -1,6 +1,6 @@
 from flask import jsonify
 
-from base import db
+from base import db, app
 
 
 class AbstractObject(db.Model):
@@ -29,3 +29,8 @@ class AbstractObject(db.Model):
     @classmethod
     def find(cls, **kwargs):
         return cls.query.filter_by(**kwargs).first()
+
+    def save(self):
+        with app.app_context():
+            db.session.add(self)
+            db.session.commit()

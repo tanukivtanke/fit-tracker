@@ -45,9 +45,11 @@ def get_meal_groups():
 def get_dishes():
     return Dish.all_json()
 
+
 @app.route('/api/meal_orders')
 def get_all_meal_orders():
     return MealOrder.all_json()
+
 
 @app.route('/api/get_meals_for_day')
 def get_meals_for_day():
@@ -65,6 +67,17 @@ def get_meals_for_meal_group():
     meals_per_group = Meal.all(meal_group_id=meal_group_id)
     meals_per_group = sorted(meals_per_group, key=lambda x:  x.id)
     return list_to_json(meals_per_group)
+
+
+@app.route('/api/meal_groups/new', methods=['POST'])
+def add_new_meal():
+    received_data = request.json
+    new_meal = MealGroup(user_id=received_data['user_id'],
+                         meal_name=received_data['meal_name'],
+                         day=received_data['day'],
+                         meal_order_id=received_data['meal_order_id'])
+    new_meal.save()
+    return new_meal.json()
 
 
 @app.route('/user/<username>')
