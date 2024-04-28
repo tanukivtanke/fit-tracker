@@ -80,6 +80,14 @@ def add_new_meal():
     return new_meal.json()
 
 
+@app.route('/api/meal/delete', methods=['DELETE'])
+def del_meal():
+    received_data = request.json
+    id_to_del = received_data['id']
+    Meal.delete_by_id(id_to_del)
+    return ''
+
+
 @app.route('/api/meal/new', methods=['POST'])
 def add_meal():
     received_data = request.json

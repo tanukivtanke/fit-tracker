@@ -35,3 +35,14 @@ class AbstractObject(db.Model):
             db.session.add(self)
             db.session.commit()
             db.session.refresh(self)
+
+    @classmethod
+    def delete_by_id(cls, obj_id):
+        with app.app_context():
+            obj = cls.find(id=obj_id)
+            if obj:
+                db.session.delete(obj)
+                db.session.commit()
+                return True
+            else:
+                return False
