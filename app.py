@@ -4,7 +4,7 @@ from flask import render_template, request, jsonify
 from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder
 from datetime import date
 
-from util import list_to_json
+from util import list_to_json, string_to_date
 
 
 @app.route('/')
@@ -74,7 +74,7 @@ def add_new_meal():
     received_data = request.json
     new_meal = MealGroup(user_id=received_data['user_id'],
                          meal_name=received_data['meal_name'],
-                         day=received_data['day'],
+                         day=string_to_date(received_data['day']),
                          meal_order_id=received_data['meal_order_id'])
     new_meal.save()
     return new_meal.json()
