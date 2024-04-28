@@ -80,6 +80,27 @@ def add_new_meal():
     return new_meal.json()
 
 
+@app.route('/api/meal/new', methods=['POST'])
+def add_meal():
+    received_data = request.json
+
+    food_id_none = received_data['food_id'] is None
+    dish_id_none = received_data['dish_id'] is None
+    if food_id_none == dish_id_none:
+        return 'Cannot add food and dish in the same request', 400
+
+    amount = received_data['amount']
+    if amount is None or not isinstance(amount, int) or amount <= 0:
+        return 'Cannot add food or dish without any amount or negative amount', 400
+
+    new_edible = Meal(meal_group_id=received_data['meal_group_id'],
+                      food_id=received_data['food_id'],
+                      dish_id=received_data['dish_id'],
+                      amount=received_data['amount'])
+    new_edible.save()
+    return new_edible.json()
+
+
 @app.route('/user/<username>')
 def show_user_profile(username):
     return render_template('meals.html', name=username)

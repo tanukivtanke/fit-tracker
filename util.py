@@ -8,4 +8,3 @@ def list_to_json(obj: list):
 
 def string_to_date(string):
     return datetime.strptime(string, '%Y-%m-%d')
-
