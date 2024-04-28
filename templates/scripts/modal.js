@@ -69,7 +69,7 @@ class Modal {
             this.onCloseListeners.forEach(s => s(event));
         });
 
-        this.modalObj.addEventListener('hide.bs.modal', event => {
+        this.modalObj.addEventListener('hidden.bs.modal', event => {
             this.modalOpened = false;
 
             if (okHidden) {

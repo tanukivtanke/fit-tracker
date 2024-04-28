@@ -10,6 +10,10 @@
 
     editMealGroupModal.onClose(renderMealGroups);
 
+    editMealGroupModal.deleteButton.addEventListener("click", () => {
+        deleteMealGroup(currEditingMealGroup.id);
+    });
+
 
     let currEditingMealGroup = null;
 
@@ -57,12 +61,21 @@
         let result = await _delete("/api/meal/delete", {
             id: mealId
         });
-        log("deleting " + mealId)
         if (result) {
-            log("ok deleting " + mealId)
             delete mealMap[mealId];
         }
         await setEditMealGroupHtml();
+    };
+
+    const deleteMealGroup = async (mealGroupId) => {
+        let result = await _delete("/api/meal_group/delete", {
+            id: mealGroupId
+        });
+        if (result) {
+            delete mealGroupMap[mealGroupId];
+        }
+        currentMealsGroups = currentMealsGroups.filter(e => e.id !== mealGroupId);
+        editMealGroupModal.hide();
     };
 
     const setEditMealGroupHtml = async () => {
@@ -73,6 +86,12 @@
         const mealsForMealGroup = await _fetch(`/api/get_meals_for_meal_group?id=${currEditingMealGroup.id}`);
         mealGroupMap[currEditingMealGroup.id].api_meals = mealsForMealGroup;
         renderMealGroups();
+
+        if (mealsForMealGroup.length > 0) {
+            hideElem(editMealGroupModal.deleteButton.id);
+        } else {
+            showElem(editMealGroupModal.deleteButton.id);
+        }
 
         let options = ``;
         for (let food of Object.values(allFoods)) {
