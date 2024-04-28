@@ -84,8 +84,7 @@ def add_new_meal():
 def del_meal():
     received_data = request.json
     id_to_del = received_data['id']
-    Meal.delete_by_id(id_to_del)
-    return ''
+    return jsonify(Meal.delete_by_id(id_to_del))
 
 
 @app.route('/api/meal/new', methods=['POST'])
