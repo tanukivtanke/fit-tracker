@@ -20,11 +20,11 @@
         <h2 class="my-3">Приёмы пищи</h2>
         <div id="current-date"></div>
     </div>
-    <div id="eating"></div>
     <div id="add-meal-group"
          class="border border-black border-2 rounded-2 text-center bg-dark text-white fs-2 fw-bold">
         <i class="fa-solid fa-plus stretched"></i>
     </div>
+    <div id="eating"></div>
 </div>
 </body>
 
@@ -40,7 +40,7 @@ const mealMap = {};
 let currentMealsGroups;
 let currentUserId = 1;
 
-async function fetchData() {
+const fetchData = async () => {
     if (allMealOrders == null) {
         allMealOrders = mapToId(await _fetch('/api/meal_orders'));
     }
@@ -64,7 +64,10 @@ async function fetchData() {
             mealMap[m.id] = m;
         }
     }
+    renderMealGroups();
+}
 
+const renderMealGroups = () => {
     let allMealsGroupsHtml = ``;
     for (let mg of currentMealsGroups) {
         let currentMealGroupHtml = ``;
@@ -82,12 +85,12 @@ async function fetchData() {
 
             let amount = m.amount;
 
-            currentMealGroupHtml += `
+            currentMealGroupHtml = `
             <div class="d-flex justify-content-between">
                 <div>${showing_name}</div>
-                <div>${amount} g</div>
+                <div>${amount} гр.</div>
             </div>
-            `;
+            ` + currentMealGroupHtml;
         }
 
         let mealName = mg.meal_name;
@@ -95,16 +98,18 @@ async function fetchData() {
             mealName = allMealOrders[mg.meal_order_id].name;
         }
 
-        allMealsGroupsHtml += `
-        <div class="border border-black border-2 rounded-2 py-2 px-3 fs-4 mb-4">
+        allMealsGroupsHtml = `
+        <div class="div-hover border border-black border-2 rounded-2 py-2 px-3 fs-4 mt-4"
+            onclick="startEditMealGroupById(${mg.id})"
+        >
             <div>${mealName}</div>
             <hr class="my-1">
             ${currentMealGroupHtml}
         </div>
-        `;
+        ` + allMealsGroupsHtml;
     }
     document.getElementById('eating').innerHTML = allMealsGroupsHtml;
-}
+};
 
 // Function to process the retrieved meals
 function processMeals(meals) {
@@ -166,13 +171,9 @@ const setupWindow = () => {
 // Call the fetchMeals function when the page loads or when needed
 window.addEventListener('load' , setupWindow);
 
-
-const addMealGroup = () => {
-console.log(123)
-};
-
 </script>
 
 {% include 'parts/add-meal-group.html' %}
+{% include 'parts/edit-meal-group.html' %}
 
 </html>

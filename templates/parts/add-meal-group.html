@@ -95,7 +95,12 @@
                     day: currentDate.toFormat('yyyy-MM-dd'),
                 });
 
-                console.log(result);
+                addMealGroupModal.hide();
+
+                if (result.id) {
+                    mealGroupMap[result.id] = result;
+                }
+                await startEditMealGroup(result);
             })
         });
     }

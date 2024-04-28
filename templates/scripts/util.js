@@ -10,6 +10,10 @@ const log = (...messages) => {
 };
 
 
+$(document).on('select2:open', () => {
+    document.querySelector('.select2-search__field').focus();
+});
+
 const hideElem = elem => {
     if (typeof elem === 'string') {
         elem = byId(elem);
@@ -22,6 +26,45 @@ const showElem = elem => {
     }
     elem.classList.remove('d-none');
 };
+
+
+function extractNumber(str,  {trimZeros = true} = {}) {
+    // Extract only numbers
+    let numbers = str.match(/\d+/g);
+
+    if (!numbers) {
+        return '';
+    }
+
+    const res = numbers.join('');
+    if (trimZeros) {
+        return res.replace(/^0+/, '');
+    } else {
+        return res;
+    }
+}
+
+
+function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultValue=null) {
+    let elem = byId(fieldId);
+    let newValue = elem.value;
+
+    let fixed = extractNumber(newValue, {trimZeros: trimZeros});
+    let maxLen = `${max}`.length;
+    if (max !== null && fixed.length > maxLen) {
+        fixed = fixed.substring(0, maxLen);
+    }
+    if (max !== null && fixed.length > 0 && parseInt(fixed) > max) {
+        fixed = `${max}`;
+    }
+    if (min !== null && fixed.length > 0 && parseInt(fixed) < min) {
+        fixed = `${min}`;
+    }
+    if (fixed !== newValue) {
+        elem.value = fixed;
+    }
+    return fixed ? parseInt(fixed) : defaultValue;
+}
 
 
 const shiftDateByOneDay = (date, forward) => {
@@ -50,6 +93,21 @@ async function _fetch(url) {
 async function _post(url, json) {
     const response = await fetch(url, {
         method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(json)
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch meals');
+    }
+    return await response.json();
+}
+
+async function _delete(url, json) {
+    const response = await fetch(url, {
+        method: 'DELETE',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'

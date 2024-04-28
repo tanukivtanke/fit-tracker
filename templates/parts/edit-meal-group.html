@@ -1,0 +1,166 @@
+
+<div id="wrapper-edit-meal-group-modal"></div>
+
+
+
+<script>
+
+    const editMealGroupModal = new Modal('edit-meal-group', 'Редактировать приём пищи', true, false, false);
+    editMealGroupModal.cancelButton.innerText = "Назад";
+
+    editMealGroupModal.onClose(renderMealGroups);
+
+
+    let currEditingMealGroup = null;
+
+    const addMealToMealGroup = async () => {
+
+        let foodId = null;
+        let dishId = null;
+
+        let chosenMeal = byId('editMealGroupModal-select').value;
+        if (!chosenMeal) {
+            return;
+        }
+
+        if (chosenMeal.startsWith("FOOD_")) {
+            foodId = parseInt(chosenMeal.substring(5));
+        }
+        if (chosenMeal.startsWith("DISH_")) {
+            dishId = parseInt(chosenMeal.substring(5));
+        }
+        if (foodId == null && dishId == null) {
+            return;
+        }
+
+        let chosenAmount = handleNumberField('editMealGroupModal-text', 0, 9999, true, null);
+        if (chosenAmount == null) {
+            return;
+        }
+
+        let result = await _post("/api/meal/new" ,{
+            food_id: foodId,
+            dish_id: dishId,
+            amount: chosenAmount,
+            meal_group_id: currEditingMealGroup.id,
+        });
+
+        if (result.id) {
+            mealMap[result.id] = result;
+        }
+
+        await setEditMealGroupHtml();
+
+    };
+
+    const deleteMealFromMealGroup = async (mealId) => {
+        let result = await _delete("/api/meal/delete", {
+            id: mealId
+        });
+        log("deleting " + mealId)
+        if (result) {
+            log("ok deleting " + mealId)
+            delete mealMap[mealId];
+        }
+        await setEditMealGroupHtml();
+    };
+
+    const setEditMealGroupHtml = async () => {
+        if (!editMealGroupModal.isOpen()) {
+            return;
+        }
+
+        const mealsForMealGroup = await _fetch(`/api/get_meals_for_meal_group?id=${currEditingMealGroup.id}`);
+        mealGroupMap[currEditingMealGroup.id].api_meals = mealsForMealGroup;
+        renderMealGroups();
+
+        let options = ``;
+        for (let food of Object.values(allFoods)) {
+            options += `
+            <option value="FOOD_${food.id}">${food.name}</option>
+            `;
+        }
+        for (let dish of Object.values(allDishes)) {
+            if (!dish.out_of_stock) {
+                options += `
+                <option value="DISH_${dish.id}">${dish.name}</option>
+                `;
+            }
+        }
+
+        const renderMeal = (m) => {
+            let name = '';
+            if (m.dish_id) {
+                name = allDishes[m.dish_id].name;
+            } else if (m.food_id) {
+                name = allFoods[m.food_id].name;
+            }
+            return `<div class='me-2 w-100 d-flex justify-content-between'>
+                    <span>${name}</span>
+                    <span>${m.amount} гр.</span>
+                    </div>`
+        };
+
+        let meals = ``;
+        for (let meal of mealsForMealGroup) {
+            meals = `
+            ${
+               HtmlPresets.makeRow(`
+                ${renderMeal(meal)}
+                <button class="btn btn-sm btn-danger"
+                    onclick="deleteMealFromMealGroup(${meal.id})">Удалить</button>`,
+                {fs: 6, ps: 2})
+            }
+            ` + meals;
+        }
+
+
+        editMealGroupModal.setHtml(`
+        <div class="row">
+            <div class="col pe-0">
+
+                <div class="input-group input-group-sm h-100">
+                    <select class="form-select" id="editMealGroupModal-select">
+                        <option value="" selected disabled></option>
+                        ${options}
+                    </select>
+                    <input id="editMealGroupModal-text" type="text" class="form-control" placeholder="Кол-во" style="max-width: 4rem">
+                    <span class="input-group-text">гр.</span>
+                </div>
+
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary"
+                    onclick="addMealToMealGroup()">Добавить</button>
+            </div>
+
+            ${meals ? '<hr class="my-3">' : ''}
+
+            <div>${meals}</div>
+
+         </div>
+
+        `);
+
+        $( '#editMealGroupModal-select').select2({
+            theme: 'bootstrap-5',
+            placeholder: "Выбрать пищу",
+            dropdownParent: $(`#${editMealGroupModal.modalId}`),
+        });
+
+        byId('editMealGroupModal-text').addEventListener('input', () => {
+            handleNumberField('editMealGroupModal-text', 0, 9999, true, null);
+        });
+    };
+
+    const startEditMealGroupById = async (mealGroupId) => {
+        await startEditMealGroup(mealGroupMap[mealGroupId]);
+    };
+
+    const startEditMealGroup = async (mealGroup) => {
+        editMealGroupModal.show();
+        currEditingMealGroup = mealGroup;
+
+        await setEditMealGroupHtml();
+    };
+</script>
