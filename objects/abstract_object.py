@@ -34,3 +34,4 @@ class AbstractObject(db.Model):
         with app.app_context():
             db.session.add(self)
             db.session.commit()
+            db.session.refresh(self)
