@@ -47,6 +47,21 @@ async function _fetch(url) {
     return await response.json();
 }
 
+async function _post(url, json) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(json)
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch meals');
+    }
+    return await response.json();
+}
+
 
 
 

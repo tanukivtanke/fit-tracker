@@ -76,6 +76,25 @@
             changeName();
 
             byId('meal-group-select').addEventListener("change", changeName);
+
+            addMealGroupModal.okButton.addEventListener("click", async () => {
+                let mealOrderId = byId('meal-group-select').value;
+
+                let actualMealOrderName = allMealOrders[mealOrderId].name;
+
+                let customMealName = byId(customNameInput).value;
+
+                if (customMealName === actualMealOrderName) {
+                    customMealName = null;
+                }
+
+                let result = await _post("/api/meal_groups/new", {
+                    meal_order_id: parseInt(byId('meal-group-select').value),
+                    meal_custom_name: customMealName,
+                });
+
+                console.log(result);
+            })
         });
     }
 </script>
