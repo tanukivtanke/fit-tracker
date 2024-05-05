@@ -124,6 +124,21 @@ def add_meal():
     return new_edible.json()
 
 
+@app.route('/api/food/new', methods=['POST'])
+def add_food():
+    received_data = request.json
+
+    new_food = Food(
+        name=received_data['name'],
+        proteins=received_data['proteins'],
+        fats=received_data['fats'],
+        carbs=received_data['carbs'],
+        kcal=received_data['kcal']
+    )
+    new_food.save()
+    return new_food.json()
+
+
 @app.route('/user/<username>')
 def show_user_profile(username):
     return render_template('meals.html', name=username)
