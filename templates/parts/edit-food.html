@@ -8,7 +8,6 @@
     const editFoodModal = new Modal('edit-food', 'Редактировать еду', true, true, false);
     editFoodModal.cancelButton.innerText = "Назад";
 
-    //editFoodModal.onClose(renderMealGroups);
     {
         const addFoodNameId = 'editFoodModal-add-food-name';
         const addProteinsId = 'editFoodModal-add-food-proteins';
@@ -19,6 +18,10 @@
 
         const searchFoodId = 'editFoodModal-search-food';
         const allFoodsId = 'editFoodModal-all-foods';
+
+        editFoodModal.onClose(() => {
+            startEditMealGroup(currEditingMealGroup);
+        });
 
         editFoodModal.onOpen(() => {
 
