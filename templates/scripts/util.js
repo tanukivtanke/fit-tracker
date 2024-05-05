@@ -67,6 +67,52 @@ function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultV
 }
 
 
+function handleFloatField(fieldId, min=null, max=null) {
+    let elem = byId(fieldId);
+    let newValue = elem.value;
+
+    let cleaned = newValue.replace(/[^0-9.]/g, '');
+
+    if (cleaned === ".") {
+        cleaned = "0.";
+    }
+
+    cleaned = cleaned.replace(/^\.+/, '');
+    cleaned = cleaned.replace(/^0+/, '0');
+
+    if (cleaned.length > 1 && cleaned.startsWith("0") && !cleaned.startsWith("0.")) {
+        cleaned = "0";
+    }
+
+    if (cleaned.length > 0) {
+        let parts = cleaned.split('.');
+
+        if (parts.length > 1) {
+            // Take the first part (stripping leading zeros) and the first digit of the second part only
+            cleaned = parts[0] + '.' + parts[1].substring(0, 1);
+        } else {
+            // If there is no dot, still strip leading zeros
+            cleaned = parts[0];
+        }
+
+        let float = parseFloat(cleaned);
+
+        if (max != null && float >= max) {
+            cleaned = "" + max;
+        }
+        if (min != null && float < min) {
+            cleaned = "" + min;
+        }
+    }
+
+    if (newValue !== cleaned) {
+        elem.value = cleaned;
+    }
+
+    return cleaned ? parseFloat(cleaned) : null;
+}
+
+
 const shiftDateByOneDay = (date, forward) => {
   if (forward) {
     return date.plus({ days: 1 });

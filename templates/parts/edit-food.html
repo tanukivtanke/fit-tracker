@@ -1,0 +1,151 @@
+
+<div id="wrapper-edit-food-modal"></div>
+
+
+
+<script>
+
+    const editFoodModal = new Modal('edit-food', 'Редактировать еду', true, true, false);
+    editFoodModal.cancelButton.innerText = "Назад";
+
+    //editFoodModal.onClose(renderMealGroups);
+    {
+        const addFoodNameId = 'editFoodModal-add-food-name';
+        const addProteinsId = 'editFoodModal-add-food-proteins';
+        const addFatsId = 'editFoodModal-add-food-fats';
+        const addCarbsId = 'editFoodModal-add-food-carbs';
+        const addKcalId = 'editFoodModal-add-food-kcal';
+        const addFoodButtonId = 'editFoodModal-add-food-button';
+
+        const searchFoodId = 'editFoodModal-search-food';
+        const allFoodsId = 'editFoodModal-all-foods';
+
+        editFoodModal.onOpen(() => {
+
+            editFoodModal.setHtml(`
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+              <label class="btn btn-outline-primary w-50 py-05" for="btnradio1">Еда</label>
+
+              <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+              <label class="btn btn-outline-primary w-50 py-05" for="btnradio2">Блюдо</label>
+            </div>
+
+            <div id="editFoodModal-food-tab">
+
+                <hr>
+
+                <h5>Новая еда</h5>
+
+                <div class="input-group mb-2-5">
+                  <input id="${addFoodNameId}" type="text" class="form-control" placeholder="Название">
+                </div>
+
+                <div class="d-flex">
+                    <div class="input-group">
+                      <span class="input-group-text py-025 proteins-bg">Б</span>
+                      <input id="${addProteinsId}" type="text" class="form-control py-025" placeholder="0">
+                      <span class="input-group-text py-025 fats-bg">Ж</span>
+                      <input id="${addFatsId}" type="text" class="form-control py-025" placeholder="0">
+                      <span class="input-group-text py-025 carbs-bg">У</span>
+                      <input id="${addCarbsId}" type="text" class="form-control py-025" placeholder="0">
+                      <span class="input-group-text py-025 kcal-bg">Кк</span>
+                      <input id="${addKcalId}" type="text" class="form-control py-025" placeholder="0">
+                    </div>
+                    <button id="${addFoodButtonId}" class="btn btn-primary ms-2 py-025" disabled>Добавить</button>
+                </div>
+
+                <hr>
+
+                <h5>Добавленная еда</h5>
+
+                <div class="input-group mb-3">
+                  <span class="input-group-text">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                  </span>
+                  <input id="${searchFoodId}" type="text" class="form-control" placeholder="Искать по названию">
+                </div>
+
+                <div id="${allFoodsId}"></div>
+            </div>
+            `);
+
+            byId(searchFoodId).addEventListener("input", renderFoods);
+            renderFoods();
+
+
+            const checkAddButton = () => {
+                let name = byId(addFoodNameId).value.trim();
+                let proteins = handleFloatField(addProteinsId, 0, 100);
+                let fats = handleFloatField(addFatsId, 0, 100);
+                let carbs = handleFloatField(addCarbsId, 0, 100);
+                let kcal = handleNumberField(addKcalId, 0, 999);
+
+                byId(addFoodButtonId).disabled =
+                    !(name.length && proteins != null && fats != null && carbs != null && kcal != null);
+            };
+
+            for (let field of [addFoodNameId, addProteinsId, addFatsId, addCarbsId, addKcalId]) {
+                byId(field).addEventListener("input", checkAddButton);
+            }
+
+            byId(addFoodButtonId).addEventListener("click", async () => {
+                let name = byId(addFoodNameId).value.trim();
+                let proteins = handleFloatField(addProteinsId, 0, 100);
+                let fats = handleFloatField(addFatsId, 0, 100);
+                let carbs = handleFloatField(addCarbsId, 0, 100);
+                let kcal = handleNumberField(addKcalId, 0, 999);
+
+                let result = await _post("/api/food/new" ,{
+                    name: name,
+                    proteins: proteins,
+                    fats: fats,
+                    carbs: carbs,
+                    kcal: kcal,
+                });
+            });
+
+        });
+
+        const renderFoods = () => {
+
+            let search = byId(searchFoodId).value.toLowerCase().trim();
+            let searchTerms = search.split(/\s+/);
+
+            let foodsHtml = ``;
+            for (let food of Object.values(allFoods)) {
+                let lowerCaseFoodName = food.name.toLowerCase();
+                if (!searchTerms.every(term => lowerCaseFoodName.includes(term))) {
+                    continue;
+                }
+
+                foodsHtml = `
+                <hr>
+                <div class="">
+                    <div class="input-group mb-2-5">
+                      <input type="text" class="form-control" value="${food.name}">
+                    </div>
+                    <div class="d-flex">
+                        <div class="input-group">
+                          <span class="input-group-text py-025 proteins-bg">Б</span>
+                          <input type="text" class="form-control py-025" value="${food.proteins}">
+                          <span class="input-group-text py-025 fats-bg">Ж</span>
+                          <input type="text" class="form-control py-025" value="${food.fats}">
+                          <span class="input-group-text py-025 carbs-bg">У</span>
+                          <input type="text" class="form-control py-025" value="${food.carbs}">
+                          <span class="input-group-text py-025 kcal-bg">Кк</span>
+                          <input type="text" class="form-control py-025" value="${food.kcal}">
+                        </div>
+                        <button class="btn btn-secondary ms-2 py-025">Изменить</button>
+                    </div>
+                </div>
+
+                ` + foodsHtml;
+            }
+
+            byId(allFoodsId).innerHTML = foodsHtml;
+        };
+    }
+
+
+</script>

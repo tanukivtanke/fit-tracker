@@ -1,4 +1,54 @@
 body {
 }
 
+.py-025 {
+    padding-top: .05rem !important;
+    padding-bottom: .05rem !important;
+}
 
+.py-05 {
+    padding-top: .10rem !important;
+    padding-bottom: .10rem !important;
+}
+
+.py-1-5 {
+    padding-top: .40rem !important;
+    padding-bottom: .40rem !important;
+}
+
+.mb-2-5 {
+    margin-bottom: .75rem !important
+}
+
+.all-row-modal {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.odd-row {
+    background-color: #eee;
+}
+
+.proteins-bg {
+    background-color: #f4feff;
+}
+
+.fats-bg {
+    background-color: #fdfcec;
+}
+
+.carbs-bg {
+    background-color: #fdf3f3;
+}
+
+.kcal-bg {
+    background-color: #f8f9fa;
+}
+
+.btn-primary:disabled {
+    border: 1px solid #afafaf;
+    background-color: #cccccc;
+    color: #666666;
+}

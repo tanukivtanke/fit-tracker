@@ -139,6 +139,9 @@
             <div class="col pe-0">
 
                 <div class="input-group input-group-sm h-100">
+                    <button class="btn btn-secondary" type="button" id="editMealGroupModal-start-edit-food">
+                        <i class="fa-solid fa-pencil"></i>
+                    </button>
                     <select class="form-select" id="editMealGroupModal-select">
                         <option value="" selected disabled></option>
                         ${options}
@@ -170,6 +173,11 @@
         byId('editMealGroupModal-text').addEventListener('input', () => {
             handleNumberField('editMealGroupModal-text', 0, 9999, true, null);
         });
+
+        byId('editMealGroupModal-start-edit-food').addEventListener('click', () => {
+            editMealGroupModal.hide();
+            editFoodModal.show();
+        })
     };
 
     const startEditMealGroupById = async (mealGroupId) => {
