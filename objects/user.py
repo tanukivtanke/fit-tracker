@@ -40,6 +40,10 @@ class Meal(AbstractObject):
     food_id = db.Column(db.Integer)
     amount = db.Column(db.Integer, nullable=False)
     meal_group_id = db.Column(db.Integer, nullable=False)
+    calc_proteins = db.Column(db.Float, nullable=False)
+    calc_fats = db.Column(db.Float, nullable=False)
+    calc_carbs = db.Column(db.Float, nullable=False)
+    calc_kcal = db.Column(db.Float, nullable=False)
 
 
 class MealGroup(AbstractObject):

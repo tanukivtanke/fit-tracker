@@ -4,7 +4,7 @@ from flask import render_template, request, jsonify
 from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder
 from datetime import date
 
-from util import list_to_json, string_to_date
+from util import list_to_json, string_to_date, calc_from_food, calc_from_dish
 
 
 @app.route('/')
@@ -98,19 +98,28 @@ def del_meal_group():
 def add_meal():
     received_data = request.json
 
-    food_id_none = received_data['food_id'] is None
-    dish_id_none = received_data['dish_id'] is None
-    if food_id_none == dish_id_none:
+    is_dish = received_data['food_id'] is None
+    is_food = received_data['dish_id'] is None
+    if is_dish == is_food:
         return 'Cannot add food and dish in the same request', 400
 
     amount = received_data['amount']
     if amount is None or not isinstance(amount, int) or amount <= 0:
         return 'Cannot add food or dish without any amount or negative amount', 400
 
+    if is_food:
+        new_data = calc_from_food(received_data['food_id'], received_data['amount'])
+    else:
+        new_data = calc_from_dish(received_data['dish_id'], received_data['amount'])
+
     new_edible = Meal(meal_group_id=received_data['meal_group_id'],
                       food_id=received_data['food_id'],
                       dish_id=received_data['dish_id'],
-                      amount=received_data['amount'])
+                      amount=received_data['amount'],
+                      calc_proteins=new_data.proteins,
+                      calc_fats=new_data.fats,
+                      calc_carbs=new_data.carbs,
+                      calc_kcal=new_data.kcal)
     new_edible.save()
     return new_edible.json()
 
