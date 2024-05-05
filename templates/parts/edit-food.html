@@ -96,6 +96,8 @@
                 let carbs = handleFloatField(addCarbsId, 0, 100);
                 let kcal = handleNumberField(addKcalId, 0, 999);
 
+                byId(addFoodButtonId).disabled = true;
+
                 let result = await _post("/api/food/new" ,{
                     name: name,
                     proteins: proteins,
@@ -103,6 +105,16 @@
                     carbs: carbs,
                     kcal: kcal,
                 });
+
+                if (result.id) {
+                    allFoods[result.id] = result;
+                }
+
+                for (let field of [addFoodNameId, addProteinsId, addFatsId, addCarbsId, addKcalId]) {
+                    byId(field).value = "";
+                }
+
+                renderFoods();
             });
 
         });
