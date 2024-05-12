@@ -1,7 +1,7 @@
 import auth
 from base import app, db
 from flask import render_template, request, jsonify
-from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder
+from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder, DishIngredient
 
 from util import list_to_json, string_to_date, calc_from_food, calc_from_dish
 
@@ -43,6 +43,11 @@ def get_meal_groups():
 @app.route('/api/dishes')
 def get_dishes():
     return Dish.all_json()
+
+
+@app.route('/api/dish_ingredient')
+def get_dishes():
+    return DishIngredient.all_json()
 
 
 @app.route('/api/meal_orders')
