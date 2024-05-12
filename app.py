@@ -150,7 +150,7 @@ def edit_food():
         food_to_change.fats = received_data['fats']
         food_to_change.carbs = received_data['carbs']
         food_to_change.kcal = received_data['kcal']
-        food_to_change.save()
+        food_to_change.update()
         return food_to_change.json()
     else:
         return ''

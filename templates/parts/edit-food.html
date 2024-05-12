@@ -127,6 +127,13 @@
             let search = byId(searchFoodId).value.toLowerCase().trim();
             let searchTerms = search.split(/\s+/);
 
+            let foodButtonKey = `data-ft-food-id`;
+            let foodNameIdKey = `data-ft-food-name-id`;
+            let foodProteinsIdKey = `data-ft-food-proteins-id`;
+            let foodFatsIdKey = `data-ft-food-fats-id`;
+            let foodCarbsIdKey = `data-ft-food-carbs-id`;
+            let foodKcalIdKey = `data-ft-food-kcal-id`;
+
             let foodsHtml = ``;
             for (let food of Object.values(allFoods)) {
                 let lowerCaseFoodName = food.name.toLowerCase();
@@ -138,20 +145,20 @@
                 <hr>
                 <div class="">
                     <div class="input-group mb-2-5">
-                      <input type="text" class="form-control" value="${food.name}">
+                        <input ${foodNameIdKey}=${food.id} type="text" class="form-control" value="${food.name}">
                     </div>
                     <div class="d-flex">
                         <div class="input-group">
                           <span class="input-group-text py-025 proteins-bg">Б</span>
-                          <input type="text" class="form-control py-025" value="${food.proteins}">
+                          <input ${foodProteinsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.proteins}">
                           <span class="input-group-text py-025 fats-bg">Ж</span>
-                          <input type="text" class="form-control py-025" value="${food.fats}">
+                          <input ${foodFatsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.fats}">
                           <span class="input-group-text py-025 carbs-bg">У</span>
-                          <input type="text" class="form-control py-025" value="${food.carbs}">
+                          <input ${foodCarbsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.carbs}">
                           <span class="input-group-text py-025 kcal-bg">Кк</span>
-                          <input type="text" class="form-control py-025" value="${food.kcal}">
+                          <input ${foodKcalIdKey}=${food.id} type="text" class="form-control py-025" value="${food.kcal}">
                         </div>
-                        <button class="btn btn-secondary ms-2 py-025">Изменить</button>
+                        <button ${foodButtonKey}=${food.id} class="btn btn-primary ms-2 py-025" disabled>Изменить</button>
                     </div>
                 </div>
 
@@ -159,6 +166,87 @@
             }
 
             byId(allFoodsId).innerHTML = foodsHtml;
+
+            const checkEditButton = (foodId) => {
+                let nameField = document.querySelector(`[${foodNameIdKey}="${foodId}"]`);
+                let proteinsField = document.querySelector(`[${foodProteinsIdKey}="${foodId}"]`);
+                let fatsField = document.querySelector(`[${foodFatsIdKey}="${foodId}"]`);
+                let carbsField = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`);
+                let kcalField = document.querySelector(`[${foodKcalIdKey}="${foodId}"]`);
+                let buttonField = document.querySelector(`[${foodButtonKey}="${foodId}"]`);
+
+                let name = nameField.value.trim();
+                let proteins = handleFloatField(proteinsField, 0, 100);
+                let fats = handleFloatField(fatsField, 0, 100);
+                let carbs = handleFloatField(carbsField, 0, 100);
+                let kcal = handleNumberField(kcalField, 0, 999);
+
+                let currFood = allFoods[foodId];
+                let currName = currFood.name;
+                let currProteins = currFood.proteins;
+                let currFats = currFood.fats;
+                let currCarbs = currFood.carbs;
+                let currKcal = currFood.kcal;
+
+                let allFieldsFilled = name.length && proteins != null && fats != null && carbs != null && kcal != null;
+                if (!allFieldsFilled) {
+                    buttonField.disabled = true;
+                    return;
+                }
+
+                let anyFieldChanged = currName !== name
+                    || currProteins !== proteins
+                    || currFats !== fats
+                    || currCarbs !== carbs
+                    || currKcal !== kcal;
+
+                buttonField.disabled = !anyFieldChanged;
+            };
+
+            for (let field of [foodNameIdKey, foodProteinsIdKey, foodFatsIdKey, foodCarbsIdKey, foodKcalIdKey]) {
+                query(`[${field}]`, e => {
+                    let value = e.getAttribute(field);
+                    let foodId = parseInt(value);
+                    if (Number.isNaN(foodId)) {
+                        return;
+                    }
+                    onInput(e, () => checkEditButton(foodId));
+                });
+            }
+
+            query(`[${foodButtonKey}]`, e => {
+                let value = e.getAttribute(foodButtonKey);
+
+                let foodId = parseInt(value);
+                if (Number.isNaN(foodId)) {
+                    return;
+                }
+
+                onClick(e, async () => {
+                    let name = document.querySelector(`[${foodNameIdKey}="${foodId}"]`).value;
+                    let proteins = document.querySelector(`[${foodProteinsIdKey}="${foodId}"]`).value;
+                    let fats = document.querySelector(`[${foodFatsIdKey}="${foodId}"]`).value;
+                    let carbs = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`).value;
+                    let kcal = document.querySelector(`[${foodKcalIdKey}="${foodId}"]`).value;
+
+                    let result = await _post("/api/food/edit", {
+                        id: foodId,
+                        name: name,
+                        proteins: parseFloat(proteins),
+                        fats: parseFloat(fats),
+                        carbs: parseFloat(carbs),
+                        kcal: parseInt(kcal),
+                    });
+
+                    if (result.id) {
+                        allFoods[result.id] = result;
+                    }
+
+                    checkEditButton(foodId);
+                });
+            });
+
+
         };
     }
 

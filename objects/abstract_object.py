@@ -36,6 +36,11 @@ class AbstractObject(db.Model):
             db.session.commit()
             db.session.refresh(self)
 
+    def update(self):
+        with app.app_context():
+            db.session.merge(self)
+            db.session.commit()
+
     @classmethod
     def delete_by_id(cls, obj_id):
         with app.app_context():

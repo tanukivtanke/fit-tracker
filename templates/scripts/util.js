@@ -27,6 +27,19 @@ const showElem = elem => {
     elem.classList.remove('d-none');
 };
 
+const addListener = (id, event, func) => {
+    const elem = typeof id === typeof "" ? byId(id) : id;
+    elem.addEventListener(event, () => func(elem));
+};
+const onLoad = func => addListener(window, 'load', func);
+const onInput = (id, func) => addListener(id, 'input', func);
+const onChange = (id, func) => addListener(id, 'change', func);
+const onClick = (id, func) => addListener(id, 'click', func);
+
+const query = (q, func) => {
+    document.querySelectorAll(q).forEach(e => func(e));
+};
+
 
 function extractNumber(str,  {trimZeros = true} = {}) {
     // Extract only numbers
@@ -46,7 +59,13 @@ function extractNumber(str,  {trimZeros = true} = {}) {
 
 
 function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultValue=null) {
-    let elem = byId(fieldId);
+    let elem;
+    if (typeof fieldId === typeof '') {
+        elem = byId(fieldId);
+    } else {
+        elem = fieldId;
+    }
+
     let newValue = elem.value;
 
     let fixed = extractNumber(newValue, {trimZeros: trimZeros});
@@ -68,7 +87,13 @@ function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultV
 
 
 function handleFloatField(fieldId, min=null, max=null) {
-    let elem = byId(fieldId);
+    let elem;
+    if (typeof fieldId === typeof '') {
+        elem = byId(fieldId);
+    } else {
+        elem = fieldId;
+    }
+
     let newValue = elem.value;
 
     let cleaned = newValue.replace(/[^0-9.]/g, '');
