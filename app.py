@@ -2,7 +2,6 @@ import auth
 from base import app, db
 from flask import render_template, request, jsonify
 from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder
-from datetime import date
 
 from util import list_to_json, string_to_date, calc_from_food, calc_from_dish
 
@@ -152,6 +151,20 @@ def edit_food():
         food_to_change.kcal = received_data['kcal']
         food_to_change.update()
         return food_to_change.json()
+    else:
+        return ''
+
+
+@app.route('/api/dish/edit', methods=['POST'])
+def edit_dish():
+    received_data = request.json
+
+    dish_to_change = Dish.find(id=received_data['id'])
+    if dish_to_change is not None:
+        dish_to_change.name = received_data['name']
+        dish_to_change.out_of_stock = received_data['out_of_stock']
+        dish_to_change.update()
+        return dish_to_change.json()
     else:
         return ''
 
