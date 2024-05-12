@@ -45,7 +45,7 @@ def get_dishes():
     return Dish.all_json()
 
 
-@app.route('/api/dish_ingredient')
+@app.route('/api/dish_ingredients')
 def get_dishes():
     return DishIngredient.all_json()
 
