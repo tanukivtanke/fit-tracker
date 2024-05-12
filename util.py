@@ -49,10 +49,13 @@ def calc_from_dish(dish_id, amount) -> Nutrients:
     kg_amount = amount / 100
     ingredients = DishIngredient.all(dish_id=dish_id)
     nutri = Nutrients()
+    total_amount = 0
     for i in ingredients:
         nutri += calc_from_food(i.food_id, i.amount)
-    return Nutrients(proteins=nutri.proteins * kg_amount,
-                     fats=nutri.fats * kg_amount,
-                     carbs=nutri.carbs * kg_amount,
-                     kcal=nutri.kcal * kg_amount)
+        total_amount += i.amount
+    total_amount_per_100g = total_amount / 100
+    return Nutrients(proteins=nutri.proteins * kg_amount / total_amount_per_100g,
+                     fats=nutri.fats * kg_amount / total_amount_per_100g,
+                     carbs=nutri.carbs * kg_amount / total_amount_per_100g,
+                     kcal=nutri.kcal * kg_amount / total_amount_per_100g)
 
