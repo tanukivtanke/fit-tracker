@@ -49,6 +49,8 @@ def calc_from_dish(dish_id, amount) -> Nutrients:
     kg_amount = amount / 100
     ingredients = DishIngredient.all(dish_id=dish_id)
     nutri = Nutrients()
+    if len(ingredients) == 0:
+        return nutri
     total_amount = 0
     for i in ingredients:
         nutri += calc_from_food(i.food_id, i.amount)
