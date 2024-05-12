@@ -139,6 +139,23 @@ def add_food():
     return new_food.json()
 
 
+@app.route('/api/food/edit', methods=['POST'])
+def edit_food():
+    received_data = request.json
+
+    food_to_change = Food.find(id=received_data['id'])
+    if food_to_change is not None:
+        food_to_change.name = received_data['name']
+        food_to_change.proteins = received_data['proteins']
+        food_to_change.fats = received_data['fats']
+        food_to_change.carbs = received_data['carbs']
+        food_to_change.kcal = received_data['kcal']
+        food_to_change.save()
+        return food_to_change.json()
+    else:
+        return ''
+
+
 @app.route('/user/<username>')
 def show_user_profile(username):
     return render_template('meals.html', name=username)
