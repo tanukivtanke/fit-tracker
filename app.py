@@ -156,6 +156,18 @@ def edit_food():
         return ''
 
 
+@app.route('/api/dish/new', methods=['POST'])
+def add_dish():
+    received_data = request.json
+
+    new_dish = Dish(
+        name=received_data['name'],
+        out_of_stock=False
+    )
+    new_dish.save()
+    return new_dish.json()
+
+
 @app.route('/user/<username>')
 def show_user_profile(username):
     return render_template('meals.html', name=username)
