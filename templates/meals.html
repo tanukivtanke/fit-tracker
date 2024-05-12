@@ -33,6 +33,7 @@
 let allMealOrders = null;
 let allFoods = null;
 let allDishes = null;
+let allDishIngredients = null;
 
 const mealGroupMap = {};
 const mealMap = {};
@@ -49,6 +50,9 @@ const fetchData = async () => {
     }
     if (allDishes == null) {
         allDishes = mapToId(await _fetch('/api/dishes'));
+    }
+    if (allDishIngredients == null) {
+        allDishIngredients = mapToId(await _fetch('/api/dish_ingredients'))
     }
 
     let currDateStr = currentDate.toFormat('yyyy-MM-dd');

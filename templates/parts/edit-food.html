@@ -9,15 +9,28 @@
     editFoodModal.cancelButton.innerText = "Назад";
 
     {
-        const addFoodNameId = 'editFoodModal-add-food-name';
-        const addProteinsId = 'editFoodModal-add-food-proteins';
-        const addFatsId = 'editFoodModal-add-food-fats';
-        const addCarbsId = 'editFoodModal-add-food-carbs';
-        const addKcalId = 'editFoodModal-add-food-kcal';
-        const addFoodButtonId = 'editFoodModal-add-food-button';
+        const rootId = editFoodModal.modalId;
 
-        const searchFoodId = 'editFoodModal-search-food';
-        const allFoodsId = 'editFoodModal-all-foods';
+        const addFoodNameId = `${rootId}-add-food-name`;
+        const addProteinsId = `${rootId}-add-food-proteins`;
+        const addFatsId = `${rootId}-add-food-fats`;
+        const addCarbsId = `${rootId}-add-food-carbs`;
+        const addKcalId = `${rootId}-add-food-kcal`;
+        const addFoodButtonId = `${rootId}-add-food-button`;
+
+        const addDishNameId = `${rootId}-add-dish-name`;
+         const addDishButtonId = `${rootId}-add-dish-button`;
+
+        const searchFoodId = `${rootId}-search-food`;
+        const allFoodsId = `${rootId}-all-foods`;
+
+        const searchDishId = `${rootId}-search-dish`;
+        const allDishesId = `${rootId}-all-dishes`;
+
+        const foodTabButtonId = `${rootId}-food-tab-btn`;
+        const dishTabButtonId = `${rootId}-dish-tab-btn`;
+        const foodTabId = `${rootId}-food-tab`;
+        const dishTabId = `${rootId}-dish-tab`;
 
         editFoodModal.onClose(() => {
             startEditMealGroup(currEditingMealGroup);
@@ -28,13 +41,13 @@
             editFoodModal.setHtml(`
             <div class="btn-group w-100" role="group">
               <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-              <label class="btn btn-outline-primary w-50 py-05" for="btnradio1">Еда</label>
+              <label id=${foodTabButtonId}  class="btn btn-outline-primary w-50 py-05" for="btnradio1">Еда</label>
 
               <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-              <label class="btn btn-outline-primary w-50 py-05" for="btnradio2">Блюдо</label>
+              <label id=${dishTabButtonId} class="btn btn-outline-primary w-50 py-05" for="btnradio2">Блюдо</label>
             </div>
 
-            <div id="editFoodModal-food-tab">
+            <div id="${foodTabId}">
 
                 <hr>
 
@@ -71,13 +84,51 @@
 
                 <div id="${allFoodsId}"></div>
             </div>
+
+            <div id="${dishTabId}">
+                <hr>
+                <h5>Новое блюдо</h5>
+                <div class="d-flex">
+                    <div class="input-group">
+                      <input id="${addDishNameId}" type="text" class="form-control" placeholder="Название">
+                    </div>
+                    <button id="${addDishButtonId}" class="btn btn-primary ms-2 py-025" disabled>Добавить</button>
+                </div>
+
+                <hr>
+
+                <h5>Добавленные блюда</h5>
+
+                <div class="input-group mb-3">
+                  <span class="input-group-text">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                  </span>
+                  <input id="${searchDishId}" type="text" class="form-control" placeholder="Искать по названию">
+                </div>
+
+                <div id="${allDishesId}"></div>
+            </div>
             `);
 
-            byId(searchFoodId).addEventListener("input", renderFoods);
+            onClick(foodTabButtonId, () => {
+                showElem(foodTabId);
+                hideElem(dishTabId);
+            });
+
+            onClick(dishTabButtonId, () => {
+                hideElem(foodTabId);
+                showElem(dishTabId);
+            });
+
+
+
+            onInput(searchFoodId, renderFoods);
+            onInput(searchDishId, renderDishes);
             renderFoods();
+            renderDishes();
 
 
-            const checkAddButton = () => {
+            const checkAddFoodButton = () => {
                 let name = byId(addFoodNameId).value.trim();
                 let proteins = handleFloatField(addProteinsId, 0, 100);
                 let fats = handleFloatField(addFatsId, 0, 100);
@@ -89,10 +140,10 @@
             };
 
             for (let field of [addFoodNameId, addProteinsId, addFatsId, addCarbsId, addKcalId]) {
-                byId(field).addEventListener("input", checkAddButton);
+                onInput(field, checkAddFoodButton);
             }
 
-            byId(addFoodButtonId).addEventListener("click", async () => {
+            onClick(addFoodButtonId, async () => {
                 let name = byId(addFoodNameId).value.trim();
                 let proteins = handleFloatField(addProteinsId, 0, 100);
                 let fats = handleFloatField(addFatsId, 0, 100);
@@ -120,6 +171,34 @@
                 renderFoods();
             });
 
+            const checkAddDishButton = () => {
+                let name = byId(addDishNameId).value.trim();
+                byId(addDishButtonId).disabled = !(name.length);
+            };
+
+            for (let field of [addDishNameId]) {
+                onInput(field, checkAddDishButton);
+            }
+
+            onClick(addDishButtonId, async () => {
+                let name = byId(addDishNameId).value.trim();
+
+                byId(addDishButtonId).disabled = true;
+
+                let result = await _post("/api/dish/new" ,{
+                    name: name,
+                });
+
+                if (result.id) {
+                    allDishes[result.id] = result;
+                }
+
+                for (let field of [addDishNameId]) {
+                    byId(field).value = "";
+                }
+
+                renderDishes();
+            });
         });
 
         const renderFoods = () => {
@@ -127,7 +206,7 @@
             let search = byId(searchFoodId).value.toLowerCase().trim();
             let searchTerms = search.split(/\s+/);
 
-            let foodButtonKey = `data-ft-food-id`;
+            let foodButtonKey = `data-ft-food-btn-id`;
             let foodNameIdKey = `data-ft-food-name-id`;
             let foodProteinsIdKey = `data-ft-food-proteins-id`;
             let foodFatsIdKey = `data-ft-food-fats-id`;
@@ -246,6 +325,153 @@
                 });
             });
 
+        };
+
+        const renderDishes = () => {
+
+            let search = byId(searchDishId).value.toLowerCase().trim();
+            let searchTerms = search.split(/\s+/);
+
+            let dishButtonKey = `data-ft-dish-btn-id`;
+            let dishNameIdKey = `data-ft-dish-name-id`;
+            let dishOutOfStockIdKey = `data-ft-dish-out-of-stock-id`;
+
+            class Nutrients {
+                constructor(proteins=0, fats=0, carbs=0, kcal=0) {
+                    this.proteins = proteins;
+                    this.fats = fats;
+                    this.carbs = carbs;
+                    this.kcal = kcal;
+                }
+
+                add(other) {
+                    this.proteins += other.proteins;
+                    this.fats += other.fats;
+                    this.carbs += other.carbs;
+                    this.kcal += other.kcal;
+                    return this;
+                }
+
+                round() {
+                    this.proteins = Math.round(this.proteins * 10) / 10;
+                    this.fats = Math.round(this.fats * 10) / 10;
+                    this.carbs = Math.round(this.carbs * 10) / 10;
+                    this.kcal = Math.round(this.kcal);
+                }
+            }
+
+            const calcNutrientsFromFood = (foodId, amount) => {
+                let amount_per_100g = amount / 100;
+                let food = allFoods[foodId];
+                return new Nutrients(
+                    food.proteins * amount_per_100g,
+                    food.fats * amount_per_100g,
+                    food.carbs * amount_per_100g,
+                    food.kcal * amount_per_100g
+                );
+            };
+
+            const calcNutrientsFromDish = (dish) => {
+                let amount_per_100g = 1;
+                let ingredients = Object.values(allDishIngredients).filter(e => e.dish_id === dish.id);
+                let nutri = new Nutrients()
+                if (ingredients.length === 0) {
+                    return nutri;
+                }
+                let total_amount = 0;
+                for (let i of ingredients) {
+                    nutri.add(calcNutrientsFromFood(i.food_id, i.amount));
+                    total_amount += i.amount;
+                }
+                let total_amount_per_100g = total_amount / 100;
+                return new Nutrients(
+                    nutri.proteins * amount_per_100g / total_amount_per_100g,
+                    nutri.fats * amount_per_100g / total_amount_per_100g,
+                    nutri.carbs * amount_per_100g / total_amount_per_100g,
+                    nutri.kcal * amount_per_100g / total_amount_per_100g,
+                );
+            };
+
+            const getDishHtml = (dish) => {
+                let nutrients = calcNutrientsFromDish(dish);
+                nutrients.round();
+
+                return `
+                <hr>
+                <div class="">
+                    <div class="d-flex align-items-start">
+                        <div class="input-group mb-2-5 me-2">
+                            <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name}">
+                        </div>
+                        ${HtmlPresets.switch('',  '', '', !dish.out_of_stock, true, 6, `${dishOutOfStockIdKey}=${dish.id}`)}
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <div class="input-group">
+                          <span class="input-group-text py-025 proteins-bg">Б</span>
+                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.proteins}" disabled>
+                          <span class="input-group-text py-025 fats-bg">Ж</span>
+                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.fats}" disabled>
+                          <span class="input-group-text py-025 carbs-bg">У</span>
+                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.carbs}" disabled>
+                          <span class="input-group-text py-025 kcal-bg">Кк</span>
+                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.kcal}" disabled>
+                        </div>
+                        <button ${dishButtonKey}=${dish.id} class="btn btn-primary ms-2 py-025">Изменить</button>
+                    </div>
+                </div>
+                `;
+            };
+
+            let dishesHtml = ``;
+
+            for (let dish of Object.values(allDishes)) {
+                let lowerCaseDishName = dish.name.toLowerCase();
+                if (!searchTerms.every(term => lowerCaseDishName.includes(term))) {
+                    continue;
+                }
+                dishesHtml = getDishHtml(dish) + dishesHtml;
+            }
+
+            byId(allDishesId).innerHTML = dishesHtml;
+
+            const saveDish = async (dishId) => {
+                let nameField = document.querySelector(`[${dishNameIdKey}="${dishId}"]`);
+                let outOfStockField = document.querySelector(`[${dishOutOfStockIdKey}="${dishId}"]`);
+
+                let name = nameField.value.trim();
+                let outOfStock = !outOfStockField.checked;
+
+                if (!name.length) {
+                    return;
+                }
+
+                let result = await _post("/api/dish/edit", {
+                    id: dishId,
+                    name: name,
+                    out_of_stock: outOfStock,
+                });
+
+                log(result)
+
+                if (result.id) {
+                    allDishes[result.id] = result;
+                }
+            };
+
+            for (let field of [dishNameIdKey, dishOutOfStockIdKey]) {
+                query(`[${field}]`, e => {
+                    let value = e.getAttribute(field);
+                    let dishId = parseInt(value);
+                    if (Number.isNaN(dishId)) {
+                        return;
+                    }
+                    if (field === dishNameIdKey) {
+                        onInput(e, () => saveDish(dishId));
+                    } else {
+                        onChange(e, () => saveDish(dishId));
+                    }
+                });
+            }
 
         };
     }

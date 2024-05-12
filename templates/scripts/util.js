@@ -255,10 +255,10 @@ class HtmlPresets {
         `;
     }
 
-    static switch(id, labelId, text, checked, enabled=true) {
+    static switch(id, labelId, text, checked, enabled=true, fs=5, data) {
         return `
-        <div class="form-check form-switch fs-5 d-flex align-items-center">
-          <input class="form-check-input" type="checkbox" role="switch" 
+        <div class="form-check form-switch fs-${fs} d-flex align-items-center">
+          <input class="form-check-input" type="checkbox" role="switch" ${data}
             ${id ? `id="${id}"` : ''}
             ${checked ? 'checked' : ''} 
             ${enabled ? '' : 'disabled'}
