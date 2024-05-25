@@ -174,6 +174,19 @@ def edit_dish():
         return ''
 
 
+@app.route('/api/dish_ingredient/new', methods=['POST'])
+def ingredient_edit():
+    received_data = request.json
+
+    new_ingredient = DishIngredient(
+        food_id=received_data['food_id'],
+        dish_id=received_data['dish_id'],
+        amount=received_data['amount'],
+    )
+    new_ingredient.save()
+    return new_ingredient.json()
+
+
 @app.route('/api/dish/new', methods=['POST'])
 def add_dish():
     received_data = request.json
