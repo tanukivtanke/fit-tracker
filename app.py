@@ -187,6 +187,13 @@ def ingredient_edit():
     return new_ingredient.json()
 
 
+@app.route('/api/dish_ingredient/delete', methods=['DELETE'])
+def del_dish_ingredient():
+    received_data = request.json
+    id_to_del = received_data['id']
+    return jsonify(DishIngredient.delete_by_id(id_to_del))
+
+
 @app.route('/api/dish/new', methods=['POST'])
 def add_dish():
     received_data = request.json
