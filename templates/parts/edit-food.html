@@ -201,6 +201,7 @@
                 }
 
                 renderFoods();
+                renderEditDish();
             });
 
             const checkAddDishButton = () => {
@@ -543,6 +544,10 @@
         }
 
         const renderEditDish = () => {
+            if (currentEditingDishId === null) {
+                return;
+            }
+
             let dishId = currentEditingDishId;
 
             let currDish = allDishes[dishId];
