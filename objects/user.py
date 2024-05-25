@@ -23,6 +23,7 @@ class Dish(AbstractObject):
 
     name = db.Column(db.String, unique=True, nullable=False)
     out_of_stock = db.Column(db.Boolean, nullable=False)
+    recipe = db.Column(db.String, nullable=False)
 
 
 class DishIngredient(AbstractObject):

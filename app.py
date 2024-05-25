@@ -174,6 +174,19 @@ def edit_dish():
         return ''
 
 
+@app.route('/api/dish_recipe/edit', methods=['POST'])
+def edit_recipe():
+    received_data = request.json
+
+    dish_to_change = Dish.find(id=received_data['id'])
+    if dish_to_change is not None:
+        dish_to_change.recipe = received_data['recipe']
+        dish_to_change.update()
+        return dish_to_change.json()
+    else:
+        return ''
+
+
 @app.route('/api/dish_ingredient/new', methods=['POST'])
 def ingredient_edit():
     received_data = request.json
@@ -200,7 +213,8 @@ def add_dish():
 
     new_dish = Dish(
         name=received_data['name'],
-        out_of_stock=False
+        out_of_stock=False,
+        recipe=''
     )
     new_dish.save()
     return new_dish.json()

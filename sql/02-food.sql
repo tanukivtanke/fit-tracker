@@ -10,7 +10,8 @@ CREATE TABLE food (
 CREATE TABLE dish (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL ,
-    out_of_stock BOOLEAN NOT NULL
+    out_of_stock BOOLEAN NOT NULL,
+    recipe TEXT NOT NULL
 );
 
 CREATE TABLE dish_ingredient (
@@ -57,8 +58,8 @@ INSERT INTO food (name, proteins, fats, carbs, kcal) VALUES ('Картофель
 INSERT INTO food (name, proteins, fats, carbs, kcal) VALUES ('Лук', 1.0, 1.0, 9, 12);
 INSERT INTO food (name, proteins, fats, carbs, kcal) VALUES ('Морковь', 2.0, 2.0, 64.9, 68);
 
-INSERT INTO dish (name, out_of_stock) VALUES ('Egged macaroni', False);
-INSERT INTO dish (name, out_of_stock) VALUES ('Рагу овощное со свининой', True);
+INSERT INTO dish (name, out_of_stock, recipe) VALUES ('Egged macaroni', False, 'Яйца смешать с макаронами и поджарить 10 минут.');
+INSERT INTO dish (name, out_of_stock, recipe) VALUES ('Рагу овощное со свининой', True, 'Все овощи порезать и потушить 30 минут или более.');
 
 INSERT INTO dish_ingredient (amount, food_id, dish_id) VALUES (250, 1, 1);
 INSERT INTO dish_ingredient (amount, food_id, dish_id) VALUES (100, 2, 1);
