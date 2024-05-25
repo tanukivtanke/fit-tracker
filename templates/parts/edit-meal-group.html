@@ -114,9 +114,9 @@
             } else if (m.food_id) {
                 name = allFoods[m.food_id].name;
             }
-            return `<div class='me-2 w-100 d-flex justify-content-between'>
+            return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
                     <span>${name}</span>
-                    <span>${m.amount} гр.</span>
+                    <span>${m.amount}&nbsp;гр.</span>
                     </div>`
         };
 
@@ -164,11 +164,13 @@
 
         `);
 
-        $( '#editMealGroupModal-select').select2({
+        $('#editMealGroupModal-select').select2({
             theme: 'bootstrap-5',
             placeholder: "Выбрать пищу",
             dropdownParent: $(`#${editMealGroupModal.modalId}`),
         });
+
+        fixSelect2();
 
         byId('editMealGroupModal-text').addEventListener('input', () => {
             handleNumberField('editMealGroupModal-text', 0, 9999, true, null);
@@ -190,4 +192,19 @@
 
         await setEditMealGroupHtml();
     };
+
+    function fixSelect2(setWidth=true) {
+        for (let e of document.getElementsByClassName('select2-selection')) {
+            if (setWidth) {
+                e.classList.add('w-15');
+            }
+            e.classList.add('px-0');
+        }
+        for (let e of document.getElementsByClassName('select2-container')) {
+            if (setWidth) {
+                e.classList.add('w-15');
+            }
+            e.classList.add('px-0');
+        }
+    }
 </script>

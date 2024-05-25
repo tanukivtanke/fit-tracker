@@ -26,6 +26,7 @@
         const editDishOutOfStockId = `${rootId}-editDishOutOfStockId`;
         const editDishAddNewBtnId = `${rootId}-editDishAddNewBtnId`;
         const editDishAmountInputId = `${rootId}-editDishAmountInputId`;
+        const editDishGetBackId = `${rootId}-editDishGetBackId`;
         const addDishButtonId = `${rootId}-add-dish-button`;
 
         const searchFoodId = `${rootId}-search-food`;
@@ -122,16 +123,12 @@
 
                 </div>
                 <div id=${editDishTab} class="d-none">
-                    <h5>Редактировать блюдо</h5>
 
-                    <div class="d-flex align-items-start">
-                        <div class="input-group me-2 mb-2-5">
-                           <input id="${editDishNameId}" type="text" class="form-control" placeholder="Название">
-                        </div>
-                        ${HtmlPresets.switch(editDishOutOfStockId, '', '', false, true, 6)}
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5>Редактировать блюдо</h5>
+                        <h6 id="${editDishGetBackId}" class="subtle-link" style="margin-top: -0.5rem;margin-right: 0.5rem;">Вернуться <i class="fa-solid fa-arrow-right"></i></h6>
                     </div>
 
-                    <hr>
 
                     <div id=${editDishFoodListId}></div>
 
@@ -151,6 +148,12 @@
             onClick(dishTabButtonId, () => {
                 hideElem(foodTabId);
                 showElem(dishTabId);
+            });
+
+            onClick(editDishGetBackId, e => {
+                currentEditingDishId = null;
+                showElem(newDishTab);
+                hideElem(editDishTab);
             });
 
 
@@ -335,7 +338,9 @@
                 }
 
                 onClick(e, async () => {
-                    let name = document.querySelector(`[${foodNameIdKey}="${foodId}"]`).value;
+                    let name = document.querySelector(`[${foodNameIdKey}="${foodId}"]`).value.trim();
+                    document.querySelector(`[${foodNameIdKey}="${foodId}"]`).value = name;
+
                     let proteins = document.querySelector(`[${foodProteinsIdKey}="${foodId}"]`).value;
                     let fats = document.querySelector(`[${foodFatsIdKey}="${foodId}"]`).value;
                     let carbs = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`).value;
@@ -484,8 +489,6 @@
                     out_of_stock: outOfStock,
                 });
 
-                log(result)
-
                 if (result.id) {
                     allDishes[result.id] = result;
                 }
@@ -555,16 +558,12 @@
             console.log(dishId)
             console.log(currDish)
 
-            byId(editDishNameId).value = currDish.name;
-            byId(editDishOutOfStockId).checked = !currDish.out_of_stock;
-
-
 
             const renderDishIngr = (di) => {
                 let name = allFoods[di.food_id].name;
-                return `<div class='me-2 w-100 d-flex justify-content-between'>
+                return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
                         <span>${name}</span>
-                        <span>${di.amount} гр.</span>
+                        <span>${di.amount}&nbsp;гр.</span>
                         </div>`
             };
 
@@ -595,6 +594,15 @@
 
             byId(editDishFoodListId).innerHTML = `
 
+            <div class="d-flex align-items-start">
+                <div class="input-group me-2 mb-2-5">
+                   <input id="${editDishNameId}" type="text" class="form-control" placeholder="Название">
+                </div>
+                ${HtmlPresets.switch(editDishOutOfStockId, '', '', false, true, 6)}
+            </div>
+
+            <hr>
+
             <div class="row">
                 <div class="col pe-0">
 
@@ -624,6 +632,35 @@
 
             `;
 
+
+
+            byId(editDishNameId).value = currDish.name;
+            byId(editDishOutOfStockId).checked = !currDish.out_of_stock;
+
+            const saveDish = async () => {
+                let name = byId(editDishNameId).value.trim();
+                let outOfStock = !byId(editDishOutOfStockId).checked;
+
+                if (!name.length) {
+                    return;
+                }
+
+                let result = await _post("/api/dish/edit", {
+                    id: dishId,
+                    name: name,
+                    out_of_stock: outOfStock,
+                });
+
+                console.log(result);
+
+                if (result.id) {
+                    allDishes[result.id] = result;
+                }
+            };
+
+            onInput(editDishNameId, saveDish);
+            onChange(editDishOutOfStockId, saveDish);
+
             byId(editDishRecipeInputId).value = currDish.recipe;
 
             onInput(editDishRecipeInputId, async e => {
@@ -645,6 +682,8 @@
                 placeholder: "Выбрать пищу",
                 dropdownParent: $(`#${editFoodModal.modalId}`),
             });
+
+            fixSelect2(false);
 
             onInput(editDishAmountInputId, e => {
                 handleNumberField(e, 0, 9999, true, null);
