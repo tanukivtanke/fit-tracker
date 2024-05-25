@@ -19,7 +19,13 @@
         const addFoodButtonId = `${rootId}-add-food-button`;
 
         const addDishNameId = `${rootId}-add-dish-name`;
-         const addDishButtonId = `${rootId}-add-dish-button`;
+        const editDishNameId = `${rootId}-editDishNameId`;
+        const editDishFoodListId = `${rootId}-editDishFoodListId`;
+        const editDishFoodListSelectId = `${rootId}-editDishFoodListSelectId`;
+        const editDishOutOfStockId = `${rootId}-editDishOutOfStockId`;
+        const editDishAddNewBtnId = `${rootId}-editDishAddNewBtnId`;
+        const editDishAmountInputId = `${rootId}-editDishAmountInputId`;
+        const addDishButtonId = `${rootId}-add-dish-button`;
 
         const searchFoodId = `${rootId}-search-food`;
         const allFoodsId = `${rootId}-all-foods`;
@@ -31,6 +37,9 @@
         const dishTabButtonId = `${rootId}-dish-tab-btn`;
         const foodTabId = `${rootId}-food-tab`;
         const dishTabId = `${rootId}-dish-tab`;
+
+        const newDishTab = `${rootId}-newDishTab`;
+        const editDishTab = `${rootId}-editDishTab`;
 
         editFoodModal.onClose(() => {
             startEditMealGroup(currEditingMealGroup);
@@ -87,26 +96,48 @@
 
             <div id="${dishTabId}">
                 <hr>
-                <h5>Новое блюдо</h5>
-                <div class="d-flex">
-                    <div class="input-group">
-                      <input id="${addDishNameId}" type="text" class="form-control" placeholder="Название">
+
+                <div id=${newDishTab}>
+                    <h5>Новое блюдо</h5>
+                    <div class="d-flex">
+                        <div class="input-group">
+                          <input id="${addDishNameId}" type="text" class="form-control" placeholder="Название">
+                        </div>
+                        <button id="${addDishButtonId}" class="btn btn-primary ms-2 py-025" disabled>Добавить</button>
                     </div>
-                    <button id="${addDishButtonId}" class="btn btn-primary ms-2 py-025" disabled>Добавить</button>
+
+                    <hr>
+
+                    <h5>Добавленные блюда</h5>
+
+                    <div class="input-group mb-3">
+                      <span class="input-group-text">
+                          <i class="fa-solid fa-magnifying-glass"></i>
+                      </span>
+                      <input id="${searchDishId}" type="text" class="form-control" placeholder="Искать по названию">
+                    </div>
+
+                    <div id="${allDishesId}"></div>
+
+                </div>
+                <div id=${editDishTab} class="d-none">
+                    <h5>Редактировать блюдо</h5>
+
+                    <div class="d-flex align-items-start">
+                        <div class="input-group me-2 mb-2-5">
+                           <input id="${editDishNameId}" type="text" class="form-control" placeholder="Название">
+                        </div>
+                        ${HtmlPresets.switch(editDishOutOfStockId, '', '', false, true, 6)}
+                    </div>
+
+                    <hr>
+
+                    <div id=${editDishFoodListId}></div>
                 </div>
 
-                <hr>
 
-                <h5>Добавленные блюда</h5>
 
-                <div class="input-group mb-3">
-                  <span class="input-group-text">
-                      <i class="fa-solid fa-magnifying-glass"></i>
-                  </span>
-                  <input id="${searchDishId}" type="text" class="form-control" placeholder="Искать по названию">
-                </div>
 
-                <div id="${allDishesId}"></div>
             </div>
             `);
 
@@ -472,6 +503,149 @@
                     }
                 });
             }
+
+            const setEditDish = () => {
+
+            }
+
+            query(`[${dishButtonKey}]`, e => {
+                console.log(e)
+
+                let value = e.getAttribute(dishButtonKey);
+                let dishId = parseInt(value);
+                if (Number.isNaN(dishId)) {
+                    return;
+                }
+
+                onClick(e, () => {
+                    hideElem(newDishTab);
+                    showElem(editDishTab);
+                    currentEditingDishId = dishId;
+                    console.log(currentEditingDishId)
+                    renderEditDish();
+                });
+
+            });
+
+        };
+
+        let currentEditingDishId = null;
+
+        const renderEditDish = () => {
+            let dishId = currentEditingDishId;
+
+            let currDish = allDishes[dishId];
+
+            console.log(dishId)
+            console.log(currDish)
+
+            byId(editDishNameId).value = currDish.name;
+            byId(editDishOutOfStockId).checked = !currDish.out_of_stock;
+
+
+
+            const renderDishIngr = (di) => {
+                let name = allFoods[di.food_id].name;
+                return `<div class='me-2 w-100 d-flex justify-content-between'>
+                        <span>${name}</span>
+                        <span>${di.amount} гр.</span>
+                        </div>`
+            };
+
+
+            let options = ``;
+            for (let food of Object.values(allFoods)) {
+                options += `
+                <option value="FOOD_${food.id}">${food.name}</option>
+                `;
+            }
+
+            let dishIngredients = ``;
+            for (let dishIngredient of Object.values(allDishIngredients)) {
+                if (dishIngredient.dish_id !== dishId) {
+                    continue;
+                }
+
+                dishIngredients = `
+                ${
+                   HtmlPresets.makeRow(`
+                    ${renderDishIngr(dishIngredient)}
+                    <button class="btn btn-sm btn-danger"
+                        onclick="deleteMealFromMealGroup(${dishIngredient.id})">Удалить</button>`,
+                    {fs: 6, ps: 2})
+                }
+                ` + dishIngredients;
+            }
+
+            byId(editDishFoodListId).innerHTML = `
+
+            <div class="row">
+                <div class="col pe-0">
+
+                    <div class="input-group input-group-sm h-100">
+                        <select class="form-select" id="${editDishFoodListSelectId}">
+                            <option value="" selected disabled></option>
+                            ${options}
+                        </select>
+                        <input id="${editDishAmountInputId}" type="text"
+                                class="form-control" placeholder="Кол-во" style="max-width: 4rem">
+                        <span class="input-group-text">гр.</span>
+                    </div>
+
+                </div>
+                <div class="col-auto">
+                    <button id=${editDishAddNewBtnId} class="btn btn-primary">Добавить</button>
+                </div>
+
+                ${dishIngredients ? '<hr class="my-3">' : ''}
+                <div>${dishIngredients}</div>
+
+            </div>
+
+            `;
+
+            $(`#${editDishFoodListSelectId}`).select2({
+                theme: 'bootstrap-5',
+                placeholder: "Выбрать пищу",
+                dropdownParent: $(`#${editFoodModal.modalId}`),
+            });
+
+            onInput(editDishAmountInputId, e => {
+                handleNumberField(e, 0, 9999, true, null);
+            });
+
+            onClick(editDishAddNewBtnId, async e => {
+                let foodId = null;
+
+                let chosenMeal = byId(editDishFoodListSelectId).value;
+                if (!chosenMeal) {
+                    return;
+                }
+
+                if (chosenMeal.startsWith("FOOD_")) {
+                    foodId = parseInt(chosenMeal.substring(5));
+                }
+                if (foodId == null) {
+                    return;
+                }
+
+                let chosenAmount = handleNumberField(editDishAmountInputId, 0, 9999, true, null);
+                if (chosenAmount == null) {
+                    return;
+                }
+
+                let result = await _post("/api/dish_ingredient/new" ,{
+                    food_id: foodId,
+                    dish_id: dishId,
+                    amount: chosenAmount,
+                });
+
+                if (result.id) {
+                    allDishIngredients[result.id] = result;
+                }
+
+                renderEditDish();
+            });
 
         };
     }
