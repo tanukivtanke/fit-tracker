@@ -94,7 +94,7 @@
                 <div id="${allFoodsId}"></div>
             </div>
 
-            <div id="${dishTabId}">
+            <div id="${dishTabId}" class="d-none">
                 <hr>
 
                 <div id=${newDishTab}>
@@ -504,10 +504,6 @@
                 });
             }
 
-            const setEditDish = () => {
-
-            }
-
             query(`[${dishButtonKey}]`, e => {
                 console.log(e)
 
@@ -530,6 +526,20 @@
         };
 
         let currentEditingDishId = null;
+
+        const deleteDishIngredientFromDishAsync = async (dishIngrId) => {
+            let result = await _delete("/api/dish_ingredient/delete", {
+                id: dishIngrId
+            });
+            if (result) {
+                delete allDishIngredients[dishIngrId];
+            }
+            renderEditDish();
+        };
+
+        function deleteDishIngredientFromDish(dishIngrId) {
+            deleteDishIngredientFromDishAsync(dishIngrId);
+        }
 
         const renderEditDish = () => {
             let dishId = currentEditingDishId;
@@ -571,7 +581,7 @@
                    HtmlPresets.makeRow(`
                     ${renderDishIngr(dishIngredient)}
                     <button class="btn btn-sm btn-danger"
-                        onclick="deleteMealFromMealGroup(${dishIngredient.id})">Удалить</button>`,
+                        onclick="deleteDishIngredientFromDish(${dishIngredient.id})">Удалить</button>`,
                     {fs: 6, ps: 2})
                 }
                 ` + dishIngredients;
