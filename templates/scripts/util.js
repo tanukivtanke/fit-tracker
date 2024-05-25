@@ -274,7 +274,7 @@ class HtmlPresets {
     static textarea(id, label) {
         return `
         <div class="form-floating">
-          <textarea class="form-control" placeholder="123" id="${id}" style="height: 100px"></textarea>
+          <textarea class="form-control" placeholder="123" id="${id}" style="height: 200px"></textarea>
           <label for="${id}">${label}</label>
         </div>
         `;

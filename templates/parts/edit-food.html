@@ -21,6 +21,7 @@
         const addDishNameId = `${rootId}-add-dish-name`;
         const editDishNameId = `${rootId}-editDishNameId`;
         const editDishFoodListId = `${rootId}-editDishFoodListId`;
+        const editDishRecipeInputId = `${rootId}-editDishRecipeInputId`;
         const editDishFoodListSelectId = `${rootId}-editDishFoodListSelectId`;
         const editDishOutOfStockId = `${rootId}-editDishOutOfStockId`;
         const editDishAddNewBtnId = `${rootId}-editDishAddNewBtnId`;
@@ -133,6 +134,7 @@
                     <hr>
 
                     <div id=${editDishFoodListId}></div>
+
                 </div>
 
 
@@ -150,7 +152,6 @@
                 hideElem(foodTabId);
                 showElem(dishTabId);
             });
-
 
 
             onInput(searchFoodId, renderFoods);
@@ -610,9 +611,29 @@
                 ${dishIngredients ? '<hr class="my-3">' : ''}
                 <div>${dishIngredients}</div>
 
+
+
             </div>
 
+            ${HtmlPresets.textarea(editDishRecipeInputId, 'Рецепт')}
+
             `;
+
+            byId(editDishRecipeInputId).value = currDish.recipe;
+
+            onInput(editDishRecipeInputId, async e => {
+                let value = e.value;
+
+                let result = await _post("/api/dish_recipe/edit" ,{
+                    id: dishId,
+                    recipe: value,
+                });
+
+                if (result.id) {
+                    allDishIngredients[result.id] = result;
+                }
+            });
+
 
             $(`#${editDishFoodListSelectId}`).select2({
                 theme: 'bootstrap-5',
