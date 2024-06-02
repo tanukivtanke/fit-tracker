@@ -24,7 +24,7 @@
         const changeUserModal = new Modal('change-user', 'Сменить пользователя');
         changeUserModal.cancelButton.innerText = "Назад";
 
-        if (currentUserId === null) {
+        if (currentUserId === null || Number.isNaN(currentUserId)) {
             currentUserId = 1;
             setCookie("user-id", currentUserId);
         }
