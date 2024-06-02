@@ -26,7 +26,6 @@
 
         if (currentUserId === null || Number.isNaN(currentUserId)) {
             currentUserId = 1;
-            setCookie("user-id", currentUserId);
         }
 
         const setupUsers = async () => {
@@ -40,6 +39,8 @@
             } else {
                 actualUser = candidates[0];
             }
+
+            setCookie("user-id", actualUser.id);
 
             byId('user-image').src = "/static/" + actualUser.image;
         };

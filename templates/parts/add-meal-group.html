@@ -78,6 +78,8 @@
             byId('meal-group-select').addEventListener("change", changeName);
 
             addMealGroupModal.okButton.addEventListener("click", async () => {
+                addMealGroupModal.okButton.disabled = true;
+
                 let mealOrderId = byId('meal-group-select').value;
 
                 let actualMealOrderName = allMealOrders[mealOrderId].name;
