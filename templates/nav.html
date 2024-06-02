@@ -1,0 +1,96 @@
+
+<nav class="navbar bg-dark text-white">
+    <div class="container" style="min-height: 50px">
+        <div class="d-flex align-items-center">
+            <div class="fs-3">Вес</div>
+        </div>
+
+        <div class="d-flex">
+            <div id="user-profile" class="bg-white rounded rounded-circle"
+                 style="width: 3rem;height: 3rem;cursor: pointer">
+                <img id="user-image" class="img-fluid"/>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="wrapper-change-user-modal"></div>
+
+<script>
+    let currentUserId = parseInt(getCookie("user-id"));
+    let currentUser = null;
+    let allUsers = [];
+    {
+        const changeUserModal = new Modal('change-user', 'Сменить пользователя');
+        changeUserModal.cancelButton.innerText = "Назад";
+
+        if (currentUserId === null) {
+            currentUserId = 1;
+            setCookie("user-id", currentUserId);
+        }
+
+        const setupUsers = async () => {
+            allUsers = await _fetch("/api/users");
+
+            let candidates = allUsers.filter(e => e.id === currentUserId);
+
+            let actualUser;
+            if (candidates.length !== 1) {
+                actualUser = allUsers[0];
+            } else {
+                actualUser = candidates[0];
+            }
+
+            byId('user-image').src = "/static/" + actualUser.image;
+        };
+
+        setupUsers();
+
+        onClick('user-profile', () => {
+            changeUserModal.show();
+        });
+
+        changeUserModal.onOpen(() => {
+            setupModalHtml();
+        });
+
+        const setupModalHtml = () => {
+            let usersHtml = ''
+            for (let user of allUsers) {
+                let isCurrentUser = user.id === currentUserId;
+                usersHtml += `
+                <div class="d-inline-flex align-items-center rounded-2 user-hover border border-4
+                    ${isCurrentUser ? 'current-user' : 'border-white'}" style="width: 49%"
+                    onmousedown="changeUser(${user.id})"
+                    >
+
+                    <div class="bg-white rounded rounded-circle"
+                        style="width: 6rem;height: 6rem;cursor: pointer">
+                        <img src="/static/${user.image}" class="img-fluid"/>
+                    </div>
+                    <div class='fs-2 flex-grow-1 ms-2'>${user.username}</div>
+                </div>
+                `;
+            }
+
+            changeUserModal.setHtml(`
+            ${usersHtml}
+            `);
+        };
+
+        function changeUser(userId) {
+            currentUserId = userId;
+            setupUsers();
+            setupModalHtml();
+
+            try {
+                fetchData();
+            } catch {
+
+            }
+        }
+
+
+    }
+</script>
+

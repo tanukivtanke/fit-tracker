@@ -3,17 +3,7 @@
 {% include 'head.html' with context %}
 
 <body>
-<nav class="navbar bg-dark text-white">
-    <div class="container" style="min-height: 50px">
-        <div class="d-flex align-items-center">
-            <div class="fs-3">Вес</div>
-        </div>
-
-        <div class="d-flex">
-            <i class="fa-solid fa-circle-user text-white fs-1"></i>
-        </div>
-    </div>
-</nav>
+{% include 'nav.html' %}
 
 <div class="container">
     <div id="under-eating" class="d-flex justify-content-between">
@@ -39,7 +29,6 @@ const mealGroupMap = {};
 const mealMap = {};
 
 let currentMealsGroups;
-let currentUserId = 1;
 
 const fetchData = async () => {
     if (allMealOrders == null) {
@@ -56,7 +45,7 @@ const fetchData = async () => {
     }
 
     let currDateStr = currentDate.toFormat('yyyy-MM-dd');
-    currentMealsGroups = await _fetch(`/api/get_meals_for_day?user=tanuki&date=${currDateStr}`);
+    currentMealsGroups = await _fetch(`/api/get_meals_for_day?user_id=${currentUserId}&date=${currDateStr}`);
 
     for (let mg of currentMealsGroups) {
         let mgId = mg.id;
