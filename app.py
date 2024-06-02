@@ -56,9 +56,8 @@ def get_all_meal_orders():
 
 @app.route('/api/get_meals_for_day')
 def get_meals_for_day():
-    username = get_argument('user')
+    user_id = get_argument('user_id')
     meal_date = get_argument('date')
-    user_id = User.find(username=username).id
     meals_by_date = MealGroup.all(user_id=user_id, day=meal_date)
     meals_by_date = sorted(meals_by_date, key=lambda x:  MealOrder.find(id=x.meal_order_id).ordering)
     return list_to_json(meals_by_date)
