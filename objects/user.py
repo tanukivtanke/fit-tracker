@@ -6,6 +6,7 @@ class User(AbstractObject):
     __tablename__ = 'user'
 
     username = db.Column(db.String(80), unique=True, nullable=False)
+    image = db.Column(db.String(255))
 
 
 class Food(AbstractObject):
