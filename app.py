@@ -1,4 +1,3 @@
-import auth
 from base import app, db
 from flask import render_template, request, jsonify
 from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder, DishIngredient

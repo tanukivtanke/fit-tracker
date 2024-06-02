@@ -1,7 +1,10 @@
 create table if not exists user (
     id integer primary key autoincrement,
-    username text
+    username text,
+    image text
 );
 
-insert into user (username) values ('tanuki');
-insert into user (username) values ('2493');
+insert into user (username, image) values ('tanuki', 'img/tanya_cheese.png');
+insert into user (username, image) values ('2493', 'img/vovamilk_can.png');
+
+

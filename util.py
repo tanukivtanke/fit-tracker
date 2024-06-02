@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from flask import jsonify
 from datetime import datetime
 
-from objects.user import Food, Dish, DishIngredient
+from objects.user import Food, DishIngredient
 
 
 def list_to_json(obj: list):
