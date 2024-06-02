@@ -4,7 +4,7 @@ create table if not exists user (
     image text
 );
 
-insert into user (username, image) values ('tanuki', 'img/tanya_cheese.png');
+insert into user (username, image) values ('tanuki', 'img/tanya_cheese_red.png');
 insert into user (username, image) values ('2493', 'img/vovamilk_can.png');
 
 
