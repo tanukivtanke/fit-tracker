@@ -17,6 +17,10 @@ input.py-025 {
     padding-bottom: .10rem !important;
 }
 
+.ms-05 {
+  margin-left: .10rem !important;
+}
+
 .py-1-5 {
     padding-top: .40rem !important;
     padding-bottom: .40rem !important;
@@ -24,6 +28,10 @@ input.py-025 {
 
 .mb-2-5 {
     margin-bottom: .75rem !important
+}
+
+.fs-7 {
+    font-size: 0.85rem;
 }
 
 .all-row-modal {
@@ -38,7 +46,7 @@ input.py-025 {
 }
 
 .proteins-bg {
-    background-color: #f4feff;
+    background-color: #ecf4fc;
 }
 
 .fats-bg {
@@ -50,7 +58,59 @@ input.py-025 {
 }
 
 .kcal-bg {
-    background-color: #f8f9fa;
+    background-color: #e8f7f5;
+}
+
+.stat-in-mg {
+    width: 4.5rem;
+    margin-left: 0.1rem;
+    margin-right: -0.2rem;
+    padding-right: 0.2rem;
+}
+
+.stat-proteins-outline {
+    outline: #8c96c5 solid 0.18rem;
+}
+
+.total-stat {
+    cursor: pointer;
+}
+
+.total-stat:hover {
+    color: white;
+}
+
+.total-proteins:hover {
+    background: #8c96c5;
+}
+
+.stat-fats-outline {
+    outline: #d1a53e solid 0.18rem;
+}
+
+.total-fats:hover {
+    background: #d1a53e;
+}
+
+.stat-carbs-outline {
+    outline: #d19898 solid 0.18rem;
+}
+
+.total-carbs:hover {
+    background: #d19898;
+}
+
+.stat-kcal-outline {
+    outline: #5ea9a2 solid 0.18rem;
+}
+
+.total-kcal:hover {
+    background: #5ea9a2;
+}
+
+#add-meal-group {
+    background: linear-gradient(45deg, rgb(136, 83, 156) 14%, rgb(238, 112, 112) 54%, rgb(237, 242, 208) 86%);
+    cursor: pointer;
 }
 
 .btn-primary:disabled {
