@@ -85,8 +85,8 @@ def get_meals_for_meal_group():
     return list_to_json(meals_per_group)
 
 
-@app.route('/api/get_meals_for_meal_group_all')
-def get_meals_for_meal_group_all():
+@app.route('/api/get_meals_for_meal_day_all')
+def get_meals_for_meal_day_all():
     user_id = get_argument('user_id')
     meal_date = get_argument('date')
     meals_by_date = MealGroup.all(user_id=user_id, day=meal_date)
