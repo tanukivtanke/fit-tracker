@@ -18,6 +18,17 @@ def about():
     return 'This is the about page'
 
 
+@app.route('/api/all_static')
+def get_all_static():
+    return jsonify({
+        "users": User.all_dict(),
+        "meal_orders": MealOrder.all_dict(),
+        "foods": Food.all_dict(),
+        "dishes": Dish.all_dict(),
+        "dish_ingredients": DishIngredient.all_dict()
+    })
+
+
 @app.route('/api/users')
 def get_users():
     return User.all_json()

@@ -23,6 +23,11 @@ class AbstractObject(db.Model):
         return jsonify([i.dict() for i in all_objs])
 
     @classmethod
+    def all_dict(cls):
+        all_objs = cls.query.all()
+        return [i.dict() for i in all_objs]
+
+    @classmethod
     def all(cls, **kwargs):
         return cls.query.filter_by(**kwargs).all()
 
