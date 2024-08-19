@@ -2,7 +2,7 @@ from base import app, db
 from flask import render_template, request, jsonify
 from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder, DishIngredient
 
-from util import list_to_json, string_to_date, calc_from_food, calc_from_dish
+from util import list_to_json, string_to_date, calc_from_food, calc_from_dish, list_to_dict
 
 from auth import *
 
@@ -83,6 +83,25 @@ def get_meals_for_meal_group():
     meals_per_group = Meal.all(meal_group_id=meal_group_id)
     meals_per_group = sorted(meals_per_group, key=lambda x:  x.id)
     return list_to_json(meals_per_group)
+
+
+@app.route('/api/get_meals_for_meal_group_all')
+def get_meals_for_meal_group_all():
+    user_id = get_argument('user_id')
+    meal_date = get_argument('date')
+    meals_by_date = MealGroup.all(user_id=user_id, day=meal_date)
+    meals_by_date = sorted(meals_by_date, key=lambda x: MealOrder.find(id=x.meal_order_id).ordering)
+    meals_ids = [i.id for i in meals_by_date]
+    meal_to_group = {}
+    for i in meals_ids:
+        meal_group_id = i
+        meals_per_group = Meal.all(meal_group_id=meal_group_id)
+        meals_per_group = sorted(meals_per_group, key=lambda x: x.id)
+        meal_to_group[str(i)] = list_to_dict(meals_per_group)
+    return jsonify({
+        'meal_groups': list_to_dict(meals_by_date),
+        'meals_for_meal_group': meal_to_group
+    })
 
 
 @app.route('/api/meal_groups/new', methods=['POST'])

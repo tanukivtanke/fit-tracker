@@ -10,6 +10,10 @@ def list_to_json(obj: list):
     return jsonify([i.dict() for i in obj])
 
 
+def list_to_dict(obj: list):
+    return [i.dict() for i in obj]
+
+
 def string_to_date(string):
     return datetime.strptime(string, '%Y-%m-%d')
 
