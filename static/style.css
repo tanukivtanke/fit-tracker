@@ -60,7 +60,7 @@ input.py-025 {
 }
 
 .w-15 {
-    max-width: 14.5rem;
+    max-width: 15rem;
 }
 
 .subtle-link {
@@ -76,6 +76,10 @@ input.py-025 {
 
 html {
     font-size: calc(min(12px, 5px + max(0px, (100vw - 200px) / 40)));
+}
+
+.w-15 {
+    max-width: 22rem;
 }
 
 
@@ -110,6 +114,9 @@ html {
     }
     html {
         font-size: 12px;
+    }
+    .w-15 {
+        max-width: 22rem;
     }
 }
 
@@ -148,6 +155,9 @@ html {
     html {
         font-size: 13px;
     }
+    .w-15 {
+        max-width: 21rem;
+    }
 }
 
 /* Large devices (desktops, 992px and up)*/
@@ -184,6 +194,9 @@ html {
     }
     html {
         font-size: 14px;
+    }
+    .w-15 {
+        max-width: 19rem;
     }
 }
 
@@ -222,6 +235,9 @@ html {
     html {
         font-size: 15px;
     }
+    .w-15 {
+        max-width: 17rem;
+    }
 }
 
 /* XX-Large devices (larger desktops, 1400px and up)*/
@@ -258,6 +274,9 @@ html {
     }
     html {
         font-size: 16px;
+    }
+    .w-15 {
+        max-width: 15rem;
     }
 }
 

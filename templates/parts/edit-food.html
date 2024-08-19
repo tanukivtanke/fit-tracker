@@ -240,7 +240,6 @@
         const renderFoods = () => {
 
             let search = byId(searchFoodId).value.toLowerCase().trim();
-            let searchTerms = search.split(/\s+/);
 
             let foodButtonKey = `data-ft-food-btn-id`;
             let foodNameIdKey = `data-ft-food-name-id`;
@@ -250,11 +249,7 @@
             let foodKcalIdKey = `data-ft-food-kcal-id`;
 
             let foodsHtml = ``;
-            for (let food of Object.values(allFoods)) {
-                let lowerCaseFoodName = food.name.toLowerCase();
-                if (!searchTerms.every(term => lowerCaseFoodName.includes(term))) {
-                    continue;
-                }
+            for (let food of SearchFilter.search(Object.values(allFoods), f => f.name, search)) {
 
                 foodsHtml = `
                 <hr>
@@ -367,8 +362,7 @@
 
         const renderDishes = () => {
 
-            let search = byId(searchDishId).value.toLowerCase().trim();
-            let searchTerms = search.split(/\s+/);
+            let search = byId(searchDishId).value;
 
             let dishButtonKey = `data-ft-dish-btn-id`;
             let dishNameIdKey = `data-ft-dish-name-id`;
@@ -462,11 +456,7 @@
 
             let dishesHtml = ``;
 
-            for (let dish of Object.values(allDishes)) {
-                let lowerCaseDishName = dish.name.toLowerCase();
-                if (!searchTerms.every(term => lowerCaseDishName.includes(term))) {
-                    continue;
-                }
+            for (let dish of SearchFilter.search(Object.values(allDishes), d => d.name, search)) {
                 dishesHtml = getDishHtml(dish) + dishesHtml;
             }
 
@@ -603,30 +593,22 @@
 
             <hr>
 
-            <div class="row">
-                <div class="col pe-0">
-
-                    <div class="input-group input-group-sm h-100">
-                        <select class="form-select" id="${editDishFoodListSelectId}">
-                            <option value="" selected disabled></option>
-                            ${options}
-                        </select>
-                        <input id="${editDishAmountInputId}" type="text"
-                                class="form-control" placeholder="Кол-во" style="max-width: 4rem">
-                        <span class="input-group-text">гр.</span>
-                    </div>
-
+            <div class="d-flex">
+                <div class="input-group input-group-sm h-100 flex-fill">
+                    <select class="form-select" id="${editDishFoodListSelectId}">
+                        <option value="" selected disabled></option>
+                        ${options}
+                    </select>
+                    <input id="${editDishAmountInputId}" type="text"
+                            class="form-control" placeholder="Кол-во"
+                            style="min-width: 4rem;max-width: 4rem;">
+                    <span class="input-group-text">гр.</span>
                 </div>
-                <div class="col-auto">
-                    <button id=${editDishAddNewBtnId} class="btn btn-primary">Добавить</button>
-                </div>
-
-                ${dishIngredients ? '<hr class="my-3">' : ''}
-                <div>${dishIngredients}</div>
-
-
-
+                <button id=${editDishAddNewBtnId} class="btn btn-primary">Добавить</button>
             </div>
+
+            ${dishIngredients ? '<hr class="my-3">' : ''}
+            <div>${dishIngredients}</div>
 
             <div class="mt-2">
                 ${HtmlPresets.textarea(editDishRecipeInputId, 'Рецепт')}
@@ -679,14 +661,20 @@
                 }
             });
 
+            const match = (params, data) => {
+                let query = params?.term ?? '';
+                return SearchFilter.search([data], e => e.text, query)[0] ?? null;
+            }
+
 
             $(`#${editDishFoodListSelectId}`).select2({
                 theme: 'bootstrap-5',
                 placeholder: "Выбрать пищу",
                 dropdownParent: $(`#${editFoodModal.modalId}`),
+                matcher: match,
             });
 
-            fixSelect2(false);
+            fixSelect2(true);
 
             onInput(editDishAmountInputId, e => {
                 handleNumberField(e, 0, 9999, true, null);

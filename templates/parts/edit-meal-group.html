@@ -135,10 +135,9 @@
 
 
         editMealGroupModal.setHtml(`
-        <div class="row">
-            <div class="col pe-0">
 
-                <div class="input-group input-group-sm h-100">
+            <div class="d-flex">
+                <div class="input-group input-group-sm h-100 flex-fill">
                     <button class="btn btn-secondary" type="button" id="editMealGroupModal-start-edit-food">
                         <i class="fa-solid fa-pencil"></i>
                     </button>
@@ -146,28 +145,31 @@
                         <option value="" selected disabled></option>
                         ${options}
                     </select>
-                    <input id="editMealGroupModal-text" type="text" class="form-control" placeholder="Кол-во" style="max-width: 4rem">
+                    <input id="editMealGroupModal-text" type="text"
+                        class="form-control" placeholder="Кол-во"
+                        style="min-width: 4rem;max-width: 4rem;">
                     <span class="input-group-text">гр.</span>
                 </div>
-
-            </div>
-            <div class="col-auto">
                 <button class="btn btn-primary"
-                    onclick="addMealToMealGroup()">Добавить</button>
+                        onclick="addMealToMealGroup()">Добавить</button>
             </div>
 
             ${meals ? '<hr class="my-3">' : ''}
 
             <div>${meals}</div>
 
-         </div>
-
         `);
+
+        const match = (params, data) => {
+            let query = params?.term ?? '';
+            return SearchFilter.search([data], e => e.text, query)[0] ?? null;
+        }
 
         $('#editMealGroupModal-select').select2({
             theme: 'bootstrap-5',
             placeholder: "Выбрать пищу",
             dropdownParent: $(`#${editMealGroupModal.modalId}`),
+            matcher: match,
         });
 
         fixSelect2(true);
