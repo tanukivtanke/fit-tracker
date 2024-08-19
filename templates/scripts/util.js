@@ -161,17 +161,30 @@ const mapToId = (array) => {
     }, {});
 }
 
+let _reqId = 0;
+
 async function _fetch(url) {
+
+    let reqId = ++_reqId;
+    console.log(`[${reqId}] GET ${url}`);
+
     const response = await fetch(url);
     if (!response.ok) {
+        console.log(`[${reqId}] RESPONSE ${response.ok}`);
         throw new Error('Failed to fetch meals');
     }
-    return await response.json();
+
+    let res = await response.json();
+
+    console.log(`[${reqId}] RESPONSE ${response.ok} ${JSON.stringify(res)}`);
+
+    return res;
 }
 
 async function _post(url, json) {
 
-    console.log(`POST ${url} ${JSON.stringify(json)}`);
+    let reqId = ++_reqId;
+    console.log(`[${reqId}] POST ${url} ${JSON.stringify(json)}`);
 
     const response = await fetch(url, {
         method: 'POST',
@@ -183,18 +196,22 @@ async function _post(url, json) {
     });
 
     if (!response.ok) {
-        console.log(`RESPONSE ${response.ok}`);
+        console.log(`[${reqId}] RESPONSE ${response.ok}`);
         throw new Error('Failed to fetch meals');
     }
 
     let res = await response.json();
 
-    console.log(`RESPONSE ${response.ok} ${JSON.stringify(res)}`);
+    console.log(`[${reqId}] RESPONSE ${response.ok} ${JSON.stringify(res)}`);
 
     return res;
 }
 
 async function _delete(url, json) {
+
+    let reqId = ++_reqId;
+    console.log(`[${reqId}] DELETE ${url}`);
+
     const response = await fetch(url, {
         method: 'DELETE',
         headers: {
@@ -203,10 +220,17 @@ async function _delete(url, json) {
         },
         body: JSON.stringify(json)
     });
+
     if (!response.ok) {
+        console.log(`[${reqId}] RESPONSE ${response.ok}`);
         throw new Error('Failed to fetch meals');
     }
-    return await response.json();
+
+    let res = await response.json();
+
+    console.log(`[${reqId}] RESPONSE ${response.ok} ${JSON.stringify(res)}`);
+
+    return res;
 }
 
 
