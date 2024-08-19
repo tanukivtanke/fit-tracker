@@ -4,6 +4,9 @@ from objects.user import Dish, Meal, MealGroup, User, Food, MealOrder, DishIngre
 
 from util import list_to_json, string_to_date, calc_from_food, calc_from_dish
 
+from auth import *
+
+from sys import argv
 
 @app.route('/')
 def hello_world():
@@ -226,4 +229,7 @@ def show_user_profile(username):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True, use_reloader=False)
+    if 'prod' in argv:
+        app.run(host='0.0.0.0', port=80)
+    else:
+        app.run(debug=True, use_reloader=False)

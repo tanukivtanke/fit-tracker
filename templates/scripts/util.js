@@ -50,6 +50,12 @@ function extractNumber(str,  {trimZeros = true} = {}) {
     }
 
     const res = numbers.join('');
+    if (res === '00') {
+        return '0';
+    }
+    if (res === '0') {
+        return res;
+    }
     if (trimZeros) {
         return res.replace(/^0+/, '');
     } else {
@@ -69,6 +75,7 @@ function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultV
     let newValue = elem.value;
 
     let fixed = extractNumber(newValue, {trimZeros: trimZeros});
+
     let maxLen = `${max}`.length;
     if (max !== null && fixed.length > maxLen) {
         fixed = fixed.substring(0, maxLen);
@@ -82,7 +89,8 @@ function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultV
     if (fixed !== newValue) {
         elem.value = fixed;
     }
-    return fixed ? parseInt(fixed) : defaultValue;
+    fixed = parseInt(fixed);
+    return Number.isInteger(fixed) ? fixed : defaultValue;
 }
 
 
@@ -162,6 +170,9 @@ async function _fetch(url) {
 }
 
 async function _post(url, json) {
+
+    console.log(`POST ${url} ${JSON.stringify(json)}`);
+
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -170,10 +181,17 @@ async function _post(url, json) {
         },
         body: JSON.stringify(json)
     });
+
     if (!response.ok) {
+        console.log(`RESPONSE ${response.ok}`);
         throw new Error('Failed to fetch meals');
     }
-    return await response.json();
+
+    let res = await response.json();
+
+    console.log(`RESPONSE ${response.ok} ${JSON.stringify(res)}`);
+
+    return res;
 }
 
 async function _delete(url, json) {

@@ -5,7 +5,7 @@
 
 <script>
 
-    const editMealGroupModal = new Modal('edit-meal-group', 'Редактировать приём пищи', true, false, false);
+    const editMealGroupModal = new Modal('edit-meal-group', 'Редактировать приём пищи', true, true, false);
     editMealGroupModal.cancelButton.innerText = "Назад";
 
     editMealGroupModal.onClose(renderMealGroups);
@@ -170,7 +170,7 @@
             dropdownParent: $(`#${editMealGroupModal.modalId}`),
         });
 
-        fixSelect2();
+        fixSelect2(true);
 
         byId('editMealGroupModal-text').addEventListener('input', () => {
             handleNumberField('editMealGroupModal-text', 0, 9999, true, null);

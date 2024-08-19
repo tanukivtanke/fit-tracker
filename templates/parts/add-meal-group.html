@@ -77,8 +77,13 @@
 
             byId('meal-group-select').addEventListener("change", changeName);
 
+            let clicked = false;
+
             addMealGroupModal.okButton.addEventListener("click", async () => {
-                addMealGroupModal.okButton.disabled = true;
+                if (clicked) {
+                    return;
+                }
+                clicked = true;
 
                 let mealOrderId = byId('meal-group-select').value;
 

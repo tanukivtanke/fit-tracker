@@ -628,7 +628,10 @@
 
             </div>
 
-            ${HtmlPresets.textarea(editDishRecipeInputId, 'Рецепт')}
+            <div class="mt-2">
+                ${HtmlPresets.textarea(editDishRecipeInputId, 'Рецепт')}
+            </div>
+
 
             `;
 
@@ -672,7 +675,7 @@
                 });
 
                 if (result.id) {
-                    allDishIngredients[result.id] = result;
+                    allDishes[result.id] = result;
                 }
             });
 

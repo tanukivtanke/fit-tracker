@@ -6,6 +6,12 @@ body {
     padding-bottom: .05rem !important;
 }
 
+input.py-025 {
+    padding-left: .1rem;
+    padding-right: .1rem;
+    text-align: center;
+}
+
 .py-05 {
     padding-top: .10rem !important;
     padding-bottom: .10rem !important;
@@ -66,3 +72,193 @@ body {
     text-decoration: underline;
     opacity: 0.75;
 }
+
+
+html {
+    font-size: calc(min(12px, 5px + max(0px, (100vw - 200px) / 40)));
+}
+
+
+/* Small devices (landscape phones, 576px and up)*/
+@media (min-width: 574px) {
+    .w-sm-20 {
+        width: 20% !important;
+    }
+    .w-sm-50 {
+        width: 50% !important;
+    }
+    .fs-sm-5 {
+        font-size: 1.25rem !important;
+    }
+    .mnw-sm-3 {
+        min-width: 3rem !important;
+    }
+    .mnw-sm-4 {
+        min-width: 4rem !important;
+    }
+    .mnw-sm-4-5 {
+        min-width: 4.5rem !important;
+    }
+    .mnw-sm-6 {
+        min-width: 6rem !important;
+    }
+    .ms-sm-1-5 {
+        margin-left: .40rem !important
+    }
+    .ms-sm-2-5 {
+        margin-left: .75rem !important
+    }
+    html {
+        font-size: 12px;
+    }
+}
+
+/* Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) {
+    .w-md-20 {
+        width: 20% !important;
+    }
+    .w-md-50 {
+        width: 50% !important;
+    }
+    .fs-md-5 {
+        font-size: 1.25rem !important;
+    }
+    .fs-md-4 {
+        font-size:calc(1.275rem + .3vw)!important;
+    }
+    .mnw-md-3 {
+        min-width: 3rem !important;
+    }
+    .mnw-md-4 {
+        min-width: 4rem !important;
+    }
+    .mnw-md-4-5 {
+        min-width: 4.5rem !important;
+    }
+    .mnw-md-6 {
+        min-width: 6rem !important;
+    }
+    .ms-md-1-5 {
+        margin-left: .40rem !important
+    }
+    .ms-md-2-5 {
+        margin-left: .75rem !important
+    }
+    html {
+        font-size: 13px;
+    }
+}
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+    .w-lg-20 {
+        width: 20% !important;
+    }
+    .w-lg-50 {
+        width: 50% !important;
+    }
+    .fs-lg-5 {
+        font-size: 1.25rem !important;
+    }
+    .fs-lg-4 {
+        font-size:calc(1.275rem + .3vw)!important;
+    }
+    .mnw-lg-3 {
+        min-width: 3rem !important;
+    }
+    .mnw-lg-4 {
+        min-width: 4rem !important;
+    }
+    .mnw-lg-4-5 {
+        min-width: 4.5rem !important;
+    }
+    .mnw-lg-6 {
+        min-width: 6rem !important;
+    }
+    .ms-lg-1-5 {
+        margin-left: .40rem !important
+    }
+    .ms-lg-2-5 {
+        margin-left: .75rem !important
+    }
+    html {
+        font-size: 14px;
+    }
+}
+
+/* X-Large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) {
+    .w-xl-20 {
+        width: 20% !important;
+    }
+    .w-xl-50 {
+        width: 50% !important;
+    }
+    .fs-xl-5 {
+        font-size: 1.25rem !important;
+    }
+    .fs-xl-4 {
+        font-size:calc(1.275rem + .3vw)!important;
+    }
+    .mnw-xl-3 {
+        min-width: 3rem !important;
+    }
+    .mnw-xl-4 {
+        min-width: 4rem !important;
+    }
+    .mnw-xl-4-5 {
+        min-width: 4.5rem !important;
+    }
+    .mnw-xl-6 {
+        min-width: 6rem !important;
+    }
+    .ms-xl-1-5 {
+        margin-left: .40rem !important
+    }
+    .ms-xl-2-5 {
+        margin-left: .75rem !important
+    }
+    html {
+        font-size: 15px;
+    }
+}
+
+/* XX-Large devices (larger desktops, 1400px and up)*/
+@media (min-width: 1400px) {
+    .w-xxl-20 {
+        width: 20% !important;
+    }
+    .w-xxl-50 {
+        width: 50% !important;
+    }
+    .fs-xxl-5 {
+        font-size: 1.25rem !important;
+    }
+    .fs-xxl-4 {
+        font-size:calc(1.275rem + .3vw)!important;
+    }
+    .mnw-xxl-3 {
+        min-width: 3rem !important;
+    }
+    .mnw-xxl-4 {
+        min-width: 4rem !important;
+    }
+    .mnw-xxl-4-5 {
+        min-width: 4.5rem !important;
+    }
+    .mnw-xxl-6 {
+        min-width: 6rem !important;
+    }
+    .ms-xxl-1-5 {
+        margin-left: .40rem !important
+    }
+    .ms-xxl-2-5 {
+        margin-left: .75rem !important
+    }
+    html {
+        font-size: 16px;
+    }
+}
+
+

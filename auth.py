@@ -19,5 +19,6 @@ users = {
 
 @auth.verify_password
 def verify_password(username, password):
+    print("VERIFY PASSWORD", username, password)
     if username in users and users.get(username) == password:
         return username
