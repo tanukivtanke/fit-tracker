@@ -5,7 +5,7 @@ class Modal {
     #oldOkDisabled;
     #oldDeleteDisabled;
 
-    constructor(modalId, title='', okHidden=true, deleteHidden=true, cancelHidden=false) {
+    constructor(modalId, title='', okHidden=true, deleteHidden=true, cancelHidden=false, allowOutsideClick=false) {
         this.modalId = `${modalId}-modal`;
         this.bodyId = `${this.modalId}-body`;
         let button =  byId(`button-${this.modalId}`);
@@ -21,10 +21,14 @@ class Modal {
             }
         }
 
+        if (!deleteHidden) {
+            allowOutsideClick = true;
+        }
+
         let wrapper = byId(`wrapper-${this.modalId}`)
         if (wrapper) {
             wrapper.innerHTML = `
-            <div class="modal fade" id="${this.modalId}" ${deleteHidden ? 'data-bs-backdrop="static" data-bs-keyboard="false"' : '' }
+            <div class="modal fade" id="${this.modalId}" ${!allowOutsideClick ? 'data-bs-backdrop="static" data-bs-keyboard="false"' : '' }
                  tabindex="-1" aria-labelledby="${this.modalId}-title" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">

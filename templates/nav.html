@@ -21,7 +21,7 @@
     let currentUser = null;
     let allUsers = [];
     {
-        const changeUserModal = new Modal('change-user', 'Сменить пользователя');
+        const changeUserModal = new Modal('change-user', 'Сменить пользователя', true, true, false, true);
         changeUserModal.cancelButton.innerText = "Назад";
 
         if (currentUserId === null || Number.isNaN(currentUserId)) {
