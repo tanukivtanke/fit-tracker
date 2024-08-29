@@ -8,6 +8,7 @@ from auth import *
 
 from sys import argv
 
+
 @app.route('/')
 def hello_world():
     return render_template('meals.html')
