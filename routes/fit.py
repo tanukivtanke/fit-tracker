@@ -157,6 +157,8 @@ def add_meal():
 
     else:
         new_amount = received_data['amount'] + same_meal.amount
+        if new_amount <= 0:
+            return same_meal.json()
         if is_food:
             new_data = calc_from_food(received_data['food_id'], new_amount)
         else:
