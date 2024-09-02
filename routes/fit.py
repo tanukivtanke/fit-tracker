@@ -130,24 +130,46 @@ def add_meal():
         return 'Cannot add food and dish in the same request', 400
 
     amount = received_data['amount']
-    if amount is None or not isinstance(amount, int) or amount <= 0:
-        return 'Cannot add food or dish without any amount or negative amount', 400
+    if amount is None or not isinstance(amount, int):
+        return 'Cannot add food or dish without any amount', 400
 
-    if is_food:
-        new_data = calc_from_food(received_data['food_id'], received_data['amount'])
+    same_meal = Meal.find(meal_group_id=received_data['meal_group_id'],
+                          food_id=received_data['food_id'],
+                          dish_id=received_data['dish_id'])
+
+    if same_meal is None:
+
+        if is_food:
+            new_data = calc_from_food(received_data['food_id'], received_data['amount'])
+        else:
+            new_data = calc_from_dish(received_data['dish_id'], received_data['amount'])
+
+        new_edible = Meal(meal_group_id=received_data['meal_group_id'],
+                          food_id=received_data['food_id'],
+                          dish_id=received_data['dish_id'],
+                          amount=received_data['amount'],
+                          calc_proteins=new_data.proteins,
+                          calc_fats=new_data.fats,
+                          calc_carbs=new_data.carbs,
+                          calc_kcal=new_data.kcal)
+        new_edible.save()
+        return new_edible.json()
+
     else:
-        new_data = calc_from_dish(received_data['dish_id'], received_data['amount'])
+        new_amount = received_data['amount'] + same_meal.amount
+        if is_food:
+            new_data = calc_from_food(received_data['food_id'], new_amount)
+        else:
+            new_data = calc_from_dish(received_data['dish_id'], new_amount)
 
-    new_edible = Meal(meal_group_id=received_data['meal_group_id'],
-                      food_id=received_data['food_id'],
-                      dish_id=received_data['dish_id'],
-                      amount=received_data['amount'],
-                      calc_proteins=new_data.proteins,
-                      calc_fats=new_data.fats,
-                      calc_carbs=new_data.carbs,
-                      calc_kcal=new_data.kcal)
-    new_edible.save()
-    return new_edible.json()
+        same_meal.amount = new_amount
+        same_meal.calc_proteins = new_data.proteins
+        same_meal.calc_fats = new_data.fats
+        same_meal.calc_carbs = new_data.carbs
+        same_meal.calc_kcal = new_data.kcal
+        same_meal.update()
+        return same_meal.json()
+
 
 
 @app.route('/api/food/new', methods=['POST'])
