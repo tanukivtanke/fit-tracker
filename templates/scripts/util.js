@@ -94,7 +94,7 @@ function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultV
 }
 
 
-function handleFloatField(fieldId, min=null, max=null) {
+function handleFloatField(fieldId, min=null, max=null, autoDot=false) {
     let elem;
     if (typeof fieldId === typeof '') {
         elem = byId(fieldId);
@@ -131,7 +131,12 @@ function handleFloatField(fieldId, min=null, max=null) {
         let float = parseFloat(cleaned);
 
         if (max != null && float >= max) {
-            cleaned = "" + max;
+            if (autoDot && float / 10 < max) {
+                float /= 10;
+                cleaned = parseInt(float) + "." + Math.round((float - parseInt(float)) * 10);
+            } else {
+                cleaned = "" + max;
+            }
         }
         if (min != null && float < min) {
             cleaned = "" + min;

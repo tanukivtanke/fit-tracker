@@ -165,9 +165,9 @@
 
             const checkAddFoodButton = () => {
                 let name = byId(addFoodNameId).value.trim();
-                let proteins = handleFloatField(addProteinsId, 0, 100);
-                let fats = handleFloatField(addFatsId, 0, 100);
-                let carbs = handleFloatField(addCarbsId, 0, 100);
+                let proteins = handleFloatField(addProteinsId, 0, 100, true);
+                let fats = handleFloatField(addFatsId, 0, 100, true);
+                let carbs = handleFloatField(addCarbsId, 0, 100, true);
                 let kcal = handleNumberField(addKcalId, 0, 999);
 
                 byId(addFoodButtonId).disabled =
@@ -180,9 +180,9 @@
 
             onClick(addFoodButtonId, async () => {
                 let name = byId(addFoodNameId).value.trim();
-                let proteins = handleFloatField(addProteinsId, 0, 100);
-                let fats = handleFloatField(addFatsId, 0, 100);
-                let carbs = handleFloatField(addCarbsId, 0, 100);
+                let proteins = handleFloatField(addProteinsId, 0, 100, true);
+                let fats = handleFloatField(addFatsId, 0, 100, true);
+                let carbs = handleFloatField(addCarbsId, 0, 100, true);
                 let kcal = handleNumberField(addKcalId, 0, 999);
 
                 byId(addFoodButtonId).disabled = true;
@@ -286,9 +286,9 @@
                 let buttonField = document.querySelector(`[${foodButtonKey}="${foodId}"]`);
 
                 let name = nameField.value.trim();
-                let proteins = handleFloatField(proteinsField, 0, 100);
-                let fats = handleFloatField(fatsField, 0, 100);
-                let carbs = handleFloatField(carbsField, 0, 100);
+                let proteins = handleFloatField(proteinsField, 0, 100, true);
+                let fats = handleFloatField(fatsField, 0, 100, true);
+                let carbs = handleFloatField(carbsField, 0, 100, true);
                 let kcal = handleNumberField(kcalField, 0, 999);
 
                 let currFood = allFoods[foodId];
