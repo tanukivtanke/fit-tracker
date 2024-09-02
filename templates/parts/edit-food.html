@@ -456,7 +456,19 @@
 
             let dishesHtml = ``;
 
-            for (let dish of SearchFilter.search(Object.values(allDishes), d => d.name, search)) {
+            let sortedDishes = [];
+            for (let d of Object.values(allDishes)) {
+                if (d.out_of_stock) {
+                    sortedDishes.push(d);
+                }
+            }
+            for (let d of Object.values(allDishes)) {
+                if (!d.out_of_stock) {
+                    sortedDishes.push(d);
+                }
+            }
+
+            for (let dish of SearchFilter.search(Object.values(sortedDishes), d => d.name, search)) {
                 dishesHtml = getDishHtml(dish) + dishesHtml;
             }
 
