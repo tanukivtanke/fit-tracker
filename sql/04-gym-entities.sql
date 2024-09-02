@@ -7,7 +7,7 @@ CREATE TABLE gym_equipment (
 CREATE TABLE gym_exercises (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     name TEXT UNIQUE NOT NULL,
-    weights_quantity INTEGER,
+    weights_quantity INTEGER NOT NULL DEFAULT 1,
     equipment_id INTEGER,
     FOREIGN KEY(equipment_id) REFERENCES gym_equipment(id));
 
