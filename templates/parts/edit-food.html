@@ -689,7 +689,7 @@
             fixSelect2(true);
 
             onInput(editDishAmountInputId, e => {
-                handleNumberField(e, 0, 9999, true, null);
+                handleNumberField(e, 0, 9999, true, null, true);
             });
 
             onClick(editDishAddNewBtnId, async e => {
@@ -707,7 +707,7 @@
                     return;
                 }
 
-                let chosenAmount = handleNumberField(editDishAmountInputId, 0, 9999, true, null);
+                let chosenAmount = handleNumberField(editDishAmountInputId, 0, 9999, true, null, true);
                 if (chosenAmount == null) {
                     return;
                 }

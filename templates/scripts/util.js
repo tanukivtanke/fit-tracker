@@ -64,7 +64,7 @@ function extractNumber(str,  {trimZeros = true} = {}) {
 }
 
 
-function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultValue=null) {
+function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultValue=null, allowNegative=false) {
     let elem;
     if (typeof fieldId === typeof '') {
         elem = byId(fieldId);
@@ -73,6 +73,10 @@ function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultV
     }
 
     let newValue = elem.value;
+    let isNegative = allowNegative && newValue[0] === '-';
+    if (isNegative && newValue === '-') {
+        return defaultValue;
+    }
 
     let fixed = extractNumber(newValue, {trimZeros: trimZeros});
 
@@ -85,6 +89,9 @@ function handleNumberField(fieldId, min=null, max=null, trimZeros=true, defaultV
     }
     if (min !== null && fixed.length > 0 && parseInt(fixed) < min) {
         fixed = `${min}`;
+    }
+    if (isNegative) {
+        fixed = "-" + fixed;
     }
     if (fixed !== newValue) {
         elem.value = fixed;
@@ -130,7 +137,7 @@ function handleFloatField(fieldId, min=null, max=null, autoDot=false) {
 
         let float = parseFloat(cleaned);
 
-        if (max != null && float >= max) {
+        if (max != null && float > max) {
             if (autoDot && float / 10 < max) {
                 float /= 10;
                 cleaned = parseInt(float) + "." + Math.round((float - parseInt(float)) * 10);
@@ -274,9 +281,9 @@ class HtmlPresets {
 
     static newTabLink = `target="_blank" rel="noopener noreferrer"`;
 
-    static makeRow(inside, {fs = 5, py = 2, ps = 3, pe = 2} = {}) {
+    static makeRow(inside, {fs = 5, py = 2, ps = 3, pe = 2, id=''} = {}) {
         return `
-        <div class="row mb-2">
+        <div ${id ? `id="${id}"` : ''} class="row mb-2">
             <div class="col">
                 <div class="py-${py} ps-${ps} pe-${pe} fs-${fs} border border-dark rounded-2 d-flex justify-content-between align-items-center div-hover">
                     ${inside}

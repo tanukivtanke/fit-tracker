@@ -159,6 +159,7 @@ const renderMealGroups = () => {
         let mgFats = 0;
         let mgCarbs = 0;
         let mgKcal = 0;
+        let mgWeight = 0;
 
         let currentMealGroupHtml = ``;
 
@@ -185,12 +186,13 @@ const renderMealGroups = () => {
             }
 
             let amount = m.amount;
+            mgWeight += amount;
 
             currentMealGroupHtml = `
             <div class="d-flex justify-content-between">
                 <div>${showing_name}</div>
                 <div class="d-flex">
-                    <div class="ms-3" style="margin-right: 0.2rem">
+                    <div class="ms-3" style="margin-right: 0.4rem">
                         <span>${amount}</span><span class="fs-7 ms-05">гр</span>
                     </div>
 
@@ -238,29 +240,35 @@ const renderMealGroups = () => {
             <div class="d-flex justify-content-between">
                 <div>${mealName}</div>
 
+                <div class="d-flex">
+                    <div class="ms-3" style="margin-right: 0.4rem">
+                        <span>${mgWeight}</span><span class="fs-7 ms-05">гр</span>
+                    </div>
 
-                ${
-                    showingStat === StatType.PROTEINS ? `
-                    <div class="text-end proteins-bg stat-in-mg stat-proteins-outline">
-                        <span>${parseInt(mgProteins)}</span><span class="fs-7 ms-05">гр</span>
-                    </div>
-                    `:
-                    showingStat === StatType.FATS ? `
-                    <div class="text-end fats-bg stat-in-mg stat-fats-outline">
-                        <span>${parseInt(mgFats)}</span><span class="fs-7 ms-05">гр</span>
-                    </div>
-                    `:
-                    showingStat === StatType.CARBS ? `
-                    <div class="text-end carbs-bg stat-in-mg stat-carbs-outline">
-                        <span>${parseInt(mgCarbs)}</span><span class="fs-7 ms-05">гр</span>
-                    </div>
-                    `:
-                    showingStat === StatType.KCAL ? `
-                    <div class="text-end kcal-bg stat-in-mg stat-kcal-outline">
-                        <span>${parseInt(mgKcal)}</span><span class="fs-7 ms-05">кк</span>
-                    </div>
-                    `: ''
-                }
+
+                    ${
+                        showingStat === StatType.PROTEINS ? `
+                        <div class="text-end proteins-bg stat-in-mg stat-proteins-outline">
+                            <span>${parseInt(mgProteins)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.FATS ? `
+                        <div class="text-end fats-bg stat-in-mg stat-fats-outline">
+                            <span>${parseInt(mgFats)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.CARBS ? `
+                        <div class="text-end carbs-bg stat-in-mg stat-carbs-outline">
+                            <span>${parseInt(mgCarbs)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.KCAL ? `
+                        <div class="text-end kcal-bg stat-in-mg stat-kcal-outline">
+                            <span>${parseInt(mgKcal)}</span><span class="fs-7 ms-05">кк</span>
+                        </div>
+                        `: ''
+                    }
+                </div>
             </div>
             <hr class="my-2 opacity-100">
             ${currentMealGroupHtml}

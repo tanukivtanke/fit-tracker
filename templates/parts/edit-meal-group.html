@@ -37,7 +37,7 @@
             return;
         }
 
-        let chosenAmount = handleNumberField('editMealGroupModal-text', 0, 9999, true, null);
+        let chosenAmount = handleNumberField('editMealGroupModal-text', 0, 9999, true, null, true);
         if (chosenAmount == null) {
             return;
         }
@@ -57,7 +57,9 @@
 
     };
 
-    const deleteMealFromMealGroup = async (mealId) => {
+    const deleteMealFromMealGroup = async (event, mealId) => {
+        event.stopPropagation();
+
         let result = await _delete("/api/meal/delete", {
             id: mealId
         });
@@ -107,6 +109,16 @@
             }
         }
 
+        const autoSelectMealFood = (meal) => {
+            let val = '';
+            if (meal.dish_id) {
+                val = `DISH_${meal.dish_id}`;
+            } else if (meal.food_id) {
+                val = `FOOD_${meal.food_id}`;
+            }
+            $('#editMealGroupModal-select').val(val).trigger('change');
+        };
+
         const renderMeal = (m) => {
             let name = '';
             if (m.dish_id) {
@@ -122,13 +134,22 @@
 
         let meals = ``;
         for (let meal of mealsForMealGroup) {
+
+            let mealId = meal.dish_id ? `MEAL_DISH_${meal.dish_id}` : `MEAL_FOOD_${meal.food_id}`;
+            setTimeout(() => {
+                let obj = byId(mealId);
+                onClick(obj, () => {
+                    autoSelectMealFood(meal);
+                });
+            });
+
             meals = `
             ${
                HtmlPresets.makeRow(`
                 ${renderMeal(meal)}
                 <button class="btn btn-sm btn-danger"
-                    onclick="deleteMealFromMealGroup(${meal.id})">Удалить</button>`,
-                {fs: 6, ps: 2})
+                    onclick="deleteMealFromMealGroup(event, ${meal.id})">Удалить</button>`,
+                {fs: 6, ps: 2, id: mealId})
             }
             ` + meals;
         }
@@ -175,7 +196,7 @@
         fixSelect2(true);
 
         byId('editMealGroupModal-text').addEventListener('input', () => {
-            handleNumberField('editMealGroupModal-text', 0, 9999, true, null);
+            handleNumberField('editMealGroupModal-text', 0, 9999, true, null, true);
         });
 
         byId('editMealGroupModal-start-edit-food').addEventListener('click', () => {
