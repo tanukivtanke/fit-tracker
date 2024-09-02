@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from flask import jsonify
+from flask import jsonify, request
 from datetime import datetime
 
-from objects.user import Food, DishIngredient
+from objects.tables import Food, DishIngredient
 
 
 def list_to_json(obj: list):
@@ -16,6 +16,10 @@ def list_to_dict(obj: list):
 
 def string_to_date(string):
     return datetime.strptime(string, '%Y-%m-%d')
+
+
+def get_argument(arg_name):
+    return request.args.get(arg_name, default="", type=str)
 
 
 @dataclass
