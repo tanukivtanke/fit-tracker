@@ -113,6 +113,11 @@ input.py-025 {
     cursor: pointer;
 }
 
+.add-highlight {
+    background-color: #f2fff2;
+    outline: #f2fff2 solid 0.5rem;
+}
+
 .btn-primary:disabled {
     border: 1px solid #afafaf;
     background-color: #cccccc;

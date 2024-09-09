@@ -97,6 +97,10 @@
 
         let options = ``;
         for (let food of Object.values(allFoods)) {
+            if (food.is_deleted) {
+                continue;
+            }
+
             options += `
             <option value="FOOD_${food.id}">${food.name}</option>
             `;

@@ -40,49 +40,85 @@
         const foodTabId = `${rootId}-food-tab`;
         const dishTabId = `${rootId}-dish-tab`;
 
+        const foodSearchTabButtonId = `${rootId}-foodSearchTabButtonId`;
+        const foodAddTabButtonId = `${rootId}-foodAddTabButtonId`;
+        const foodDeleteTabButtonId = `${rootId}-foodDeleteTabButtonId`;
+        const foodSearchTabRadioId = `${rootId}-foodSearchTabRadioId`;
+        const foodAddTabRadioId = `${rootId}-foodAddTabRadioId`;
+        const foodDeleteTabRadioId = `${rootId}-foodDeleteTabRadioId`;
+        const foodAddSectionId = `${rootId}-foodAddSectionId`;
+
         const newDishTab = `${rootId}-newDishTab`;
         const editDishTab = `${rootId}-editDishTab`;
 
         editFoodModal.onClose(() => {
             startEditMealGroup(currEditingMealGroup);
+            searchFoodMode = true;
+            addingFoodMode = false;
+            deletingFoodMode = false;
         });
+
+        let searchFoodMode = true;
+        let addingFoodMode = false;
+        let deletingFoodMode = false;
 
         editFoodModal.onOpen(() => {
 
             editFoodModal.setHtml(`
             <div class="btn-group w-100" role="group">
-              <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-              <label id=${foodTabButtonId}  class="btn btn-outline-primary w-50 py-05" for="btnradio1">Еда</label>
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+                <label id=${foodTabButtonId}  class="btn btn-outline-primary w-50 py-05" for="btnradio1">Еда</label>
 
-              <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-              <label id=${dishTabButtonId} class="btn btn-outline-primary w-50 py-05" for="btnradio2">Блюдо</label>
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+                <label id=${dishTabButtonId} class="btn btn-outline-primary w-50 py-05" for="btnradio2">Блюдо</label>
             </div>
 
             <div id="${foodTabId}">
 
                 <hr>
 
-                <h5>Новая еда</h5>
+                <div class="btn-group fs-4 w-100 mb-3">
+                    <input type="radio" class="btn-check" name="btnfoodsearch" id="${foodSearchTabRadioId}" autocomplete="off" checked>
+                    <label id=${foodSearchTabButtonId}  class="btn btn-outline-primary w-50 py-05" for="${foodSearchTabRadioId}">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </label>
 
-                <div class="input-group mb-2-5">
-                  <input id="${addFoodNameId}" type="text" class="form-control" placeholder="Название">
+                    <input type="radio" class="btn-check" name="btnfoodsearch" id="${foodAddTabRadioId}" autocomplete="off">
+                    <label id=${foodAddTabButtonId} class="btn btn-outline-primary w-50 py-05" for="${foodAddTabRadioId}">
+                        <i class="fa-solid fa-plus"></i>
+                    </label>
+
+                    <input type="radio" class="btn-check" name="btnfoodsearch" id="${foodDeleteTabRadioId}" autocomplete="off">
+                    <label id=${foodDeleteTabButtonId} class="btn btn-outline-primary w-50 py-05" for="${foodDeleteTabRadioId}">
+                        <i class="fa-solid fa-trash"></i>
+                    </label>
                 </div>
 
-                <div class="d-flex">
-                    <div class="input-group">
-                      <span class="input-group-text py-025 proteins-bg">Б</span>
-                      <input id="${addProteinsId}" type="text" class="form-control py-025" placeholder="0">
-                      <span class="input-group-text py-025 fats-bg">Ж</span>
-                      <input id="${addFatsId}" type="text" class="form-control py-025" placeholder="0">
-                      <span class="input-group-text py-025 carbs-bg">У</span>
-                      <input id="${addCarbsId}" type="text" class="form-control py-025" placeholder="0">
-                      <span class="input-group-text py-025 kcal-bg">Кк</span>
-                      <input id="${addKcalId}" type="text" class="form-control py-025" placeholder="0">
+                <div id="${foodAddSectionId}" class="d-none add-highlight">
+                    <h5>Новая еда</h5>
+
+                    <div class="input-group mb-2-5">
+                      <input id="${addFoodNameId}" type="text" class="form-control" placeholder="Название">
                     </div>
-                    <button id="${addFoodButtonId}" class="btn btn-primary ms-2 py-025" disabled>Добавить</button>
+
+                    <div class="d-flex">
+                        <div class="input-group">
+                          <span class="input-group-text py-025 proteins-bg">Б</span>
+                          <input id="${addProteinsId}" type="text" class="form-control py-025" placeholder="0">
+                          <span class="input-group-text py-025 fats-bg">Ж</span>
+                          <input id="${addFatsId}" type="text" class="form-control py-025" placeholder="0">
+                          <span class="input-group-text py-025 carbs-bg">У</span>
+                          <input id="${addCarbsId}" type="text" class="form-control py-025" placeholder="0">
+                          <span class="input-group-text py-025 kcal-bg">Кк</span>
+                          <input id="${addKcalId}" type="text" class="form-control py-025" placeholder="0">
+                        </div>
+                        <button id="${addFoodButtonId}" class="btn btn-primary ms-2 py-025" disabled>Добавить</button>
+                    </div>
+
+                    <hr>
                 </div>
 
-                <hr>
+
 
                 <h5>Добавленная еда</h5>
 
@@ -154,6 +190,38 @@
                 currentEditingDishId = null;
                 showElem(newDishTab);
                 hideElem(editDishTab);
+            });
+
+            const _checkFoodTabVisibility = () => {
+                if (addingFoodMode) {
+                    showElem(foodAddSectionId);
+                } else {
+                    hideElem(foodAddSectionId);
+                }
+            };
+
+            onClick(foodSearchTabButtonId, () => {
+                searchFoodMode = true;
+                addingFoodMode = false;
+                deletingFoodMode = false;
+                _checkFoodTabVisibility();
+                renderFoods();
+            });
+
+            onClick(foodAddTabButtonId, () => {
+                searchFoodMode = false;
+                addingFoodMode = true;
+                deletingFoodMode = false;
+                _checkFoodTabVisibility();
+                renderFoods();
+            });
+
+            onClick(foodDeleteTabButtonId, () => {
+                searchFoodMode = false;
+                addingFoodMode = false;
+                deletingFoodMode = true;
+                _checkFoodTabVisibility();
+                renderFoods();
             });
 
 
@@ -242,6 +310,7 @@
             let search = byId(searchFoodId).value.toLowerCase().trim();
 
             let foodButtonKey = `data-ft-food-btn-id`;
+            let foodDeleteButtonKey = `data-ft-food-foodDeleteButtonKey`;
             let foodNameIdKey = `data-ft-food-name-id`;
             let foodProteinsIdKey = `data-ft-food-proteins-id`;
             let foodFatsIdKey = `data-ft-food-fats-id`;
@@ -250,6 +319,9 @@
 
             let foodsHtml = ``;
             for (let food of SearchFilter.search(Object.values(allFoods), f => f.name, search)) {
+                if (food.is_deleted) {
+                    continue;
+                }
 
                 foodsHtml = `
                 <hr>
@@ -268,7 +340,8 @@
                           <span class="input-group-text py-025 kcal-bg">Кк</span>
                           <input ${foodKcalIdKey}=${food.id} type="text" class="form-control py-025" value="${food.kcal}">
                         </div>
-                        <button ${foodButtonKey}=${food.id} class="btn btn-primary ms-2 py-025" disabled>Изменить</button>
+                        <button ${foodButtonKey}=${food.id} class="btn btn-primary ms-2 py-025 ${deletingFoodMode ? 'd-none' : ''}" disabled>Изменить</button>
+                        <button ${foodDeleteButtonKey}=${food.id} class="btn btn-danger ms-2 py-025 ${deletingFoodMode ? '' : 'd-none'}">Удалить</button>
                     </div>
                 </div>
 
@@ -355,6 +428,27 @@
                     }
 
                     checkEditButton(foodId);
+                });
+            });
+
+            query(`[${foodDeleteButtonKey}]`, e => {
+                let value = e.getAttribute(foodDeleteButtonKey);
+
+                let foodId = parseInt(value);
+                if (Number.isNaN(foodId)) {
+                    return;
+                }
+
+                onClick(e, async () => {
+                    let result = await _delete("/api/food/delete", {
+                        id: foodId,
+                    });
+
+                    if (result.id) {
+                        allFoods[result.id] = result;
+                    }
+
+                    renderFoods();
                 });
             });
 
@@ -572,6 +666,9 @@
 
             let options = ``;
             for (let food of Object.values(allFoods)) {
+                if (food.is_deleted) {
+                    continue;
+                }
                 options += `
                 <option value="FOOD_${food.id}">${food.name}</option>
                 `;
