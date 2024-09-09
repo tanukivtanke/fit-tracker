@@ -182,7 +182,8 @@ def add_food():
         proteins=received_data['proteins'],
         fats=received_data['fats'],
         carbs=received_data['carbs'],
-        kcal=received_data['kcal']
+        kcal=received_data['kcal'],
+        is_deleted=False
     )
     new_food.save()
     return new_food.json()
