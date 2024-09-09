@@ -3,7 +3,8 @@ from base import app, db
 from flask import render_template, request, jsonify
 from objects.tables import Dish, Meal, MealGroup, User, Food, MealOrder, DishIngredient
 
-from util import list_to_json, string_to_date, calc_from_food, calc_from_dish, list_to_dict, get_argument
+from util import list_to_json, string_to_date, calc_from_food, calc_from_dish, list_to_dict, get_argument, \
+    deletion_change_food
 
 from auth import *
 
@@ -256,11 +257,15 @@ def del_dish_ingredient():
 @app.route('/api/food/delete', methods=['DELETE'])
 def del_food():
     received_data = request.json
-    id_to_del = received_data['id']
-    food_to_del = Food.find(id=id_to_del)
-    food_to_del.is_deleted = True
-    food_to_del.update()
+    food_to_del = deletion_change_food(received_data['id'], True)
     return food_to_del.json()
+
+
+@app.route('/api/food/revive', methods=['POST'])
+def revive_food():
+    received_data = request.json
+    food_to_rev = deletion_change_food(received_data['id'], False)
+    return food_to_rev.json()
 
 
 @app.route('/api/dish/new', methods=['POST'])

@@ -69,3 +69,11 @@ def calc_from_dish(dish_id, amount) -> Nutrients:
                      carbs=nutri.carbs * kg_amount / total_amount_per_100g,
                      kcal=nutri.kcal * kg_amount / total_amount_per_100g)
 
+
+def deletion_change_food(food_id, is_deleted):
+    id_to_del = food_id
+    food_to_del = Food.find(id=id_to_del)
+    food_to_del.is_deleted = is_deleted
+    food_to_del.update()
+    return food_to_del
+
