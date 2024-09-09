@@ -118,6 +118,15 @@ input.py-025 {
     outline: #f2fff2 solid 0.5rem;
 }
 
+.deleted-highlight {
+    background-color: #fff2f2;
+    outline: #fff2f2 solid 1rem;
+}
+
+.opacity-65 {
+    opacity: .65 !important;
+}
+
 .btn-primary:disabled {
     border: 1px solid #afafaf;
     background-color: #cccccc;

@@ -37,7 +37,18 @@ class SearchFilter {
         const originalQueryParts = normalizeString(query).split(/\s+/);
         const convertedQueryParts = originalQueryParts.map(convertQuery).map(normalizeString);
 
-        return list.filter(item => {
+        return list.sort((a, b) => {
+            if (a.is_deleted && b.is_deleted) {
+                return a.id - b.id;
+            }
+            if (a.is_deleted) {
+                return -1;
+            }
+            if (b.is_deleted) {
+                return 1;
+            }
+            return a.id - b.id;
+        }).filter(item => {
             const itemString = normalizeString(stringRepresentationFn(item));
             const convertedItemString = normalizeString(convertQuery(itemString));
 

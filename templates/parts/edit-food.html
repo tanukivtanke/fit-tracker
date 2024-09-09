@@ -310,6 +310,7 @@
             let search = byId(searchFoodId).value.toLowerCase().trim();
 
             let foodButtonKey = `data-ft-food-btn-id`;
+            let foodReviveButtonKey = `data-ft-food-foodReviveButtonKey`;
             let foodDeleteButtonKey = `data-ft-food-foodDeleteButtonKey`;
             let foodNameIdKey = `data-ft-food-name-id`;
             let foodProteinsIdKey = `data-ft-food-proteins-id`;
@@ -319,13 +320,13 @@
 
             let foodsHtml = ``;
             for (let food of SearchFilter.search(Object.values(allFoods), f => f.name, search)) {
-                if (food.is_deleted) {
+                if (food.is_deleted && !addingFoodMode) {
                     continue;
                 }
 
                 foodsHtml = `
                 <hr>
-                <div class="">
+                <div class="${food.is_deleted ? 'deleted-highlight' : ''}">
                     <div class="input-group mb-2-5">
                         <input ${foodNameIdKey}=${food.id} type="text" class="form-control" value="${food.name}">
                     </div>
@@ -340,7 +341,8 @@
                           <span class="input-group-text py-025 kcal-bg">Кк</span>
                           <input ${foodKcalIdKey}=${food.id} type="text" class="form-control py-025" value="${food.kcal}">
                         </div>
-                        <button ${foodButtonKey}=${food.id} class="btn btn-primary ms-2 py-025 ${deletingFoodMode ? 'd-none' : ''}" disabled>Изменить</button>
+                        <button ${foodButtonKey}=${food.id} class="btn btn-primary ms-2 py-025 ${!deletingFoodMode && !food.is_deleted ? '' : 'd-none'}" disabled>Изменить</button>
+                        <button ${foodReviveButtonKey}=${food.id} class="btn btn-success opacity-65 ms-2 py-025 ${!deletingFoodMode && food.is_deleted ? '' : 'd-none'}">Вернуть</button>
                         <button ${foodDeleteButtonKey}=${food.id} class="btn btn-danger ms-2 py-025 ${deletingFoodMode ? '' : 'd-none'}">Удалить</button>
                     </div>
                 </div>
@@ -441,6 +443,27 @@
 
                 onClick(e, async () => {
                     let result = await _delete("/api/food/delete", {
+                        id: foodId,
+                    });
+
+                    if (result.id) {
+                        allFoods[result.id] = result;
+                    }
+
+                    renderFoods();
+                });
+            });
+
+            query(`[${foodReviveButtonKey}]`, e => {
+                let value = e.getAttribute(foodReviveButtonKey);
+
+                let foodId = parseInt(value);
+                if (Number.isNaN(foodId)) {
+                    return;
+                }
+
+                onClick(e, async () => {
+                    let result = await _post("/api/food/revive", {
                         id: foodId,
                     });
 
