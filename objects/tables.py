@@ -19,6 +19,7 @@ class Food(AbstractObject):
     fats = db.Column(db.Float, nullable=False)
     carbs = db.Column(db.Float, nullable=False)
     kcal = db.Column(db.Float, nullable=False)
+    is_deleted = db.Column(db.Boolean, nullable=False)
 
 
 class Dish(AbstractObject):

@@ -173,7 +173,6 @@ def add_meal():
         return same_meal.json()
 
 
-
 @app.route('/api/food/new', methods=['POST'])
 def add_food():
     received_data = request.json
@@ -251,6 +250,16 @@ def del_dish_ingredient():
     received_data = request.json
     id_to_del = received_data['id']
     return jsonify(DishIngredient.delete_by_id(id_to_del))
+
+
+@app.route('/api/food/delete', methods=['DELETE'])
+def del_food():
+    received_data = request.json
+    id_to_del = received_data['id']
+    food_to_del = Food.find(id=id_to_del)
+    food_to_del.is_deleted = True
+    food_to_del.update()
+    return food_to_del.json()
 
 
 @app.route('/api/dish/new', methods=['POST'])
