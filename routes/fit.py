@@ -1,10 +1,11 @@
+from datetime import date, timedelta
 
 from base import app, db
 from flask import render_template, request, jsonify
 from objects.tables import Dish, Meal, MealGroup, User, Food, MealOrder, DishIngredient
 
 from util import list_to_json, string_to_date, calc_from_food, calc_from_dish, list_to_dict, get_argument, \
-    deletion_change_food
+    deletion_change_food, calculate_calories_from_day, Nutrients
 
 from auth import *
 
@@ -280,3 +281,27 @@ def add_dish():
     new_dish.save()
     return new_dish.json()
 
+
+@app.route('/api/get_average')
+def calculate_weekly_average():
+    received_data = request.json
+
+    user_id = received_data['id']
+    view_date = received_data['date']
+    days = received_data['days']
+    view_date = date.fromisoformat(view_date)
+    week_start = view_date - timedelta(days=days)
+
+    calories_sum = Nutrients()
+    for i in range(days):
+        one_day = calculate_calories_from_day(user_id, week_start)
+        if one_day.kcal:
+            calories_sum += calculate_calories_from_day(user_id, week_start)
+        else:
+            days -= 1
+        week_start += timedelta(days=1)
+
+    if not days:
+        return '0'
+
+    return jsonify((calories_sum / days).dict())

@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
 from flask import jsonify, request
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
-from objects.tables import Food, DishIngredient
+from objects.tables import Food, DishIngredient, MealGroup, Meal
 
 
 def list_to_json(obj: list):
@@ -42,6 +42,19 @@ class Nutrients:
         self.kcal += other.kcal
         return self
 
+    def __truediv__(self, integer):
+        return Nutrients(self.proteins / integer,
+                         self.fats / integer,
+                         self.carbs / integer,
+                         self.kcal / integer)
+
+    def dict(self):
+        return obj_to_dict(self)
+
+
+def obj_to_dict(obj):
+    return {k: v for k, v in obj.__dict__.items() if not k.startswith("_")}
+
 
 def calc_from_food(food_id, amount) -> Nutrients:
     kg_amount = amount / 100
@@ -76,4 +89,15 @@ def deletion_change_food(food_id, is_deleted):
     food_to_del.is_deleted = is_deleted
     food_to_del.update()
     return food_to_del
+
+
+def calculate_calories_from_day(user_id, day):
+    meals = MealGroup.all(user_id=user_id, day=day)
+    nutrients_to_sum = Nutrients()
+    for meal in meals:
+        this_meal = Meal.all(meal_group_id=meal.id)
+        for component in this_meal:
+            nutrient = Nutrients(component.calc_proteins, component.calc_fats, component.calc_carbs, component.calc_kcal)
+            nutrients_to_sum += nutrient
+    return nutrients_to_sum
 
