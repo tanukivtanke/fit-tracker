@@ -290,7 +290,7 @@ def add_dish():
 def calculate_weekly_average():
     received_data = request.json
 
-    user_id = received_data['id']
+    user_id = received_data['user_id']
     view_date = received_data['date']
     days = received_data['days']
     view_date = date.fromisoformat(view_date)
