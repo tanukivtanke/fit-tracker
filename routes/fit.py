@@ -288,11 +288,10 @@ def add_dish():
 
 @app.route('/api/get_average')
 def calculate_weekly_average():
-    received_data = request.json
 
-    user_id = received_data['user_id']
-    view_date = received_data['date']
-    days = received_data['days']
+    user_id = get_argument('user_id')
+    view_date = get_argument('date')
+    days = get_argument('days')
     view_date = date.fromisoformat(view_date)
     week_start = view_date - timedelta(days=days)
 
