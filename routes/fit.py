@@ -240,7 +240,8 @@ def ingredient_edit():
     received_data = request.json
 
     new_ingredient = DishIngredient(
-        food_id=received_data['food_id'],
+        food_id_ingredient=received_data['food_id_ingredient'],
+        dish_id_ingredient=received_data['dish_id_ingredient'],
         dish_id=received_data['dish_id'],
         amount=received_data['amount'],
     )
