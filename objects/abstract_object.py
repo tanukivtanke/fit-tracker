@@ -1,7 +1,6 @@
 from flask import jsonify
 
 from base import db, app
-from util import obj_to_dict
 
 
 class AbstractObject(db.Model):
@@ -13,6 +12,7 @@ class AbstractObject(db.Model):
         return f"{self.__class__.__name__}({fields})"
 
     def dict(self):
+        from util import obj_to_dict
         return obj_to_dict(self)
 
     def json(self):
