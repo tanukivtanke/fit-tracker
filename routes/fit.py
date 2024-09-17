@@ -239,6 +239,9 @@ def edit_recipe():
 def ingredient_edit():
     received_data = request.json
 
+    if received_data('dish_id') == received_data('dish_id_ingredient'):
+        return 'Cannot add dish into the same dish', 400
+
     new_ingredient = DishIngredient(
         food_id_ingredient=received_data['food_id_ingredient'],
         dish_id_ingredient=received_data['dish_id_ingredient'],
