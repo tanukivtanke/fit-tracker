@@ -293,7 +293,7 @@ def calculate_weekly_average():
     view_date = get_argument('date')
     days = get_argument('days')
     view_date = date.fromisoformat(view_date)
-    week_start = view_date - timedelta(days=days)
+    week_start = view_date - timedelta(days=int(days))
 
     calories_sum = Nutrients()
     for i in range(days):
