@@ -38,16 +38,33 @@ class SearchFilter {
         const convertedQueryParts = originalQueryParts.map(convertQuery).map(normalizeString);
 
         return list.sort((a, b) => {
-            if (a.is_deleted && b.is_deleted) {
+            if (a.out_of_stock !== undefined) {
+                if (a.out_of_stock && b.out_of_stock) {
+                    return a.id - b.id;
+                }
+                if (a.out_of_stock) {
+                    return -1;
+                }
+                if (b.out_of_stock) {
+                    return 1;
+                }
+                return a.id - b.id;
+
+
+            } else {
+                if (a.is_deleted && b.is_deleted) {
+                    return a.id - b.id;
+                }
+                if (a.is_deleted) {
+                    return -1;
+                }
+                if (b.is_deleted) {
+                    return 1;
+                }
                 return a.id - b.id;
             }
-            if (a.is_deleted) {
-                return -1;
-            }
-            if (b.is_deleted) {
-                return 1;
-            }
-            return a.id - b.id;
+
+
         }).filter(item => {
             const itemString = normalizeString(stringRepresentationFn(item));
             const convertedItemString = normalizeString(convertQuery(itemString));
