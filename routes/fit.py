@@ -306,6 +306,6 @@ def calculate_weekly_average():
         week_start += timedelta(days=1)
 
     if not days:
-        return '0'
+        return jsonify(Nutrients().dict())
 
     return jsonify((calories_sum / days).dict())
