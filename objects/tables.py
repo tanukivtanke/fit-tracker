@@ -34,7 +34,8 @@ class DishIngredient(AbstractObject):
     __tablename__ = 'fit_dish_ingredient'
 
     dish_id = db.Column(db.Integer, nullable=False)
-    food_id = db.Column(db.Integer, nullable=False)
+    food_id_ingredient = db.Column(db.Integer)
+    dish_id_ingredient = db.Column(db.Integer)
     amount = db.Column(db.Integer, nullable=False)
 
 
