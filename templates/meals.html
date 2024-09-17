@@ -8,6 +8,7 @@
 <div class="container">
     <div id="under-eating" class="d-flex justify-content-between">
         <h2 class="my-3">Приёмы пищи</h2>
+        <div id="average-data" class="opacity-50"></div>
         <div id="current-date"></div>
     </div>
 
@@ -86,6 +87,8 @@ let showStat = stat => {
     renderMealGroups();
 }
 
+let averageData = null;
+
 const fetchData = async () => {
     if (allStatic == null) {
         allStatic = await _fetch('/api/all_static');
@@ -142,6 +145,8 @@ const fetchData = async () => {
             mealMap[m.id] = m;
         }
     }
+
+    averageData = await _fetch(`/api/get_average?user_id=${currentUserId}&date=${currDateStr}&days=7`);
     renderMealGroups();
 }
 
@@ -280,6 +285,21 @@ const renderMealGroups = () => {
     byId('total-fats').innerText = parseInt(totalFats);
     byId('total-carbs').innerText = parseInt(totalCarbs);
     byId('total-kcal').innerText = parseInt(totalKcal);
+
+    if (averageData !== null) {
+        if (showingStat === StatType.PROTEINS) {
+            byId('average-data').innerHTML = '<span class="me-1">Белки за 7 дней:</span> ' + Math.round(averageData.proteins) + " в среднем";
+        }
+        if (showingStat === StatType.FATS) {
+            byId('average-data').innerHTML = '<span class="me-1">Жиры за 7 дней:</span> ' + Math.round(averageData.fats) + " в среднем";
+        }
+        if (showingStat === StatType.CARBS) {
+            byId('average-data').innerHTML = '<span class="me-1">Углеводы за 7 дней:</span> ' + Math.round(averageData.carbs) + " в среднем";
+        }
+        if (showingStat === StatType.KCAL) {
+            byId('average-data').innerHTML = '<span class="me-1">Калории за 7 дней:</span> ' + Math.round(averageData.kcal) + " в среднем";
+        }
+    }
 
     document.getElementById('eating').innerHTML = allMealsGroupsHtml;
 };
