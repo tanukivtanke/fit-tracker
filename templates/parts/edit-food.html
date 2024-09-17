@@ -529,7 +529,7 @@
                 }
                 let total_amount = 0;
                 for (let i of ingredients) {
-                    nutri.add(calcNutrientsFromFood(i.food_id, i.amount));
+                    nutri.add(calcNutrientsFromFood(i.food_id_ingredient, i.amount));
                     total_amount += i.amount;
                 }
                 let total_amount_per_100g = total_amount / 100;
@@ -679,7 +679,7 @@
 
 
             const renderDishIngr = (di) => {
-                let name = allFoods[di.food_id].name;
+                let name = allFoods[di.food_id_ingredient].name;
                 return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
                         <span>${name}</span>
                         <span>${di.amount}&nbsp;гр.</span>
@@ -813,7 +813,8 @@
             });
 
             onClick(editDishAddNewBtnId, async e => {
-                let foodId = null;
+                let foodIdIngredient = null;
+                let dishIdIngredient = null;
 
                 let chosenMeal = byId(editDishFoodListSelectId).value;
                 if (!chosenMeal) {
@@ -821,9 +822,9 @@
                 }
 
                 if (chosenMeal.startsWith("FOOD_")) {
-                    foodId = parseInt(chosenMeal.substring(5));
+                    foodIdIngredient = parseInt(chosenMeal.substring(5));
                 }
-                if (foodId == null) {
+                if (foodIdIngredient == null) {
                     return;
                 }
 
@@ -833,7 +834,8 @@
                 }
 
                 let result = await _post("/api/dish_ingredient/new" ,{
-                    food_id: foodId,
+                    food_id_ingredient: foodIdIngredient,
+                    dish_id_ingredient: dishIdIngredient,
                     dish_id: dishId,
                     amount: chosenAmount,
                 });
