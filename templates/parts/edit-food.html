@@ -529,8 +529,13 @@
                 }
                 let total_amount = 0;
                 for (let i of ingredients) {
-                    nutri.add(calcNutrientsFromFood(i.food_id_ingredient, i.amount));
-                    total_amount += i.amount;
+                    if (i.food_id_ingredient) {
+                        nutri.add(calcNutrientsFromFood(i.food_id_ingredient, i.amount));
+                        total_amount += i.amount;
+                    } else if (i.dish_id_ingredient) {
+                        nutri.add(calcNutrientsFromFood(i.dish_id_ingredient, i.amount));
+                        total_amount += i.amount;
+                    }
                 }
                 let total_amount_per_100g = total_amount / 100;
                 return new Nutrients(
