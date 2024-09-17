@@ -684,7 +684,12 @@
 
 
             const renderDishIngr = (di) => {
-                let name = allFoods[di.food_id_ingredient].name;
+                let name;
+                if (di.food_id_ingredient) {
+                    name = allFoods[di.food_id_ingredient].name;
+                } else {
+                    name = allDishes[di.dish_id_ingredient].name;
+                }
                 return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
                         <span>${name}</span>
                         <span>${di.amount}&nbsp;гр.</span>
@@ -701,6 +706,15 @@
                 <option value="FOOD_${food.id}">${food.name}</option>
                 `;
             }
+            for (let dish of Object.values(allDishes)) {
+                if (dish.out_of_stock) {
+                    continue;
+                }
+                options += `
+                <option value="DISH_${dish.id}">${dish.name}</option>
+                `;
+            }
+
 
             let dishIngredients = ``;
             for (let dishIngredient of Object.values(allDishIngredients)) {
@@ -828,8 +842,11 @@
 
                 if (chosenMeal.startsWith("FOOD_")) {
                     foodIdIngredient = parseInt(chosenMeal.substring(5));
+                } else if (chosenMeal.startsWith("DISH_")) {
+                    dishIdIngredient = parseInt(chosenMeal.substring(5));
                 }
-                if (foodIdIngredient == null) {
+
+                if (foodIdIngredient == null && dishIdIngredient == null) {
                     return;
                 }
 
