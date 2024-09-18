@@ -185,7 +185,8 @@ def add_food():
         fats=received_data['fats'],
         carbs=received_data['carbs'],
         kcal=received_data['kcal'],
-        is_deleted=False
+        is_deleted=False,
+        portion_size=received_data['portion_size']
     )
     new_food.save()
     return new_food.json()
@@ -202,6 +203,7 @@ def edit_food():
         food_to_change.fats = received_data['fats']
         food_to_change.carbs = received_data['carbs']
         food_to_change.kcal = received_data['kcal']
+        food_to_change.portion_size = received_data['portion_size']
         food_to_change.update()
         return food_to_change.json()
     else:

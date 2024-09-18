@@ -1,0 +1,1 @@
+alter table fit_food add column portion_size integer;
