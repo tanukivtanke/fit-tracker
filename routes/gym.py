@@ -76,10 +76,10 @@ def get_latest():
     user_id = get_argument('user_id')
     curr_date = date.fromisoformat(get_argument("date"))
 
-    today_training = TrainingJournal.find(date=curr_date)
+    today_training = TrainingJournal.find(date=curr_date, user_id=user_id)
 
     if not today_training:
-        future_trainings = TrainingJournal.all(date=None)
+        future_trainings = TrainingJournal.all(date=None, user_id=user_id)
         if future_trainings:
             return jsonify({
                 "exists": False,
