@@ -71,7 +71,7 @@ def get_all_gym():
     })
 
 
-@app.route('/api/get_latest_training_plan')
+@app.route('/api/gym/get_latest_training_plan')
 def get_latest():
     user_id = get_argument('user_id')
     curr_date = date.fromisoformat(get_argument("date"))
