@@ -8,6 +8,11 @@ from util import list_to_json, string_to_date, calc_from_food, calc_from_dish, l
 from auth import *
 
 
+@app.route('/gym')
+def gym():
+    return render_template('gym.html')
+
+
 @app.route('/api/gym/equipment')
 def get_equipment():
     return Equipment.all_json()
