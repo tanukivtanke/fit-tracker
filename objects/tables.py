@@ -87,6 +87,7 @@ class TrainingJournal(AbstractObject):
     training_plan_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.Date, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
+    training_program_id = db.Column(db.Integer)
 
 
 class TrainingPlanComponents(AbstractObject):
@@ -134,3 +135,15 @@ class Supersets(AbstractObject):
     superset_id = db.Column(db.Integer, nullable=False)
     exercise_id = db.Column(db.Integer, nullable=False)
 
+
+class TrainingPrograms(AbstractObject):
+    __tablename__ = 'gym_training_programs'
+
+    name = db.Column(db.String, nullable=False)
+
+
+class TrainingProgramComponents(AbstractObject):
+    __tablename__ = 'gym_training_program_components'
+
+    training_plan_id = db.Column(db.Integer, nullable=False)
+    training_program_id = db.Column(db.Integer, nullable=False)
