@@ -199,7 +199,8 @@ def add_food():
         carbs=received_data['carbs'],
         kcal=received_data['kcal'],
         is_deleted=False,
-        portion_size=received_data['portion_size']
+        portion_size=received_data['portion_size'],
+        last_used=date.today()
     )
     new_food.save()
     return new_food.json()
@@ -295,7 +296,8 @@ def add_dish():
     new_dish = Dish(
         name=received_data['name'],
         out_of_stock=False,
-        recipe=''
+        recipe='',
+        last_used=date.today()
     )
     new_dish.save()
     return new_dish.json()
