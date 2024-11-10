@@ -147,3 +147,9 @@ class TrainingProgramComponents(AbstractObject):
 
     training_plan_id = db.Column(db.Integer, nullable=False)
     training_program_id = db.Column(db.Integer, nullable=False)
+
+
+class UserId(AbstractObject):
+    __tablename__ = 'user_id'
+
+    user_id = db.Column(db.String, nullable=False)
