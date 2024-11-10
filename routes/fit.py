@@ -141,10 +141,12 @@ def add_meal():
         curr_food = Food.find(id=food_id)
         curr_food.last_used = date.today()
         curr_food.update()
+        db.session.commit()
     else:
         curr_dish = Dish.find(id=dish_id)
         curr_dish.last_used = date.today()
         curr_dish.update()
+        db.session.commit()
 
     same_meal = Meal.find(meal_group_id=received_data['meal_group_id'],
                           food_id=food_id,
