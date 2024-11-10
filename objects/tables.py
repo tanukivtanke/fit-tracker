@@ -21,6 +21,7 @@ class Food(AbstractObject):
     kcal = db.Column(db.Float, nullable=False)
     is_deleted = db.Column(db.Boolean, nullable=False)
     portion_size = db.Column(db.Integer)
+    last_used = db.Column(db.Date)
 
 
 class Dish(AbstractObject):
@@ -29,6 +30,7 @@ class Dish(AbstractObject):
     name = db.Column(db.String, unique=True, nullable=False)
     out_of_stock = db.Column(db.Boolean, nullable=False)
     recipe = db.Column(db.String, nullable=False)
+    last_used = db.Column(db.Date)
 
 
 class DishIngredient(AbstractObject):

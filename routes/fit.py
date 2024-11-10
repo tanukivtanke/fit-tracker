@@ -126,8 +126,10 @@ def del_meal_group():
 def add_meal():
     received_data = request.json
 
-    is_dish = received_data['food_id'] is None
-    is_food = received_data['dish_id'] is None
+    food_id = received_data['food_id']
+    dish_id = received_data['dish_id']
+    is_dish = food_id is None
+    is_food = dish_id is None
     if is_dish == is_food:
         return 'Cannot add food and dish in the same request', 400
 
@@ -135,21 +137,30 @@ def add_meal():
     if amount is None or not isinstance(amount, int):
         return 'Cannot add food or dish without any amount', 400
 
+    if is_food:
+        curr_food = Food.find(id=food_id)
+        curr_food.last_used = date.today()
+        curr_food.update()
+    else:
+        curr_dish = Dish.find(id=dish_id)
+        curr_dish.last_used = date.today()
+        curr_dish.update()
+
     same_meal = Meal.find(meal_group_id=received_data['meal_group_id'],
-                          food_id=received_data['food_id'],
-                          dish_id=received_data['dish_id'])
+                          food_id=food_id,
+                          dish_id=dish_id)
 
     if same_meal is None:
 
         if is_food:
-            new_data = calc_from_food(received_data['food_id'], received_data['amount'])
+            new_data = calc_from_food(food_id, amount)
         else:
-            new_data = calc_from_dish(received_data['dish_id'], received_data['amount'])
+            new_data = calc_from_dish(dish_id, amount)
 
         new_edible = Meal(meal_group_id=received_data['meal_group_id'],
-                          food_id=received_data['food_id'],
-                          dish_id=received_data['dish_id'],
-                          amount=received_data['amount'],
+                          food_id=food_id,
+                          dish_id=dish_id,
+                          amount=amount,
                           calc_proteins=new_data.proteins,
                           calc_fats=new_data.fats,
                           calc_carbs=new_data.carbs,
@@ -158,13 +169,13 @@ def add_meal():
         return new_edible.json()
 
     else:
-        new_amount = received_data['amount'] + same_meal.amount
+        new_amount = amount + same_meal.amount
         if new_amount <= 0:
             return same_meal.json()
         if is_food:
-            new_data = calc_from_food(received_data['food_id'], new_amount)
+            new_data = calc_from_food(food_id, new_amount)
         else:
-            new_data = calc_from_dish(received_data['dish_id'], new_amount)
+            new_data = calc_from_dish(dish_id, new_amount)
 
         same_meal.amount = new_amount
         same_meal.calc_proteins = new_data.proteins
