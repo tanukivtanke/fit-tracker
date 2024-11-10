@@ -127,6 +127,14 @@ input.py-025 {
     opacity: .65 !important;
 }
 
+.portion-input {
+    max-width: 4rem !important;
+}
+
+.pe-cursor {
+    cursor: pointer;
+}
+
 .btn-primary:disabled {
     border: 1px solid #afafaf;
     background-color: #cccccc;

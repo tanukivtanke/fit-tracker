@@ -12,7 +12,7 @@ from auth import *
 
 @app.route('/')
 def meals():
-    return render_template('meals.html')
+    return render_template('fit.html')
 
 
 @app.route('/about')

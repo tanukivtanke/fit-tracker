@@ -16,6 +16,7 @@
         const addFatsId = `${rootId}-add-food-fats`;
         const addCarbsId = `${rootId}-add-food-carbs`;
         const addKcalId = `${rootId}-add-food-kcal`;
+        const addFoodPortionSizeId = `${rootId}-add-food-addFoodPortionSizeId`;
         const addFoodButtonId = `${rootId}-add-food-button`;
 
         const addDishNameId = `${rootId}-add-dish-name`;
@@ -98,7 +99,9 @@
                     <h5>Новая еда</h5>
 
                     <div class="input-group mb-2-5">
-                      <input id="${addFoodNameId}" type="text" class="form-control" placeholder="Название">
+                         <input id="${addFoodNameId}" type="text" class="form-control" placeholder="Название">
+                         <span class="input-group-text py-025">1шт</span>
+                         <input id="${addFoodPortionSizeId}" type="text" class="form-control portion-input text-center" placeholder="Вес">
                     </div>
 
                     <div class="d-flex">
@@ -237,12 +240,22 @@
                 let fats = handleFloatField(addFatsId, 0, 100, true);
                 let carbs = handleFloatField(addCarbsId, 0, 100, true);
                 let kcal = handleNumberField(addKcalId, 0, 999);
+                handleNumberField(addFoodPortionSizeId, 0, 9999);
 
                 byId(addFoodButtonId).disabled =
                     !(name.length && proteins != null && fats != null && carbs != null && kcal != null);
             };
 
-            for (let field of [addFoodNameId, addProteinsId, addFatsId, addCarbsId, addKcalId]) {
+            let fields = [
+                addFoodNameId,
+                addProteinsId,
+                addFatsId,
+                addCarbsId,
+                addKcalId,
+                addFoodPortionSizeId
+            ];
+
+            for (let field of fields) {
                 onInput(field, checkAddFoodButton);
             }
 
@@ -252,6 +265,7 @@
                 let fats = handleFloatField(addFatsId, 0, 100, true);
                 let carbs = handleFloatField(addCarbsId, 0, 100, true);
                 let kcal = handleNumberField(addKcalId, 0, 999);
+                let portion = handleNumberField(addFoodPortionSizeId, 0, 9999);
 
                 byId(addFoodButtonId).disabled = true;
 
@@ -261,13 +275,14 @@
                     fats: fats,
                     carbs: carbs,
                     kcal: kcal,
+                    portion_size: portion,
                 });
 
                 if (result.id) {
                     allFoods[result.id] = result;
                 }
 
-                for (let field of [addFoodNameId, addProteinsId, addFatsId, addCarbsId, addKcalId]) {
+                for (let field of fields) {
                     byId(field).value = "";
                 }
 
@@ -313,6 +328,7 @@
             let foodReviveButtonKey = `data-ft-food-foodReviveButtonKey`;
             let foodDeleteButtonKey = `data-ft-food-foodDeleteButtonKey`;
             let foodNameIdKey = `data-ft-food-name-id`;
+            let foodPortionSizeIdKey = `data-ft-food-foodPortionSizeIdKey-id`;
             let foodProteinsIdKey = `data-ft-food-proteins-id`;
             let foodFatsIdKey = `data-ft-food-fats-id`;
             let foodCarbsIdKey = `data-ft-food-carbs-id`;
@@ -329,6 +345,8 @@
                 <div class="${food.is_deleted ? 'deleted-highlight' : ''}">
                     <div class="input-group mb-2-5">
                         <input ${foodNameIdKey}=${food.id} type="text" class="form-control" value="${food.name}">
+                        <span class="input-group-text py-025">1шт</span>
+                         <input ${foodPortionSizeIdKey}=${food.id} type="text" class="form-control portion-input text-center" placeholder="Вес" value="${food.portion_size ?? ''}">
                     </div>
                     <div class="d-flex">
                         <div class="input-group">
@@ -358,6 +376,7 @@
                 let fatsField = document.querySelector(`[${foodFatsIdKey}="${foodId}"]`);
                 let carbsField = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`);
                 let kcalField = document.querySelector(`[${foodKcalIdKey}="${foodId}"]`);
+                let portionSizeField = document.querySelector(`[${foodPortionSizeIdKey}="${foodId}"]`);
                 let buttonField = document.querySelector(`[${foodButtonKey}="${foodId}"]`);
 
                 let name = nameField.value.trim();
@@ -365,6 +384,7 @@
                 let fats = handleFloatField(fatsField, 0, 100, true);
                 let carbs = handleFloatField(carbsField, 0, 100, true);
                 let kcal = handleNumberField(kcalField, 0, 999);
+                let portionSize = handleNumberField(portionSizeField, 0, 9999);
 
                 let currFood = allFoods[foodId];
                 let currName = currFood.name;
@@ -372,6 +392,7 @@
                 let currFats = currFood.fats;
                 let currCarbs = currFood.carbs;
                 let currKcal = currFood.kcal;
+                let currPortionSize = currFood.portion_size;
 
                 let allFieldsFilled = name.length && proteins != null && fats != null && carbs != null && kcal != null;
                 if (!allFieldsFilled) {
@@ -383,12 +404,13 @@
                     || currProteins !== proteins
                     || currFats !== fats
                     || currCarbs !== carbs
-                    || currKcal !== kcal;
+                    || currKcal !== kcal
+                    || currPortionSize !== portionSize;
 
                 buttonField.disabled = !anyFieldChanged;
             };
 
-            for (let field of [foodNameIdKey, foodProteinsIdKey, foodFatsIdKey, foodCarbsIdKey, foodKcalIdKey]) {
+            for (let field of [foodNameIdKey, foodProteinsIdKey, foodFatsIdKey, foodCarbsIdKey, foodKcalIdKey, foodPortionSizeIdKey]) {
                 query(`[${field}]`, e => {
                     let value = e.getAttribute(field);
                     let foodId = parseInt(value);
@@ -415,6 +437,7 @@
                     let fats = document.querySelector(`[${foodFatsIdKey}="${foodId}"]`).value;
                     let carbs = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`).value;
                     let kcal = document.querySelector(`[${foodKcalIdKey}="${foodId}"]`).value;
+                    let portionSize = document.querySelector(`[${foodPortionSizeIdKey}="${foodId}"]`).value;
 
                     let result = await _post("/api/food/edit", {
                         id: foodId,
@@ -423,6 +446,7 @@
                         fats: parseFloat(fats),
                         carbs: parseFloat(carbs),
                         kcal: parseInt(kcal),
+                        portion_size: parseInt(portionSize),
                     });
 
                     if (result.id) {

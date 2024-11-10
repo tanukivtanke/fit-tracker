@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' with context %}
+
+<body>
+{% include 'nav.html' %}
+
+<div class="container">
+    <div id="under-eating" class="d-flex justify-content-between">
+        <h2 class="my-3">Приёмы пищи</h2>
+        <div id="average-data" class="opacity-50"></div>
+        <div id="current-date"></div>
+    </div>
+
+    <div class="d-flex fs-4" style="margin-right: 1.20rem">
+        <div id="add-meal-group"
+             class="border border-black border-2 rounded-2 text-center bg-dark text-white fs-2 fw-bold flex-grow-1">
+            <i class="fa-solid fa-plus stretched"></i>
+        </div>
+
+
+        <div class="d-flex align-items-center" style="margin-top: -0.7rem">
+
+            <div class="d-flex flex-column ms-3">
+                <div class="fs-7">белки</div>
+                <div class="text-end proteins-bg stat-in-mg stat-proteins-outline total-stat total-proteins"
+                     onclick="showStat(StatType.PROTEINS)">
+                    <span id="total-proteins">0</span><span class="fs-7 ms-05">гр</span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column ms-3">
+                <div class="fs-7">жиры</div>
+                <div class="text-end fats-bg stat-in-mg stat-fats-outline total-stat total-fats"
+                        onclick="showStat(StatType.FATS)">
+                    <span id="total-fats">0</span><span class="fs-7 ms-05">гр</span>
+                </div>
+            </div>
+
+
+            <div class="d-flex flex-column ms-3">
+                <div class="fs-7">углеводы</div>
+                <div class="text-end carbs-bg stat-in-mg stat-carbs-outline total-stat total-carbs"
+                        onclick="showStat(StatType.CARBS)">
+                    <span id="total-carbs">0</span><span class="fs-7 ms-05">гр</span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column ms-3 d-none">
+                <div class="fs-7">калории</div>
+                <div class="text-end kcal-bg stat-in-mg stat-kcal-outline total-stat total-kcal"
+                        onclick="showStat(StatType.KCAL)">
+                    <span id="total-kcal">0</span><span class="fs-7 ms-05">кк</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div id="eating"></div>
+</div>
+</body>
+
+
+<script>
+let allStatic = null;
+let allMealOrders = null;
+let allFoods = null;
+let allDishes = null;
+let allDishIngredients = null;
+
+const mealGroupMap = {};
+const mealMap = {};
+
+let currentMealsGroups;
+
+class StatType {
+    static PROTEINS = 'PROTEINS';
+    static FATS = 'FATS';
+    static CARBS = 'CARBS';
+    static KCAL = 'KCAL';
+}
+
+let showingStat = StatType.PROTEINS;
+
+let showStat = stat => {
+    showingStat = stat;
+    renderMealGroups();
+}
+
+let averageData = null;
+
+const fetchData = async () => {
+    if (allStatic == null) {
+        allStatic = await _fetch('/api/all_static');
+        if (allStatic.meal_orders) {
+            allMealOrders = mapToId(allStatic.meal_orders);
+        }
+        if (allStatic.foods) {
+            allFoods = mapToId(allStatic.foods);
+        }
+        if (allStatic.dishes) {
+            allDishes = mapToId(allStatic.dishes);
+        }
+        if (allStatic.dish_ingredients) {
+            allDishIngredients = mapToId(allStatic.dish_ingredients);
+        }
+    }
+
+    if (allMealOrders == null) {
+        allMealOrders = mapToId(await _fetch('/api/meal_orders'));
+    }
+    if (allFoods == null) {
+        allFoods = mapToId(await _fetch('/api/foods'));
+    }
+    if (allDishes == null) {
+        allDishes = mapToId(await _fetch('/api/dishes'));
+    }
+    if (allDishIngredients == null) {
+        allDishIngredients = mapToId(await _fetch('/api/dish_ingredients'))
+    }
+
+    let currDateStr = currentDate.toFormat('yyyy-MM-dd');
+    let allCurrent = await _fetch(`/api/get_meals_for_meal_day_all?user_id=${currentUserId}&date=${currDateStr}`);
+
+    currentMealsGroups = allCurrent["meal_groups"];
+    if (currentMealsGroups == null) {
+        currentMealsGroups = await _fetch(`/api/get_meals_for_day?user_id=${currentUserId}&date=${currDateStr}`);
+    }
+
+    let meals = allCurrent["meals_for_meal_group"];
+
+    for (let mg of currentMealsGroups) {
+        let mgId = mg.id;
+        mealGroupMap[mgId] = mg;
+
+        let mealsForMealGroup;
+        if (meals[mgId + '']) {
+            mealsForMealGroup = meals[mgId + ''];
+        } else {
+            mealsForMealGroup = await _fetch(`/api/get_meals_for_meal_group?id=${mgId}`);
+        }
+
+        mg.api_meals = mealsForMealGroup;
+        for (let m of mealsForMealGroup) {
+            mealMap[m.id] = m;
+        }
+    }
+
+    averageData = await _fetch(`/api/get_average?user_id=${currentUserId}&date=${currDateStr}&days=7`);
+    renderMealGroups();
+}
+
+const renderMealGroups = () => {
+    let allMealsGroupsHtml = ``;
+
+    let totalProteins = 0;
+    let totalFats = 0;
+    let totalCarbs = 0;
+    let totalKcal = 0;
+
+    for (let mg of currentMealsGroups) {
+
+        let mgProteins = 0;
+        let mgFats = 0;
+        let mgCarbs = 0;
+        let mgKcal = 0;
+        let mgWeight = 0;
+
+        let currentMealGroupHtml = ``;
+
+        for (let m of mg.api_meals) {
+
+            let proteins = m.calc_proteins;
+            let fats = m.calc_fats;
+            let carbs = m.calc_carbs;
+            let kcal = m.calc_kcal;
+
+            mgProteins += proteins;
+            mgFats += fats;
+            mgCarbs += carbs;
+            mgKcal += kcal;
+
+            let showing_name = null;
+            if (m.dish_id !== null) {
+                showing_name = allDishes[m.dish_id].name;
+            } else if (m.food_id !== null) {
+                showing_name = allFoods[m.food_id].name;
+            }
+            if (showing_name === null) {
+                continue;
+            }
+
+            let amount = m.amount;
+            mgWeight += amount;
+
+            currentMealGroupHtml = `
+            <div class="d-flex justify-content-between">
+                <div>${showing_name}</div>
+                <div class="d-flex">
+                    <div class="ms-3" style="margin-right: 0.4rem">
+                        <span>${amount}</span><span class="fs-7 ms-05">гр</span>
+                    </div>
+
+                    ${
+                        showingStat === StatType.PROTEINS ? `
+                        <div class="text-end proteins-bg stat-in-mg">
+                             <span>${parseInt(proteins)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.FATS ? `
+                        <div class="text-end fats-bg stat-in-mg">
+                             <span>${parseInt(fats)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.CARBS ? `
+                        <div class="text-end carbs-bg stat-in-mg">
+                             <span>${parseInt(carbs)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.KCAL ? `
+                        <div class="text-end kcal-bg stat-in-mg">
+                             <span>${parseInt(kcal)}</span><span class="fs-7 ms-05">кк</span>
+                        </div>
+                        `: ''
+                    }
+                </div>
+            </div>
+            ` + currentMealGroupHtml;
+        }
+
+        totalProteins += mgProteins;
+        totalFats += mgFats;
+        totalCarbs += mgCarbs;
+        totalKcal += mgKcal;
+
+        let mealName = mg.meal_name;
+        if (mealName == null) {
+            mealName = allMealOrders[mg.meal_order_id].name;
+        }
+
+        allMealsGroupsHtml = `
+        <div class="div-hover border border-black border-2 rounded-2 py-2 px-3 fs-4 mt-4"
+            onclick="startEditMealGroupById(${mg.id})"
+        >
+            <div class="d-flex justify-content-between">
+                <div>${mealName}</div>
+
+                <div class="d-flex">
+                    <div class="ms-3" style="margin-right: 0.4rem">
+                        <span>${mgWeight}</span><span class="fs-7 ms-05">гр</span>
+                    </div>
+
+
+                    ${
+                        showingStat === StatType.PROTEINS ? `
+                        <div class="text-end proteins-bg stat-in-mg stat-proteins-outline">
+                            <span>${parseInt(mgProteins)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.FATS ? `
+                        <div class="text-end fats-bg stat-in-mg stat-fats-outline">
+                            <span>${parseInt(mgFats)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.CARBS ? `
+                        <div class="text-end carbs-bg stat-in-mg stat-carbs-outline">
+                            <span>${parseInt(mgCarbs)}</span><span class="fs-7 ms-05">гр</span>
+                        </div>
+                        `:
+                        showingStat === StatType.KCAL ? `
+                        <div class="text-end kcal-bg stat-in-mg stat-kcal-outline">
+                            <span>${parseInt(mgKcal)}</span><span class="fs-7 ms-05">кк</span>
+                        </div>
+                        `: ''
+                    }
+                </div>
+            </div>
+            <hr class="my-2 opacity-100">
+            ${currentMealGroupHtml}
+        </div>
+        ` + allMealsGroupsHtml;
+    }
+
+    byId('total-proteins').innerText = parseInt(totalProteins);
+    byId('total-fats').innerText = parseInt(totalFats);
+    byId('total-carbs').innerText = parseInt(totalCarbs);
+    byId('total-kcal').innerText = parseInt(totalKcal);
+
+    if (averageData !== null) {
+        if (showingStat === StatType.PROTEINS) {
+            byId('average-data').innerHTML = '<span class="me-1">Белки за 7 дней:</span> ' + Math.round(averageData.proteins) + " в среднем";
+        }
+        if (showingStat === StatType.FATS) {
+            byId('average-data').innerHTML = '<span class="me-1">Жиры за 7 дней:</span> ' + Math.round(averageData.fats) + " в среднем";
+        }
+        if (showingStat === StatType.CARBS) {
+            byId('average-data').innerHTML = '<span class="me-1">Углеводы за 7 дней:</span> ' + Math.round(averageData.carbs) + " в среднем";
+        }
+        if (showingStat === StatType.KCAL) {
+            byId('average-data').innerHTML = '<span class="me-1">Калории за 7 дней:</span> ' + Math.round(averageData.kcal) + " в среднем";
+        }
+    }
+
+    document.getElementById('eating').innerHTML = allMealsGroupsHtml;
+};
+
+// Function to process the retrieved meals
+function processMeals(meals) {
+  // Get the container element where the meals will be displayed
+  const mealContainer = document.getElementById('meal-container');
+
+  // Clear any existing content in the container
+  mealContainer.innerHTML = '';
+
+  // Iterate over each meal and create HTML elements to display them
+  meals.forEach(meal => {
+    const mealElement = document.createElement('div');
+    mealElement.textContent = meal.name;
+    // Add other relevant meal details to the element
+
+    mealContainer.appendChild(mealElement);
+  });
+}
+
+
+function setupDate() {
+    let currDateStr = currentDate.toFormat('d MMMM');
+
+    let arrowBackward = `
+    <span id='go-to-prev-day'>
+        <i class="fa-solid fa-arrow-left"></i>
+    </span>`;
+
+    let arrowForward = '';
+    if (!nowDate.hasSame(currentDate, 'day')) {
+        arrowForward  = `
+        <span id='go-to-next-day'>
+            <i class="fa-solid fa-arrow-right"></i>
+        </span>`;
+    }
+
+    byId('current-date').innerHTML = `
+    ${arrowBackward}
+    <span class="fs-5 mx-2">${currDateStr}</span>
+    ${arrowForward}
+    `;
+
+    byId('go-to-prev-day')?.addEventListener('click', () => {
+        currentDate = shiftDateByOneDay(currentDate, false);
+        setupWindow();
+    });
+
+     byId('go-to-next-day')?.addEventListener('click', () => {
+        currentDate = shiftDateByOneDay(currentDate, true);
+        setupWindow();
+    });
+}
+
+const setupWindow = () => {
+    setupDate();
+    fetchData();
+}
+
+// Call the fetchMeals function when the page loads or when needed
+window.addEventListener('load' , setupWindow);
+
+</script>
+
+{% include 'parts/add-meal-group.html' %}
+{% include 'parts/edit-meal-group.html' %}
+{% include 'parts/edit-food.html' %}
+
+</html>

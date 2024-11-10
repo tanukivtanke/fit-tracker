@@ -7,7 +7,7 @@
 
 <div class="container">
     <div id="under-eating" class="d-flex justify-content-between">
-        <h2 class="my-3">Приёмы пищи</h2>
+        <h2 class="my-3">Приёмы пищи GYMMMMMMMMMM</h2>
         <div id="average-data" class="opacity-50"></div>
         <div id="current-date"></div>
     </div>
@@ -63,6 +63,18 @@
 
 <script>
 let allStatic = null;
+let allEquipments = null;
+let allExercises = null;
+let allExerciseGroups = null;
+let allExerciseGroupings = null;
+let allSupersets = null;
+let allTrainingPlans = null;
+let allTrainingPlanComponents = null;
+let allTrainingPrograms = null;
+let allTrainingProgramComponents = null;
+
+
+
 let allMealOrders = null;
 let allFoods = null;
 let allDishes = null;
@@ -73,54 +85,65 @@ const mealMap = {};
 
 let currentMealsGroups;
 
-class StatType {
-    static PROTEINS = 'PROTEINS';
-    static FATS = 'FATS';
-    static CARBS = 'CARBS';
-    static KCAL = 'KCAL';
-}
-
-let showingStat = StatType.KCAL;
-
-let showStat = stat => {
-    showingStat = stat;
-    renderMealGroups();
-}
-
-let averageData = null;
-
 const fetchData = async () => {
     if (allStatic == null) {
-        allStatic = await _fetch('/api/all_static');
-        if (allStatic.meal_orders) {
-            allMealOrders = mapToId(allStatic.meal_orders);
+        allStatic = await _fetch('/api/gym/all_static');
+        if (allStatic.equipment) {
+            allEquipments = mapToId(allStatic.equipment);
         }
-        if (allStatic.foods) {
-            allFoods = mapToId(allStatic.foods);
+        if (allStatic.exercises) {
+            allExercises = mapToId(allStatic.exercises);
         }
-        if (allStatic.dishes) {
-            allDishes = mapToId(allStatic.dishes);
+        if (allStatic.exercise_groups) {
+            allExerciseGroups = mapToId(allStatic.exercise_groups);
         }
-        if (allStatic.dish_ingredients) {
-            allDishIngredients = mapToId(allStatic.dish_ingredients);
+        if (allStatic.grouping) {
+            allExerciseGroupings = mapToId(allStatic.grouping);
         }
-    }
-
-    if (allMealOrders == null) {
-        allMealOrders = mapToId(await _fetch('/api/meal_orders'));
-    }
-    if (allFoods == null) {
-        allFoods = mapToId(await _fetch('/api/foods'));
-    }
-    if (allDishes == null) {
-        allDishes = mapToId(await _fetch('/api/dishes'));
-    }
-    if (allDishIngredients == null) {
-        allDishIngredients = mapToId(await _fetch('/api/dish_ingredients'))
+        if (allStatic.supersets) {
+            allSupersets = mapToId(allStatic.supersets);
+        }
+        if (allStatic.training_plan_components) {
+            allTrainingPlanComponents = mapToId(allStatic.training_plan_components);
+        }
+        if (allStatic.training_plans) {
+            allTrainingPlans = mapToId(allStatic.training_plans);
+        }
+        if (allStatic.training_programs) {
+            allTrainingPrograms = mapToId(allStatic.training_programs);
+        }
+        if (allStatic.training_program_components) {
+            allTrainingProgramComponents = mapToId(allStatic.training_program_components);
+        }
     }
 
     let currDateStr = currentDate.toFormat('yyyy-MM-dd');
-    let allCurrent = await _fetch(`/api/get_meals_for_meal_day_all?user_id=${currentUserId}&date=${currDateStr}`);
+    let allCurrent = await _fetch(`/api/gym/get_latest_training_plan?user_id=${currentUserId}&date=${currDateStr}`);
+
+    
+
+    `
+    // Если есть на дату
+    {
+        "exists" : true,
+        "training_journal" : { ... },
+        "training_details" : [ {...}, {...}, {...} ... ]
+    }
+
+    // Если нет на дату, но есть будущие тренировки (date=null)
+    {
+        "exists" : false,
+        "training_journal" : { id=min, ..., date=null },
+        "training_details" : null,
+    }
+
+    // Если нет на дату, и нет будущих тренировок
+    {
+        "exists" : false,
+        "training_journal" : null,
+        "training_details" : null,
+    }
+    `
 
     currentMealsGroups = allCurrent["meal_groups"];
     if (currentMealsGroups == null) {

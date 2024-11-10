@@ -10,7 +10,7 @@ def get_users():
 
 @app.route('/user/<username>')
 def show_user_profile(username):
-    return render_template('meals.html', name=username)
+    return render_template('fit.html', name=username)
 
 
 if __name__ == '__main__':

@@ -1,8 +1,9 @@
 
 <nav class="navbar bg-dark text-white">
     <div class="container" style="min-height: 50px">
-        <div class="d-flex align-items-center">
-            <div class="fs-3">Вес</div>
+        <div id="header-fit-sym-switch" class="d-flex align-items-center pe-cursor">
+            <div id="header-fit-option" class="fs-3 px-3 rounded rounded-3 d-none">Fit</div>
+            <div id="header-gym-option" class="fs-3 px-3 rounded rounded-3 d-none">Gym</div>
         </div>
 
         <div class="d-flex">
@@ -26,6 +27,16 @@
 
         if (currentUserId === null || Number.isNaN(currentUserId)) {
             currentUserId = 1;
+        }
+
+        if (window.location.pathname.startsWith("/gym")) {
+            byId('header-gym-option').classList.add('bg-white');
+            byId('header-gym-option').classList.add('text-dark');
+            onClick('header-fit-sym-switch', () => window.location = "/");
+        } else {
+            byId('header-fit-option').classList.add('bg-white');
+            byId('header-fit-option').classList.add('text-dark');
+            onClick('header-fit-sym-switch', () => window.location = "/gym");
         }
 
         const setupUsers = async () => {

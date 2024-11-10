@@ -171,7 +171,7 @@
                         ${options}
                     </select>
                     <input id="editMealGroupModal-text" type="text"
-                        class="form-control" placeholder="Кол-во"
+                        class="form-control text-center" placeholder="Кол-во"
                         style="min-width: 4rem;max-width: 4rem;">
                     <span class="input-group-text">гр.</span>
                 </div>
@@ -207,6 +207,23 @@
             editMealGroupModal.hide();
             editFoodModal.show();
         })
+
+        $('#editMealGroupModal-select').on('change', function (e) {
+
+            let value = e.currentTarget.value;
+            if (value.startsWith("FOOD_")) {
+                let foodId = value.substring(5);
+                let food = allFoods[foodId];
+                if (food.portion_size) {
+                    let amountField = byId('editMealGroupModal-text');
+                    let amount = amountField.value;
+                    if (!amount) {
+                        amountField.value = food.portion_size;
+                    }
+                }
+            }
+
+        });
     };
 
     const startEditMealGroupById = async (mealGroupId) => {
