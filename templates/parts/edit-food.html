@@ -341,24 +341,27 @@
                     continue;
                 }
 
+                let editable = deletingFoodMode || food.is_deleted ? 'disabled' : '';
+
                 foodsHtml = `
                 <hr>
                 <div class="${food.is_deleted ? 'deleted-highlight' : ''}">
                     <div class="input-group mb-2-5">
-                        <input ${foodNameIdKey}=${food.id} type="text" class="form-control" value="${food.name}">
+                        <input ${foodNameIdKey}=${food.id} type="text" class="form-control" value="${food.name}" ${editable}>
                         <span class="input-group-text py-025">1шт</span>
-                         <input ${foodPortionSizeIdKey}=${food.id} type="text" class="form-control portion-input text-center" placeholder="Вес" value="${food.portion_size ?? ''}">
+                        <input ${foodPortionSizeIdKey}=${food.id} type="text" class="form-control portion-input text-center"
+                                placeholder="Вес" value="${food.portion_size ?? ''}" ${editable}>
                     </div>
                     <div class="d-flex">
                         <div class="input-group">
                           <span class="input-group-text py-025 proteins-bg">Б</span>
-                          <input ${foodProteinsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.proteins}">
+                          <input ${foodProteinsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.proteins}" ${editable}>
                           <span class="input-group-text py-025 fats-bg">Ж</span>
-                          <input ${foodFatsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.fats}">
+                          <input ${foodFatsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.fats}" ${editable}>
                           <span class="input-group-text py-025 carbs-bg">У</span>
-                          <input ${foodCarbsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.carbs}">
+                          <input ${foodCarbsIdKey}=${food.id} type="text" class="form-control py-025" value="${food.carbs}" ${editable}>
                           <span class="input-group-text py-025 kcal-bg">Кк</span>
-                          <input ${foodKcalIdKey}=${food.id} type="text" class="form-control py-025" value="${food.kcal}">
+                          <input ${foodKcalIdKey}=${food.id} type="text" class="form-control py-025" value="${food.kcal}" ${editable}>
                         </div>
                         <button ${foodButtonKey}=${food.id} class="btn btn-primary ms-2 py-025 ${!deletingFoodMode && !food.is_deleted ? '' : 'd-none'}" disabled>Изменить</button>
                         <button ${foodReviveButtonKey}=${food.id} class="btn btn-success opacity-65 ms-2 py-025 ${!deletingFoodMode && food.is_deleted ? '' : 'd-none'}">Вернуть</button>
