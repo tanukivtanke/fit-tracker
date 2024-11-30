@@ -193,6 +193,7 @@
                 currentEditingDishId = null;
                 showElem(newDishTab);
                 hideElem(editDishTab);
+                renderDishes();
             });
 
             const _checkFoodTabVisibility = () => {
@@ -544,8 +545,10 @@
                 );
             };
 
-            const calcNutrientsFromDish = (dish) => {
-                let amount_per_100g = 1;
+            const calcNutrientsFromDish = (dishId, amount=100) => {
+                let dish = allDishes[dishId];
+
+                let amount_per_100g = amount / 100;
                 let ingredients = Object.values(allDishIngredients).filter(e => e.dish_id === dish.id);
                 let nutri = new Nutrients()
                 if (ingredients.length === 0) {
@@ -557,7 +560,7 @@
                         nutri.add(calcNutrientsFromFood(i.food_id_ingredient, i.amount));
                         total_amount += i.amount;
                     } else if (i.dish_id_ingredient) {
-                        nutri.add(calcNutrientsFromFood(i.dish_id_ingredient, i.amount));
+                        nutri.add(calcNutrientsFromDish(i.dish_id_ingredient, i.amount));
                         total_amount += i.amount;
                     }
                 }
@@ -571,7 +574,7 @@
             };
 
             const getDishHtml = (dish) => {
-                let nutrients = calcNutrientsFromDish(dish);
+                let nutrients = calcNutrientsFromDish(dish.id);
                 nutrients.round();
 
                 return `
@@ -600,25 +603,29 @@
                 `;
             };
 
-            let dishesHtml = ``;
+            const setAllDishesHtml = () => {
+                let dishesHtml = ``;
 
-            let sortedDishes = [];
-            for (let d of Object.values(allDishes)) {
-                if (d.out_of_stock) {
-                    sortedDishes.push(d);
+                let sortedDishes = [];
+                for (let d of Object.values(allDishes)) {
+                    if (d.out_of_stock) {
+                        sortedDishes.push(d);
+                    }
                 }
-            }
-            for (let d of Object.values(allDishes)) {
-                if (!d.out_of_stock) {
-                    sortedDishes.push(d);
+                for (let d of Object.values(allDishes)) {
+                    if (!d.out_of_stock) {
+                        sortedDishes.push(d);
+                    }
                 }
-            }
 
-            for (let dish of SearchFilter.search(Object.values(sortedDishes), d => d.name, search)) {
-                dishesHtml = getDishHtml(dish) + dishesHtml;
-            }
+                for (let dish of SearchFilter.search(Object.values(sortedDishes), d => d.name, search)) {
+                    dishesHtml = getDishHtml(dish) + dishesHtml;
+                }
 
-            byId(allDishesId).innerHTML = dishesHtml;
+                byId(allDishesId).innerHTML = dishesHtml;
+            };
+
+            setAllDishesHtml();
 
             const saveDish = async (dishId) => {
                 let nameField = document.querySelector(`[${dishNameIdKey}="${dishId}"]`);
