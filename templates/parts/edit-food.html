@@ -336,14 +336,20 @@
             let foodKcalIdKey = `data-ft-food-kcal-id`;
 
             let foodsHtml = ``;
-            for (let food of SearchFilter.search(Object.values(allFoods), f => f.name, search)) {
+            let foodsCount = 0;
+            for (let food of SearchFilter.search(Object.values(allFoods), f => f.name, search, true)) {
                 if (food.is_deleted && !addingFoodMode) {
                     continue;
                 }
 
+                foodsCount++;
+                if (foodsCount > MAX_ENTRIES_IN_LIST) {
+                    break;
+                }
+
                 let editable = deletingFoodMode || food.is_deleted ? 'disabled' : '';
 
-                foodsHtml = `
+                foodsHtml += `
                 <hr>
                 <div class="${food.is_deleted ? 'deleted-highlight' : ''}">
                     <div class="input-group mb-2-5">
@@ -369,7 +375,7 @@
                     </div>
                 </div>
 
-                ` + foodsHtml;
+                `;
             }
 
             byId(allFoodsId).innerHTML = foodsHtml;
@@ -609,6 +615,9 @@
             const setAllDishesHtml = () => {
                 let dishesHtml = ``;
 
+                /**
+                 * @type {Dish[]}
+                 */
                 let sortedDishes = [];
                 for (let d of Object.values(allDishes)) {
                     if (d.out_of_stock) {
@@ -621,8 +630,14 @@
                     }
                 }
 
-                for (let dish of SearchFilter.search(Object.values(sortedDishes), d => d.name, search)) {
-                    dishesHtml = getDishHtml(dish) + dishesHtml;
+                let dishesCount = 0;
+                for (let dish of SearchFilter.search(Object.values(sortedDishes), d => d.name, search, true)) {
+                    dishesCount++;
+                    if (dishesCount > MAX_ENTRIES_IN_LIST && dish.out_of_stock) {
+                        break;
+                    }
+
+                    dishesHtml += getDishHtml(dish);
                 }
 
                 byId(allDishesId).innerHTML = dishesHtml;
@@ -788,16 +803,42 @@
                 `;
             }
 
+            /**
+             * @param {DishIngredient} di
+             */
+            const autoSelectDishIngredient = (di) => {
+                let val = '';
+                if (di.dish_id_ingredient) {
+                    val = `DISH_${di.dish_id_ingredient}`;
+                } else if (di.food_id_ingredient) {
+                    val = `FOOD_${di.food_id_ingredient}`;
+                }
+                $(`#${editDishFoodListSelectId}`).val(val).trigger('change');
+            };
+
 
             let totalWeight = 0;
 
             let dishIngredients = ``;
+            let position = 0;
             for (let dishIngredient of Object.values(allDishIngredients)) {
                 if (dishIngredient.dish_id !== dishId) {
                     continue;
                 }
+                position++;
 
-                totalWeight += dishIngredient.amount;
+                let di = dishIngredient;
+                totalWeight += di.amount;
+
+                let ingrId = di.dish_id_ingredient
+                    ? `INGREDIENT_DISH_${di.dish_id_ingredient}-${position}`
+                    : `INGREDIENT_FOOD_${di.food_id_ingredient}-${position}`;
+                setTimeout(() => {
+                    let obj = byId(ingrId);
+                    onClick(obj, () => {
+                        autoSelectDishIngredient(di);
+                    });
+                });
 
                 dishIngredients = `
                 ${
@@ -805,7 +846,7 @@
                     ${renderDishIngr(dishIngredient)}
                     <button class="btn btn-sm btn-danger"
                         onclick="deleteDishIngredientFromDish(${dishIngredient.id})">Удалить</button>`,
-                    {fs: 6, ps: 2})
+                    {fs: 6, ps: 2, id: ingrId})
                 }
                 ` + dishIngredients;
             }

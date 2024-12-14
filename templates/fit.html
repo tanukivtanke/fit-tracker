@@ -62,15 +62,115 @@
 
 
 <script>
+
+class Food {
+    constructor(json) {
+        this.orig = json;
+
+        this.id = json.id;
+        this.name = json.name;
+        this.proteins = json.proteins;
+        this.fats = json.fats;
+        this.carbs = json.carbs;
+        this.kcal = json.kcal;
+        this.is_deleted = json.is_deleted;
+        this.portion_size = json.portion_size;
+        this.last_used = json.last_used;
+    }
+}
+
+class Dish {
+    constructor(json) {
+        this.orig = json;
+
+        this.id = json.id;
+        this.name = json.name;
+        this.out_of_stock = json.out_of_stock;
+        this.recipe = json.recipe;
+        this.last_used = json.last_used;
+    }
+}
+
+class DishIngredient {
+    constructor(json) {
+        this.orig = json;
+
+        this.id = json.id;
+        this.dish_id = json.dish_id;
+        this.amount = json.amount;
+        this.dish_id_ingredient = json.dish_id_ingredient;
+        this.food_id_ingredient = json.food_id_ingredient;
+    }
+}
+
+class MealOrder {
+    constructor(json) {
+        this.orig = json;
+
+        this.id = json.id;
+        this.name = json.name;
+        this.ordering = json.ordering;
+    }
+}
+
+class MealGroup {
+    constructor(json) {
+        this.orig = json;
+
+        this.id = json.id;
+        this.meal_name = json.meal_name;
+        this.user_id = json.user_id;
+        this.day = json.day;
+        this.meal_order_id = json.meal_order_id;
+    }
+}
+
+class Meal {
+    constructor(json) {
+        this.orig = json;
+
+        this.id = json.id;
+        this.dish_id = json.dish_id;
+        this.food_id = json.food_id;
+        this.meal_group_id = json.meal_group_id;
+        this.amount = json.amount;
+        this.calc_proteins = json.calc_proteins;
+        this.calc_fats = json.calc_fats;
+        this.calc_carbs = json.calc_carbs;
+        this.calc_kcal = json.calc_kcal;
+    }
+}
+
+const MAX_ENTRIES_IN_LIST = 30;
+
 let allStatic = null;
+/**
+ * @type {MealOrder[]}
+ */
 let allMealOrders = null;
+/**
+ * @type {Food[]}
+ */
 let allFoods = null;
+/**
+ * @type {Dish[]}
+ */
 let allDishes = null;
+/**
+ * @type {DishIngredient[]}
+ */
 let allDishIngredients = null;
-
+/**
+ * @type {Object.<number, MealGroup>}
+ */
 const mealGroupMap = {};
+/**
+ * @type {Object.<number, Meal>}
+ */
 const mealMap = {};
-
+/**
+ * @type {MealGroup[]}
+ */
 let currentMealsGroups;
 
 class StatType {

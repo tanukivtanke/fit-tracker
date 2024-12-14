@@ -13,7 +13,15 @@ for (let i = 0; i < engRow.length; i++) {
 
 class SearchFilter {
 
-    static search(list, stringRepresentationFn, query) {
+    /**
+     * @template T
+     * @param {T[]} list
+     * @param stringRepresentationFn
+     * @param query
+     * @param reverse
+     * @returns {T[]}
+     */
+    static search(list, stringRepresentationFn, query, reverse=false) {
         // Helper function to convert query between Russian and English
         function convertQuery(q) {
             return q.split('').map(char =>
@@ -37,31 +45,33 @@ class SearchFilter {
         const originalQueryParts = normalizeString(query).split(/\s+/);
         const convertedQueryParts = originalQueryParts.map(convertQuery).map(normalizeString);
 
+        let revMult = reverse ? -1 : 1;
+
         return list.sort((a, b) => {
             if (a.out_of_stock !== undefined) {
                 if (a.out_of_stock && b.out_of_stock) {
-                    return a.id - b.id;
+                    return (a.id - b.id) * revMult;
                 }
                 if (a.out_of_stock) {
-                    return -1;
+                    return -1 * revMult;
                 }
                 if (b.out_of_stock) {
-                    return 1;
+                    return 1 * revMult;
                 }
-                return a.id - b.id;
+                return (a.id - b.id) * revMult;
 
 
             } else {
                 if (a.is_deleted && b.is_deleted) {
-                    return a.id - b.id;
+                    return (a.id - b.id) * revMult;
                 }
                 if (a.is_deleted) {
-                    return -1;
+                    return -1 * revMult;
                 }
                 if (b.is_deleted) {
-                    return 1;
+                    return 1 * revMult;
                 }
-                return a.id - b.id;
+                return (a.id - b.id) * revMult;
             }
 
 
