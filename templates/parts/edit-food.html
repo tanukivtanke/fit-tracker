@@ -713,6 +713,7 @@
                 }
 
                 onClick(e, () => {
+                    byId(searchDishId).value = "";
                     hideElem(newDishTab);
                     showElem(editDishTab);
                     currentEditingDishId = dishId;
