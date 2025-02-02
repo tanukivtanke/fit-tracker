@@ -59,7 +59,17 @@
         setupUsers();
 
         onClick('user-profile', () => {
-            changeUserModal.show();
+            let otherUsers = [];
+             for (let user of allUsers) {
+                 if (user.id !== currentUserId) {
+                     otherUsers.push(user);
+                 }
+             }
+             if (otherUsers.length === 1) {
+                 changeUser(otherUsers[0].id);
+             } else {
+                 changeUserModal.show();
+             }
         });
 
         changeUserModal.onOpen(() => {
