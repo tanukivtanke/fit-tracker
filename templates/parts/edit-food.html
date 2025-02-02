@@ -235,12 +235,26 @@
             renderDishes();
 
 
-            const checkAddFoodButton = () => {
+            const calcCalories = (proteins, fats, carbs) => {
+                return Math.round(proteins * 4 + fats * 9 + carbs * 4);
+            };
+
+
+            const checkAddFoodButton = autoCalcKcal => {
                 let name = byId(addFoodNameId).value.trim();
                 let proteins = handleFloatField(addProteinsId, 0, 100, true);
                 let fats = handleFloatField(addFatsId, 0, 100, true);
                 let carbs = handleFloatField(addCarbsId, 0, 100, true);
-                let kcal = handleNumberField(addKcalId, 0, 999);
+
+                let kcal;
+                if (autoCalcKcal && proteins != null && fats != null && carbs != null) {
+                    let calculatedKcal = calcCalories(proteins, fats, carbs);
+                    byId(addKcalId).value = calculatedKcal + '';
+                    kcal = handleNumberField(addKcalId, calculatedKcal, calculatedKcal);
+                } else {
+                    kcal = handleNumberField(addKcalId, 0, 999);
+                }
+
                 handleNumberField(addFoodPortionSizeId, 0, 9999);
 
                 byId(addFoodButtonId).disabled =
@@ -256,8 +270,15 @@
                 addFoodPortionSizeId
             ];
 
+            let autoCalcKcalOnFields = [
+                addProteinsId,
+                addFatsId,
+                addCarbsId,
+            ];
+
             for (let field of fields) {
-                onInput(field, checkAddFoodButton);
+                let autoCalcKcal = autoCalcKcalOnFields.includes(field);
+                onInput(field, () => checkAddFoodButton(autoCalcKcal));
             }
 
             onClick(addFoodButtonId, async () => {
