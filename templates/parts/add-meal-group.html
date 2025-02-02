@@ -4,12 +4,15 @@
 <div id="wrapper-add-meal-group-modal"></div>
 
 <script>
+
+
+    let functionAddMealGroup;
     {
         const addMealGroupModal = new Modal('add-meal-group', 'Добавить приём пищи', false);
 
         const customNameInput = 'meal-group-name-input';
 
-        byId('add-meal-group').addEventListener('click', () => {
+        functionAddMealGroup = () => {
             addMealGroupModal.show();
 
             const unsortedMealOrders = Object.values(allMealOrders);
@@ -76,40 +79,41 @@
             changeName();
 
             byId('meal-group-select').addEventListener("change", changeName);
+        };
 
-            let clicked = false;
 
-            addMealGroupModal.okButton.addEventListener("click", async () => {
-                if (clicked) {
-                    return;
-                }
-                clicked = true;
+        let clicked = false;
 
-                let mealOrderId = byId('meal-group-select').value;
+        addMealGroupModal.onOkClick(async () => {
+            if (clicked) {
+                return;
+            }
+            clicked = true;
 
-                let actualMealOrderName = allMealOrders[mealOrderId].name;
+            let mealOrderId = byId('meal-group-select').value;
 
-                let customMealName = byId(customNameInput).value;
+            let actualMealOrderName = allMealOrders[mealOrderId].name;
 
-                if (customMealName === actualMealOrderName) {
-                    customMealName = null;
-                }
+            let customMealName = byId(customNameInput).value;
 
-                let result = await _post("/api/meal_groups/new", {
-                    meal_order_id: parseInt(byId('meal-group-select').value),
-                    meal_name: customMealName,
-                    user_id: currentUserId,
-                    day: currentDate.toFormat('yyyy-MM-dd'),
-                });
+            if (customMealName === actualMealOrderName) {
+                customMealName = null;
+            }
 
-                addMealGroupModal.hide();
+            let result = await _post("/api/meal_groups/new", {
+                meal_order_id: parseInt(byId('meal-group-select').value),
+                meal_name: customMealName,
+                user_id: currentUserId,
+                day: currentDate.toFormat('yyyy-MM-dd'),
+            });
 
-                if (result.id) {
-                    mealGroupMap[result.id] = result;
-                }
-                await startEditMealGroup(result);
-                fetchData();
-            })
-        });
+            addMealGroupModal.hide();
+
+            if (result.id) {
+                mealGroupMap[result.id] = result;
+            }
+            await startEditMealGroup(result);
+            fetchData();
+        })
     }
 </script>
