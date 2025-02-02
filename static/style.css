@@ -160,6 +160,10 @@ html {
     font-size: calc(min(12px, 5px + max(0px, (100vw - 200px) / 40)));
 }
 
+.hide-on-mobile {
+    display: none;
+}
+
 .w-15 {
     max-width: 22rem;
 }
@@ -199,6 +203,9 @@ html {
     }
     .w-15 {
         max-width: 22rem;
+    }
+    .hide-on-mobile {
+        display: inherit;
     }
 }
 

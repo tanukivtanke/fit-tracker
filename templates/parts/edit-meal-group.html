@@ -6,6 +6,7 @@
 <script>
 
     const editMealGroupModal = new Modal('edit-meal-group', 'Редактировать приём пищи', true, true, false);
+    editMealGroupModal.hideCrossOnMobile();
     editMealGroupModal.cancelButton.innerText = "Назад";
 
     editMealGroupModal.onClose(renderMealGroups);

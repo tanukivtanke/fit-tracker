@@ -4,6 +4,7 @@ class Modal {
     #oldDeleteText;
     #oldOkDisabled;
     #oldDeleteDisabled;
+    #closeCrossId;
 
     constructor(modalId, title='', okHidden=true, deleteHidden=true, cancelHidden=false, allowOutsideClick=false) {
         this.modalId = `${modalId}-modal`;
@@ -21,6 +22,8 @@ class Modal {
             }
         }
 
+        this.#closeCrossId = `${this.modalId}-closeCrossId`;
+
         if (!deleteHidden) {
             allowOutsideClick = true;
         }
@@ -34,7 +37,7 @@ class Modal {
                     <div class="modal-content">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="${this.modalId}-title">${title}</h1>
-                            <button tabindex="-1" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button id="${this.#closeCrossId}" tabindex="-1" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div id="${this.bodyId}" class="modal-body">
                         </div>
@@ -110,6 +113,10 @@ class Modal {
                 this.onDeleteListeners.forEach(s => s(event));
             }
         });
+    }
+
+    hideCrossOnMobile() {
+        byId(this.#closeCrossId).classList.add('hide-on-mobile');
     }
 
     isOpen() {
