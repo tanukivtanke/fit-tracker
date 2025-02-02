@@ -41,6 +41,13 @@ input.py-025 {
     padding-right: 1rem;
 }
 
+.low-line-height {
+  line-height: 0.9;
+}
+.low-line-height::first-line {
+  line-height: normal;
+}
+
 .odd-row {
     background-color: #eee;
 }

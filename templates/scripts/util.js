@@ -411,3 +411,38 @@ class HtmlPresets {
 }
 
 
+
+
+
+
+function adjustSpacing() {
+  document.querySelectorAll('.low-line-height').forEach(el => {
+    const style = window.getComputedStyle(el);
+    const lineHeight = parseFloat(style.lineHeight);
+    const fontSize = parseFloat(style.fontSize);
+    const elHeight = el.clientHeight;
+
+    // Calculate the number of full lines using floor.
+    const lines = Math.floor(elHeight / lineHeight);
+
+    // Reset any previously set padding.
+    el.style.paddingTop = '';
+    el.style.paddingBottom = '';
+
+    console.log('lines:', lines, 'elHeight:', elHeight, 'lineHeight:', lineHeight);
+
+    if (lines > 1) {
+      // If you’re aiming to mimic a “normal” line-height (e.g. 1.4)
+      // for the first and last lines when the inner lines use 0.9,
+      // then calculate the missing space.
+      const desiredLineHeight = 1.4;
+      const currentInnerLineHeight = 0.9;
+      const extraSpace = (desiredLineHeight - currentInnerLineHeight) * fontSize;
+
+      // Add half the extra space to the top and half to the bottom.
+      // el.style.paddingTop = (extraSpace / 2) + 'px';
+      el.style.paddingBottom = (extraSpace / 2) + 'px';
+    }
+  });
+}
+

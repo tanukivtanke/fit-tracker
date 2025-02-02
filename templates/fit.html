@@ -296,7 +296,7 @@ const renderMealGroups = () => {
 
             currentMealGroupHtml = `
             <div class="d-flex justify-content-between">
-                <div>${showing_name}</div>
+                <div class='low-line-height'>${showing_name}</div>
                 <div class="d-flex">
                     <div class="ms-3" style="margin-right: 0.4rem">
                         <span>${amount}</span><span class="fs-7 ms-05">гр</span>
@@ -403,6 +403,7 @@ const renderMealGroups = () => {
     }
 
     document.getElementById('eating').innerHTML = allMealsGroupsHtml;
+    adjustSpacing();
 };
 
 // Function to process the retrieved meals
