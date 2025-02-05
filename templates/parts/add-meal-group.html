@@ -82,13 +82,7 @@
         };
 
 
-        let clicked = false;
-
         addMealGroupModal.onOkClick(async () => {
-            if (clicked) {
-                return;
-            }
-            clicked = true;
 
             let mealOrderId = byId('meal-group-select').value;
 
