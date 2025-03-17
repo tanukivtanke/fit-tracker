@@ -19,7 +19,7 @@
         const addFoodPortionSizeId = `${rootId}-add-food-addFoodPortionSizeId`;
         const addFoodButtonId = `${rootId}-add-food-button`;
 
-        const addDishNameId = `${rootId}-add-dish-name`;
+        const addSearchDishNameId = `${rootId}-addSearchDishNameId`;
         const editDishNameId = `${rootId}-editDishNameId`;
         const editDishFoodListId = `${rootId}-editDishFoodListId`;
         const editDishRecipeInputId = `${rootId}-editDishRecipeInputId`;
@@ -33,7 +33,6 @@
         const searchFoodId = `${rootId}-search-food`;
         const allFoodsId = `${rootId}-all-foods`;
 
-        const searchDishId = `${rootId}-search-dish`;
         const allDishesId = `${rootId}-all-dishes`;
 
         const foodTabButtonId = `${rootId}-food-tab-btn`;
@@ -142,7 +141,10 @@
                     <h5>Новое блюдо</h5>
                     <div class="d-flex">
                         <div class="input-group">
-                          <input id="${addDishNameId}" type="text" class="form-control" placeholder="Название">
+                            <span class="input-group-text">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input id="${addSearchDishNameId}" type="text" class="form-control" placeholder="Название">
                         </div>
                         <button id="${addDishButtonId}" class="btn btn-primary ms-2 py-025" disabled>Добавить</button>
                     </div>
@@ -150,13 +152,6 @@
                     <hr>
 
                     <h5>Добавленные блюда</h5>
-
-                    <div class="input-group mb-3">
-                      <span class="input-group-text">
-                          <i class="fa-solid fa-magnifying-glass"></i>
-                      </span>
-                      <input id="${searchDishId}" type="text" class="form-control" placeholder="Искать по названию">
-                    </div>
 
                     <div id="${allDishesId}"></div>
 
@@ -230,7 +225,7 @@
 
 
             onInput(searchFoodId, renderFoods);
-            onInput(searchDishId, renderDishes);
+            onInput(addSearchDishNameId, renderDishes);
             renderFoods();
             renderDishes();
 
@@ -313,16 +308,16 @@
             });
 
             const checkAddDishButton = () => {
-                let name = byId(addDishNameId).value.trim();
+                let name = byId(addSearchDishNameId).value.trim();
                 byId(addDishButtonId).disabled = !(name.length);
             };
 
-            for (let field of [addDishNameId]) {
+            for (let field of [addSearchDishNameId]) {
                 onInput(field, checkAddDishButton);
             }
 
             onClick(addDishButtonId, async () => {
-                let name = byId(addDishNameId).value.trim();
+                let name = byId(addSearchDishNameId).value.trim();
 
                 byId(addDishButtonId).disabled = true;
 
@@ -334,7 +329,7 @@
                     allDishes[result.id] = result;
                 }
 
-                for (let field of [addDishNameId]) {
+                for (let field of [addSearchDishNameId]) {
                     byId(field).value = "";
                 }
 
@@ -534,7 +529,7 @@
 
         const renderDishes = () => {
 
-            let search = byId(searchDishId).value;
+            let search = byId(addSearchDishNameId).value;
 
             let dishButtonKey = `data-ft-dish-btn-id`;
             let dishNameIdKey = `data-ft-dish-name-id`;
@@ -713,7 +708,7 @@
                 }
 
                 onClick(e, () => {
-                    byId(searchDishId).value = "";
+                    byId(addSearchDishNameId).value = "";
                     hideElem(newDishTab);
                     showElem(editDishTab);
                     currentEditingDishId = dishId;
