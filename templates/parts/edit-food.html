@@ -21,6 +21,7 @@
 
         const addSearchDishNameId = `${rootId}-addSearchDishNameId`;
         const editDishNameId = `${rootId}-editDishNameId`;
+        const editDishForDishNameId = `${rootId}-editDishForDishNameId`;
         const editDishFoodListId = `${rootId}-editDishFoodListId`;
         const editDishRecipeInputId = `${rootId}-editDishRecipeInputId`;
         const editDishFoodListSelectId = `${rootId}-editDishFoodListSelectId`;
@@ -28,17 +29,24 @@
         const editDishAddNewBtnId = `${rootId}-editDishAddNewBtnId`;
         const editDishAmountInputId = `${rootId}-editDishAmountInputId`;
         const editDishGetBackId = `${rootId}-editDishGetBackId`;
-        const addDishButtonId = `${rootId}-add-dish-button`;
+        const editDishAddRecipeNameInputId = `${rootId}-editDishAddRecipeNameInputId`;
+        const editDishAddRecipeBtnId = `${rootId}-editDishAddRecipeBtnId`;
+        const editDishAllDishRecipesId = `${rootId}-editDishAllDishRecipesId`;
+        const addDishButtonId = `${rootId}-addDishButtonId`;
 
-        const searchFoodId = `${rootId}-search-food`;
-        const allFoodsId = `${rootId}-all-foods`;
+        const dishButtonKey = `data-ft-dish-btn-id`;
+        const dishNameIdKey = `data-ft-dish-name-id`;
+        const dishOutOfStockIdKey = `data-ft-dish-out-of-stock-id`;
 
-        const allDishesId = `${rootId}-all-dishes`;
+        const searchFoodId = `${rootId}-searchFoodId`;
+        const allFoodsId = `${rootId}-allFoodsId`;
 
-        const foodTabButtonId = `${rootId}-food-tab-btn`;
-        const dishTabButtonId = `${rootId}-dish-tab-btn`;
-        const foodTabId = `${rootId}-food-tab`;
-        const dishTabId = `${rootId}-dish-tab`;
+        const allDishesId = `${rootId}-allDishesId`;
+
+        const foodTabButtonId = `${rootId}-foodTabButtonId`;
+        const dishTabButtonId = `${rootId}-dishTabButtonId`;
+        const foodTabId = `${rootId}-foodTabId`;
+        const dishTabId = `${rootId}-dishTabId`;
 
         const foodSearchTabButtonId = `${rootId}-foodSearchTabButtonId`;
         const foodAddTabButtonId = `${rootId}-foodAddTabButtonId`;
@@ -50,6 +58,8 @@
 
         const newDishTab = `${rootId}-newDishTab`;
         const editDishTab = `${rootId}-editDishTab`;
+
+        const editDishPreviousDishHistory = [];
 
         editFoodModal.onClose(() => {
             startEditMealGroup(currEditingMealGroup);
@@ -95,7 +105,7 @@
                 </div>
 
                 <div id="${foodAddSectionId}" class="d-none add-highlight">
-                    <h5>Новая еда</h5>
+                    <div class="opacity-50" >Новая еда</div>
 
                     <div class="input-group mb-2-5">
                          <input id="${addFoodNameId}" type="text" class="form-control" placeholder="Название">
@@ -122,7 +132,7 @@
 
 
 
-                <h5>Добавленная еда</h5>
+                <div class="opacity-50" >Добавленная еда</div>
 
                 <div class="input-group mb-3">
                   <span class="input-group-text">
@@ -138,7 +148,7 @@
                 <hr>
 
                 <div id=${newDishTab}>
-                    <h5>Новое блюдо</h5>
+                    <div class="opacity-50" >Новое блюдо</div>
                     <div class="d-flex">
                         <div class="input-group">
                             <span class="input-group-text">
@@ -151,7 +161,7 @@
 
                     <hr>
 
-                    <h5>Добавленные блюда</h5>
+                    <div class="opacity-50" style="margin-bottom: -1rem;" >Добавленные блюда</div>
 
                     <div id="${allDishesId}"></div>
 
@@ -159,10 +169,12 @@
                 <div id=${editDishTab} class="d-none">
 
                     <div class="d-flex justify-content-between align-items-start">
-                        <h5>Редактировать блюдо</h5>
-                        <h6 id="${editDishGetBackId}" class="subtle-link" style="margin-top: -0.5rem;margin-right: 0.5rem;">Вернуться <i class="fa-solid fa-arrow-right"></i></h6>
+                        <div class="opacity-50" >Редактировать блюдо</div>
+                        <h6 id="${editDishGetBackId}" class="subtle-link" style="margin-top: -0.5rem;margin-right: 0.5rem;">
+                            Вернуться
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </h6>
                     </div>
-
 
                     <div id=${editDishFoodListId}></div>
 
@@ -185,10 +197,15 @@
             });
 
             onClick(editDishGetBackId, e => {
-                currentEditingDishId = null;
-                showElem(newDishTab);
-                hideElem(editDishTab);
-                renderDishes();
+                if (editDishPreviousDishHistory.length === 0) {
+                    currentEditingDishId = null;
+                    showElem(newDishTab);
+                    hideElem(editDishTab);
+                    renderDishes();
+                } else {
+                    currentEditingDishId = editDishPreviousDishHistory.pop();
+                    renderEditDish();
+                }
             });
 
             const _checkFoodTabVisibility = () => {
@@ -323,6 +340,8 @@
 
                 let result = await _post("/api/dish/new" ,{
                     name: name,
+                    for_dish: null,
+                    out_of_stock: false,
                 });
 
                 if (result.id) {
@@ -436,7 +455,9 @@
                 buttonField.disabled = !anyFieldChanged;
             };
 
-            for (let field of [foodNameIdKey, foodProteinsIdKey, foodFatsIdKey, foodCarbsIdKey, foodKcalIdKey, foodPortionSizeIdKey]) {
+            for (let field of [foodNameIdKey, foodProteinsIdKey,
+                                foodFatsIdKey, foodCarbsIdKey,
+                                foodKcalIdKey, foodPortionSizeIdKey]) {
                 query(`[${field}]`, e => {
                     let value = e.getAttribute(field);
                     let foodId = parseInt(value);
@@ -527,106 +548,179 @@
 
         };
 
+        class Nutrients {
+            constructor(proteins=0, fats=0, carbs=0, kcal=0) {
+                this.proteins = proteins;
+                this.fats = fats;
+                this.carbs = carbs;
+                this.kcal = kcal;
+            }
+
+            add(other) {
+                this.proteins += other.proteins;
+                this.fats += other.fats;
+                this.carbs += other.carbs;
+                this.kcal += other.kcal;
+                return this;
+            }
+
+            round() {
+                this.proteins = Math.round(this.proteins * 10) / 10;
+                this.fats = Math.round(this.fats * 10) / 10;
+                this.carbs = Math.round(this.carbs * 10) / 10;
+                this.kcal = Math.round(this.kcal);
+            }
+        }
+
+        const calcNutrientsFromFood = (foodId, amount) => {
+            let amount_per_100g = amount / 100;
+            let food = allFoods[foodId];
+            return new Nutrients(
+                food.proteins * amount_per_100g,
+                food.fats * amount_per_100g,
+                food.carbs * amount_per_100g,
+                food.kcal * amount_per_100g
+            );
+        };
+
+        const calcNutrientsFromDish = (dishId, amount=100) => {
+            let dish = allDishes[dishId];
+
+            let amount_per_100g = amount / 100;
+            let ingredients = Object.values(allDishIngredients).filter(e => e.dish_id === dish.id);
+            let nutri = new Nutrients()
+            if (ingredients.length === 0) {
+                return nutri;
+            }
+            let total_amount = 0;
+            for (let i of ingredients) {
+                if (i.food_id_ingredient) {
+                    nutri.add(calcNutrientsFromFood(i.food_id_ingredient, i.amount));
+                    total_amount += i.amount;
+                } else if (i.dish_id_ingredient) {
+                    nutri.add(calcNutrientsFromDish(i.dish_id_ingredient, i.amount));
+                    total_amount += i.amount;
+                }
+            }
+            let total_amount_per_100g = total_amount / 100;
+            return new Nutrients(
+                nutri.proteins * amount_per_100g / total_amount_per_100g,
+                nutri.fats * amount_per_100g / total_amount_per_100g,
+                nutri.carbs * amount_per_100g / total_amount_per_100g,
+                nutri.kcal * amount_per_100g / total_amount_per_100g,
+            );
+        };
+
+        const saveDish = async (dishId) => {
+            let nameField = document.querySelector(`[${dishNameIdKey}="${dishId}"]`);
+            let outOfStockField = document.querySelector(`[${dishOutOfStockIdKey}="${dishId}"]`);
+
+            let name = nameField.value.trim();
+            let outOfStock = !outOfStockField.checked;
+
+            if (!name.length) {
+                return;
+            }
+
+            let result = await _post("/api/dish/edit", {
+                id: dishId,
+                name: name,
+                out_of_stock: outOfStock,
+            });
+
+            if (result.id) {
+                allDishes[result.id] = result;
+            }
+        };
+
+        const getDishHtml = (dish) => {
+            let nutrients = calcNutrientsFromDish(dish.id);
+            nutrients.round();
+
+            return `
+            <hr>
+            <div class="">
+                <div class="d-flex align-items-start">
+                    <div class="input-group mb-2-5 me-2">
+                        <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name}">
+                    </div>
+                    ${HtmlPresets.switch('',  '', '', !dish.out_of_stock, true, 6, `${dishOutOfStockIdKey}=${dish.id}`)}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <div class="input-group">
+                      <span class="input-group-text py-025 proteins-bg">Б</span>
+                      <input type="text" class="form-control py-025 bg-white" value="${nutrients.proteins}" disabled>
+                      <span class="input-group-text py-025 fats-bg">Ж</span>
+                      <input type="text" class="form-control py-025 bg-white" value="${nutrients.fats}" disabled>
+                      <span class="input-group-text py-025 carbs-bg">У</span>
+                      <input type="text" class="form-control py-025 bg-white" value="${nutrients.carbs}" disabled>
+                      <span class="input-group-text py-025 kcal-bg">Кк</span>
+                      <input type="text" class="form-control py-025 bg-white" value="${nutrients.kcal}" disabled>
+                    </div>
+                    <button ${dishButtonKey}=${dish.id} class="btn btn-primary ms-2 py-025">Изменить</button>
+                </div>
+            </div>
+            `;
+        };
+
+        const setDishesCallbacks = () => {
+            for (let field of [dishNameIdKey, dishOutOfStockIdKey]) {
+                query(`[${field}]`, e => {
+                    let value = e.getAttribute(field);
+                    let dishId = parseInt(value);
+                    if (Number.isNaN(dishId)) {
+                        return;
+                    }
+
+                    let okField = field + "-OK";
+                    if (e.getAttribute(okField) !== null) {
+                        return;
+                    } else {
+                        e.setAttribute(okField, "OK");
+                    }
+
+                    if (field === dishNameIdKey) {
+                        onInput(e, () => saveDish(dishId));
+                    } else {
+                        onChange(e, () => saveDish(dishId));
+                    }
+                });
+            }
+
+            query(`[${dishButtonKey}]`, e => {
+
+                let value = e.getAttribute(dishButtonKey);
+                let dishId = parseInt(value);
+                if (Number.isNaN(dishId)) {
+                    return;
+                }
+
+                let okField = dishButtonKey + "-ok";
+                if (e.getAttribute(okField) !== null) {
+                    return;
+                } else {
+                    e.setAttribute(okField, "OK");
+                }
+
+                onClick(e, () => {
+                    byId(addSearchDishNameId).value = "";
+                    hideElem(newDishTab);
+                    showElem(editDishTab);
+
+                    let dish = allDishes[dishId];
+                    if (dish.for_dish !== null) {
+                        editDishPreviousDishHistory.push(currentEditingDishId);
+                    }
+                    currentEditingDishId = dishId;
+
+                    renderEditDish();
+                });
+            });
+        };
+
         const renderDishes = () => {
 
             let search = byId(addSearchDishNameId).value;
-
-            let dishButtonKey = `data-ft-dish-btn-id`;
-            let dishNameIdKey = `data-ft-dish-name-id`;
-            let dishOutOfStockIdKey = `data-ft-dish-out-of-stock-id`;
-
-            class Nutrients {
-                constructor(proteins=0, fats=0, carbs=0, kcal=0) {
-                    this.proteins = proteins;
-                    this.fats = fats;
-                    this.carbs = carbs;
-                    this.kcal = kcal;
-                }
-
-                add(other) {
-                    this.proteins += other.proteins;
-                    this.fats += other.fats;
-                    this.carbs += other.carbs;
-                    this.kcal += other.kcal;
-                    return this;
-                }
-
-                round() {
-                    this.proteins = Math.round(this.proteins * 10) / 10;
-                    this.fats = Math.round(this.fats * 10) / 10;
-                    this.carbs = Math.round(this.carbs * 10) / 10;
-                    this.kcal = Math.round(this.kcal);
-                }
-            }
-
-            const calcNutrientsFromFood = (foodId, amount) => {
-                let amount_per_100g = amount / 100;
-                let food = allFoods[foodId];
-                return new Nutrients(
-                    food.proteins * amount_per_100g,
-                    food.fats * amount_per_100g,
-                    food.carbs * amount_per_100g,
-                    food.kcal * amount_per_100g
-                );
-            };
-
-            const calcNutrientsFromDish = (dishId, amount=100) => {
-                let dish = allDishes[dishId];
-
-                let amount_per_100g = amount / 100;
-                let ingredients = Object.values(allDishIngredients).filter(e => e.dish_id === dish.id);
-                let nutri = new Nutrients()
-                if (ingredients.length === 0) {
-                    return nutri;
-                }
-                let total_amount = 0;
-                for (let i of ingredients) {
-                    if (i.food_id_ingredient) {
-                        nutri.add(calcNutrientsFromFood(i.food_id_ingredient, i.amount));
-                        total_amount += i.amount;
-                    } else if (i.dish_id_ingredient) {
-                        nutri.add(calcNutrientsFromDish(i.dish_id_ingredient, i.amount));
-                        total_amount += i.amount;
-                    }
-                }
-                let total_amount_per_100g = total_amount / 100;
-                return new Nutrients(
-                    nutri.proteins * amount_per_100g / total_amount_per_100g,
-                    nutri.fats * amount_per_100g / total_amount_per_100g,
-                    nutri.carbs * amount_per_100g / total_amount_per_100g,
-                    nutri.kcal * amount_per_100g / total_amount_per_100g,
-                );
-            };
-
-            const getDishHtml = (dish) => {
-                let nutrients = calcNutrientsFromDish(dish.id);
-                nutrients.round();
-
-                return `
-                <hr>
-                <div class="">
-                    <div class="d-flex align-items-start">
-                        <div class="input-group mb-2-5 me-2">
-                            <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name}">
-                        </div>
-                        ${HtmlPresets.switch('',  '', '', !dish.out_of_stock, true, 6, `${dishOutOfStockIdKey}=${dish.id}`)}
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <div class="input-group">
-                          <span class="input-group-text py-025 proteins-bg">Б</span>
-                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.proteins}" disabled>
-                          <span class="input-group-text py-025 fats-bg">Ж</span>
-                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.fats}" disabled>
-                          <span class="input-group-text py-025 carbs-bg">У</span>
-                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.carbs}" disabled>
-                          <span class="input-group-text py-025 kcal-bg">Кк</span>
-                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.kcal}" disabled>
-                        </div>
-                        <button ${dishButtonKey}=${dish.id} class="btn btn-primary ms-2 py-025">Изменить</button>
-                    </div>
-                </div>
-                `;
-            };
 
             const setAllDishesHtml = () => {
                 let dishesHtml = ``;
@@ -648,6 +742,10 @@
 
                 let dishesCount = 0;
                 for (let dish of SearchFilter.search(Object.values(sortedDishes), d => d.name, search, true)) {
+                    if (dish.for_dish !== null) {
+                        continue;
+                    }
+
                     dishesCount++;
                     if (dishesCount > MAX_ENTRIES_IN_LIST && dish.out_of_stock) {
                         break;
@@ -660,64 +758,7 @@
             };
 
             setAllDishesHtml();
-
-            const saveDish = async (dishId) => {
-                let nameField = document.querySelector(`[${dishNameIdKey}="${dishId}"]`);
-                let outOfStockField = document.querySelector(`[${dishOutOfStockIdKey}="${dishId}"]`);
-
-                let name = nameField.value.trim();
-                let outOfStock = !outOfStockField.checked;
-
-                if (!name.length) {
-                    return;
-                }
-
-                let result = await _post("/api/dish/edit", {
-                    id: dishId,
-                    name: name,
-                    out_of_stock: outOfStock,
-                });
-
-                if (result.id) {
-                    allDishes[result.id] = result;
-                }
-            };
-
-            for (let field of [dishNameIdKey, dishOutOfStockIdKey]) {
-                query(`[${field}]`, e => {
-                    let value = e.getAttribute(field);
-                    let dishId = parseInt(value);
-                    if (Number.isNaN(dishId)) {
-                        return;
-                    }
-                    if (field === dishNameIdKey) {
-                        onInput(e, () => saveDish(dishId));
-                    } else {
-                        onChange(e, () => saveDish(dishId));
-                    }
-                });
-            }
-
-            query(`[${dishButtonKey}]`, e => {
-                console.log(e)
-
-                let value = e.getAttribute(dishButtonKey);
-                let dishId = parseInt(value);
-                if (Number.isNaN(dishId)) {
-                    return;
-                }
-
-                onClick(e, () => {
-                    byId(addSearchDishNameId).value = "";
-                    hideElem(newDishTab);
-                    showElem(editDishTab);
-                    currentEditingDishId = dishId;
-                    console.log(currentEditingDishId)
-                    renderEditDish();
-                });
-
-            });
-
+            setDishesCallbacks();
         };
 
         let currentEditingDishId = null;
@@ -780,7 +821,7 @@
 
             // Collect all valid dishes
             for (let dish of Object.values(allDishes)) {
-                if (!dish.out_of_stock) {
+                if (!dish.out_of_stock || dish.for_dish === currDish.id) {
                     elems.push({
                         type: 'DISH',
                         id: dish.id,
@@ -792,6 +833,14 @@
 
             // Sort the elements based on your criteria
             elems.sort((a, b) => {
+                if (a.for_dish && !b.for_dish || !a.for_dish && b.for_dish) {
+                    if (a.for_dish) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }
+
                 if (a.last_used && b.last_used) {
                     // Both have last_used; sort by most recent date first
                     const dateDiff = new Date(b.last_used) - new Date(a.last_used);
@@ -868,6 +917,26 @@
                 ` + dishIngredients;
             }
 
+            let allRecipesHtml = '';
+            for (let dish of Object.values(allDishes)) {
+                if (dish.for_dish !== currDish.id) {
+                    continue;
+                }
+                allRecipesHtml = getDishHtml(dish) + allRecipesHtml;
+            }
+
+            if (allRecipesHtml) {
+                allRecipesHtml += "<br>";
+            }
+
+
+            let parentDishId = currDish.for_dish;
+            let parentDishName = '';
+            if (parentDishId !== null) {
+                let parentDish = allDishes[parentDishId];
+                parentDishName = parentDish.name;
+            }
+
             byId(editDishFoodListId).innerHTML = `
 
             <div class="d-flex align-items-start">
@@ -875,6 +944,11 @@
                    <input id="${editDishNameId}" type="text" class="form-control" placeholder="Название">
                 </div>
                 ${HtmlPresets.switch(editDishOutOfStockId, '', '', false, true, 6)}
+            </div>
+
+            <div id="${editDishForDishNameId}" class="${parentDishId ? "" : "d-none"} text-center "
+                 style="margin-top: -0.8rem;margin-bottom: -0.4rem">
+                    <span class="opacity-50">Рецепт для </span><span class="opacity-75">${parentDishName}</span>
             </div>
 
             <hr>
@@ -900,6 +974,18 @@
 
 
             <div>${dishIngredients}</div>
+
+            <hr>
+            <div class="opacity-50">Рецепты</div>
+
+            <div class="d-flex">
+                <div class="input-group">
+                    <input id="${editDishAddRecipeNameInputId}" type="text" class="form-control" placeholder="Новый рецепт">
+                </div>
+                <button id="${editDishAddRecipeBtnId}" class="btn btn-primary ms-2 py-025" disabled>Добавить</button>
+            </div>
+
+            <div id="${editDishAllDishRecipesId}">${allRecipesHtml}</div>
 
             <div class="mt-2">
                 ${HtmlPresets.textarea(editDishRecipeInputId, 'Рецепт')}
@@ -1008,6 +1094,28 @@
 
                 renderEditDish();
             });
+
+
+            onInput(editDishAddRecipeNameInputId, elem => {
+               byId(editDishAddRecipeBtnId).disabled=!elem.value.trim();
+            });
+
+            onClick(editDishAddRecipeBtnId, async () => {
+                let elem = byId(editDishAddRecipeNameInputId);
+                let result = await _post("/api/dish/new" ,{
+                    name: elem.value.trim(),
+                    for_dish: currDish.id,
+                    out_of_stock: true,
+                });
+
+                if (result.id) {
+                    allDishes[result.id] = result;
+                }
+
+                renderEditDish();
+            });
+
+            setDishesCallbacks();
 
         };
     }
