@@ -31,6 +31,7 @@ class Dish(AbstractObject):
     out_of_stock = db.Column(db.Boolean, nullable=False)
     recipe = db.Column(db.String, nullable=False)
     last_used = db.Column(db.Date)
+    for_dish = db.Column(db.Integer)
 
 
 class DishIngredient(AbstractObject):

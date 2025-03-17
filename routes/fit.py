@@ -255,13 +255,20 @@ def edit_recipe():
 def ingredient_edit():
     received_data = request.json
 
-    if received_data['dish_id'] == received_data['dish_id_ingredient']:
-        return 'Cannot add dish into the same dish', 400
+    dish_ingr_id = received_data['dish_id_ingredient']
+    dish_id = received_data['dish_id']
+    if received_data['dish_id_ingredient']:
+        if dish_id == dish_ingr_id:
+            return 'Cannot add dish into the same dish', 400
+
+        destination = Dish.find(dish_id=dish_ingr_id).for_dish
+        if destination is not None and destination != dish_id:
+            return 'Cannot add the dish into the dish it was not made for', 400
 
     new_ingredient = DishIngredient(
         food_id_ingredient=received_data['food_id_ingredient'],
-        dish_id_ingredient=received_data['dish_id_ingredient'],
-        dish_id=received_data['dish_id'],
+        dish_id_ingredient=dish_ingr_id,
+        dish_id=dish_id,
         amount=received_data['amount'],
     )
     new_ingredient.save()
@@ -297,7 +304,8 @@ def add_dish():
         name=received_data['name'],
         out_of_stock=False,
         recipe='',
-        last_used=date.today()
+        last_used=date.today(),
+        for_dish=received_data["for_dish"]
     )
     new_dish.save()
     return new_dish.json()

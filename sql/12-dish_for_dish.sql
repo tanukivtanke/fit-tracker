@@ -1,0 +1,1 @@
+alter table fit_dish add column for_dish integer
