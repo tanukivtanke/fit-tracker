@@ -298,7 +298,7 @@ def add_dish():
 
     new_dish = Dish(
         name=received_data['name'],
-        out_of_stock=False,
+        out_of_stock=received_data["out_of_stock"],
         recipe='',
         last_used=date.today(),
         for_dish=received_data["for_dish"]
