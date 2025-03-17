@@ -27,7 +27,7 @@ class Food(AbstractObject):
 class Dish(AbstractObject):
     __tablename__ = 'fit_dish'
 
-    name = db.Column(db.String, unique=True, nullable=False)
+    name = db.Column(db.String, nullable=False)
     out_of_stock = db.Column(db.Boolean, nullable=False)
     recipe = db.Column(db.String, nullable=False)
     last_used = db.Column(db.Date)

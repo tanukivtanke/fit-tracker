@@ -257,13 +257,9 @@ def ingredient_edit():
 
     dish_ingr_id = received_data['dish_id_ingredient']
     dish_id = received_data['dish_id']
-    if received_data['dish_id_ingredient']:
+    if dish_ingr_id:
         if dish_id == dish_ingr_id:
             return 'Cannot add dish into the same dish', 400
-
-        destination = Dish.find(dish_id=dish_ingr_id).for_dish
-        if destination is not None and destination != dish_id:
-            return 'Cannot add the dish into the dish it was not made for', 400
 
     new_ingredient = DishIngredient(
         food_id_ingredient=received_data['food_id_ingredient'],
