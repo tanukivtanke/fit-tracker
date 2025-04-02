@@ -850,9 +850,21 @@
                 }
             }
 
+            let dishParents = [currDish.id];
+            {
+                let dish = currDish;
+                while (dish.for_dish) {
+                    dishParents.push(dish.for_dish);
+                    dish = allDishes[dish.for_dish];
+                }
+            }
+
             // Collect all valid dishes
             for (let dish of Object.values(allDishes)) {
-                if (!dish.out_of_stock || dish.for_dish === currDish.id) {
+                if (dishParents.includes(dish.id)) {
+                    continue;
+                }
+                if (!dish.out_of_stock || dishParents.includes(dish.for_dish)) {
                     elems.push({
                         type: 'DISH',
                         id: dish.id,
