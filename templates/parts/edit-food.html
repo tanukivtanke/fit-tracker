@@ -611,6 +611,18 @@
             );
         };
 
+        const calcDishTotalWeight = (dishId) => {
+            let dish = allDishes[dishId];
+
+            let totalWeight = 0;
+            let ingredients = Object.values(allDishIngredients).filter(e => e.dish_id === dish.id);
+            for (let i of ingredients) {
+                totalWeight += i.amount;
+            }
+
+            return totalWeight;
+        };
+
         const saveDish = async (dishId) => {
             let nameField = document.querySelector(`[${dishNameIdKey}="${dishId}"]`);
             let outOfStockField = document.querySelector(`[${dishOutOfStockIdKey}="${dishId}"]`);
@@ -633,7 +645,7 @@
             }
         };
 
-        const getDishHtml = (dish) => {
+        const getDishHtml = (dish, nameEditable=true) => {
             let nutrients = calcNutrientsFromDish(dish.id);
             nutrients.round();
 
@@ -642,7 +654,14 @@
             <div class="">
                 <div class="d-flex align-items-start">
                     <div class="input-group mb-2-5 me-2">
-                        <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name}">
+                        ${
+                            nameEditable ? `
+                            <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name}">
+                            ` : `
+                            <div ${dishNameIdKey}=${dish.id} class="form-control div-hover">${dish.name}</div>
+                            `
+                        }
+
                     </div>
                     ${HtmlPresets.switch('',  '', '', !dish.out_of_stock, true, 6, `${dishOutOfStockIdKey}=${dish.id}`)}
                 </div>
@@ -663,7 +682,7 @@
             `;
         };
 
-        const setDishesCallbacks = () => {
+        const setDishesCallbacks = (nameCallback=null) => {
             for (let field of [dishNameIdKey, dishOutOfStockIdKey]) {
                 query(`[${field}]`, e => {
                     let value = e.getAttribute(field);
@@ -680,8 +699,13 @@
                     }
 
                     if (field === dishNameIdKey) {
-                        onInput(e, () => saveDish(dishId));
-                    } else {
+                        if (nameCallback == null) {
+                            onInput(e, () => saveDish(dishId));
+                        } else {
+                            onClick(e, () => nameCallback(dishId));
+                        }
+
+                    } else if (field === dishOutOfStockIdKey) {
                         onChange(e, () => saveDish(dishId));
                     }
                 });
@@ -885,6 +909,14 @@
                 $(`#${editDishFoodListSelectId}`).val(val).trigger('change');
             };
 
+            /**
+             * @param {Dish} dish
+             */
+            const autoSelectDish = (dish) => {
+                 let val = `DISH_${dish.id}`;
+                 $(`#${editDishFoodListSelectId}`).val(val).trigger('change');
+            };
+
 
             let totalWeight = 0;
 
@@ -925,7 +957,7 @@
                 if (dish.for_dish !== currDish.id) {
                     continue;
                 }
-                allRecipesHtml = getDishHtml(dish) + allRecipesHtml;
+                allRecipesHtml = getDishHtml(dish, false) + allRecipesHtml;
             }
 
             if (allRecipesHtml) {
@@ -1118,7 +1150,14 @@
                 renderEditDish();
             });
 
-            setDishesCallbacks();
+            setDishesCallbacks((dishId) => {
+                let totalWeight = calcDishTotalWeight(dishId);
+                if (totalWeight > 0) {
+                    let dish = allDishes[dishId];
+                    autoSelectDish(dish);
+                    byId(editDishAmountInputId).value = totalWeight;
+                }
+            });
 
         };
     }
