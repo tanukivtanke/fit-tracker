@@ -20,6 +20,9 @@
         const addFoodButtonId = `${rootId}-add-food-button`;
 
         const addSearchDishNameId = `${rootId}-addSearchDishNameId`;
+        const dishSearchIconDiv = `${rootId}-dishSearchIconDiv`;
+        const dishSearchLimitedEntries = `${rootId}-dishSearchLimitedEntries`;
+        const dishSearchAllEntries = `${rootId}-dishSearchAllEntries`;
         const editDishNameId = `${rootId}-editDishNameId`;
         const editDishForDishNameId = `${rootId}-editDishForDishNameId`;
         const editDishFoodListId = `${rootId}-editDishFoodListId`;
@@ -49,6 +52,9 @@
         const dishTabId = `${rootId}-dishTabId`;
 
         const foodSearchTabButtonId = `${rootId}-foodSearchTabButtonId`;
+        const foodSearchIconDiv = `${rootId}-foodSearchIconDiv`;
+        const foodSearchLimitedEntries = `${rootId}-foodSearchLimitedEntries`;
+        const foodSearchAllEntries = `${rootId}-foodSearchAllEntries`;
         const foodAddTabButtonId = `${rootId}-foodAddTabButtonId`;
         const foodDeleteTabButtonId = `${rootId}-foodDeleteTabButtonId`;
         const foodSearchTabRadioId = `${rootId}-foodSearchTabRadioId`;
@@ -66,11 +72,15 @@
             searchFoodMode = true;
             addingFoodMode = false;
             deletingFoodMode = false;
+            searchAllFoodMode = false;
+            searchAllDishesMode = false;
         });
 
         let searchFoodMode = true;
         let addingFoodMode = false;
         let deletingFoodMode = false;
+        let searchAllFoodMode = false;
+        let searchAllDishesMode = false;
 
         editFoodModal.onOpen(() => {
 
@@ -135,8 +145,9 @@
                 <div class="opacity-50" >Добавленная еда</div>
 
                 <div class="input-group mb-3">
-                  <span class="input-group-text">
-                      <i class="fa-solid fa-magnifying-glass"></i>
+                  <span id=${foodSearchIconDiv} class="input-group-text">
+                      <i id=${foodSearchLimitedEntries} class="fa-solid fa-magnifying-glass"></i>
+                      <i id=${foodSearchAllEntries} class="fa-solid fa-earth-americas text-white"></i>
                   </span>
                   <input id="${searchFoodId}" type="text" class="form-control" placeholder="Искать по названию">
                 </div>
@@ -151,8 +162,9 @@
                     <div class="opacity-50" >Новое блюдо</div>
                     <div class="d-flex">
                         <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fa-solid fa-magnifying-glass"></i>
+                            <span id=${dishSearchIconDiv} class="input-group-text">
+                               <i id=${dishSearchLimitedEntries} class="fa-solid fa-magnifying-glass"></i>
+                               <i id=${dishSearchAllEntries} class="fa-solid fa-earth-americas text-white"></i>
                             </span>
                             <input id="${addSearchDishNameId}" type="text" class="form-control" placeholder="Название">
                         </div>
@@ -238,6 +250,16 @@
                 deletingFoodMode = true;
                 _checkFoodTabVisibility();
                 renderFoods();
+            });
+
+            onClick(foodSearchIconDiv, () => {
+                searchAllFoodMode = !searchAllFoodMode;
+                renderFoods();
+            });
+
+            onClick(dishSearchIconDiv, () => {
+                searchAllDishesMode = !searchAllDishesMode;
+                renderDishes();
             });
 
 
@@ -356,7 +378,31 @@
             });
         });
 
+        const renderFoodSearchIcon = () => {
+            _renderSearchIcon(searchAllFoodMode, foodSearchIconDiv, foodSearchAllEntries, foodSearchLimitedEntries);
+        };
+
+        const renderDishSearchIcon = () => {
+            _renderSearchIcon(searchAllDishesMode, dishSearchIconDiv, dishSearchAllEntries, dishSearchLimitedEntries);
+        };
+
+        const _renderSearchIcon = (mode, divId, allId, limitedId) => {
+            let iconDiv = byId(divId);
+            let allIcon = byId(allId);
+            let limitedIcon = byId(limitedId);
+            if (mode) {
+                iconDiv.classList.add('bg-primary');
+                showElem(allIcon);
+                hideElem(limitedIcon);
+            } else {
+                iconDiv.classList.remove('bg-primary');
+                showElem(limitedIcon);
+                hideElem(allIcon);
+            }
+        };
+
         const renderFoods = () => {
+            renderFoodSearchIcon();
 
             let search = byId(searchFoodId).value.toLowerCase().trim();
 
@@ -378,7 +424,7 @@
                 }
 
                 foodsCount++;
-                if (foodsCount > MAX_ENTRIES_IN_LIST) {
+                if (foodsCount > MAX_ENTRIES_IN_LIST && !searchAllFoodMode) {
                     break;
                 }
 
@@ -750,6 +796,7 @@
         };
 
         const renderDishes = () => {
+            renderDishSearchIcon();
 
             let search = byId(addSearchDishNameId).value;
 
@@ -778,7 +825,7 @@
                     }
 
                     dishesCount++;
-                    if (dishesCount > MAX_ENTRIES_IN_LIST && dish.out_of_stock) {
+                    if (dishesCount > MAX_ENTRIES_IN_LIST && dish.out_of_stock && !searchAllDishesMode) {
                         break;
                     }
 
