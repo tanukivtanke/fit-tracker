@@ -175,6 +175,32 @@ const mealMap = {};
  */
 let currentMealsGroups;
 
+/**
+ * Returns the full name of a dish including its ancestry
+ * @param {number} dishId - The ID of the dish
+ * @returns {string} Full dish name with ancestry (Root parent | parent | dish name)
+ */
+const getDishFullName = (dishId) => {
+    if (!dishId || !allDishes[dishId]) {
+        return "";
+    }
+    
+    const names = [];
+    let currentDish = allDishes[dishId];
+    names.push(currentDish.name);
+    
+    // Traverse up the dish ancestry
+    while (currentDish.for_dish) {
+        const parentDishId = currentDish.for_dish;
+        currentDish = allDishes[parentDishId];
+        if (!currentDish) break;
+        names.unshift(currentDish.name); // Add parent to the beginning
+    }
+    
+    return names.join(' - ');
+};
+
+
 class StatType {
     static PROTEINS = 'PROTEINS';
     static FATS = 'FATS';
@@ -284,7 +310,7 @@ const renderMealGroups = () => {
 
             let showing_name = null;
             if (m.dish_id !== null) {
-                showing_name = allDishes[m.dish_id].name;
+                showing_name = getDishFullName(m.dish_id);
             } else if (m.food_id !== null) {
                 showing_name = allFoods[m.food_id].name;
             }

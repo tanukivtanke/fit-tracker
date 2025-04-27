@@ -709,7 +709,7 @@
                             nameEditable ? `
                             <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name}">
                             ` : `
-                            <div ${dishNameIdKey}=${dish.id} class="form-control div-hover">${dish.name}</div>
+                            <div ${dishNameIdKey}=${dish.id} class="form-control div-hover">${getDishFullName(dish.id)}</div>
                             `
                         }
 
@@ -873,7 +873,7 @@
                 if (di.food_id_ingredient) {
                     name = allFoods[di.food_id_ingredient].name;
                 } else {
-                    name = allDishes[di.dish_id_ingredient].name;
+                    name = getDishFullName(di.dish_id_ingredient);
                 }
                 return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
                         <span>${name}</span>
@@ -915,7 +915,7 @@
                     elems.push({
                         type: 'DISH',
                         id: dish.id,
-                        name: dish.name,
+                        name: getDishFullName(dish.id),
                         last_used: dish.last_used || null,
                         for_dish: dish.for_dish || null
                     });

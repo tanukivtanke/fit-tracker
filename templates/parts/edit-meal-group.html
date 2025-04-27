@@ -117,7 +117,7 @@
                 elems.push({
                     type: 'DISH',
                     id: dish.id,
-                    name: dish.name,
+                    name: getDishFullName(dish.id),
                     last_used: dish.last_used || null
                 });
             }
@@ -166,7 +166,7 @@
         const renderMeal = (m) => {
             let name = '';
             if (m.dish_id) {
-                name = allDishes[m.dish_id].name;
+                name = getDishFullName(m.dish_id);
             } else if (m.food_id) {
                 name = allFoods[m.food_id].name;
             }
