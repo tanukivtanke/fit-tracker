@@ -66,7 +66,7 @@ def get_meals_for_day():
     user_id = get_argument('user_id')
     meal_date = get_argument('date')
     meals_by_date = MealGroup.all(user_id=user_id, day=meal_date)
-    meals_by_date = sorted(meals_by_date, key=lambda x:  MealOrder.find(id=x.meal_order_id).ordering)
+    meals_by_date = sorted(meals_by_date, key=lambda x: MealOrder.find(id=x.meal_order_id).ordering)
     return list_to_json(meals_by_date)
 
 
@@ -74,7 +74,7 @@ def get_meals_for_day():
 def get_meals_for_meal_group():
     meal_group_id = get_argument('id')
     meals_per_group = Meal.all(meal_group_id=meal_group_id)
-    meals_per_group = sorted(meals_per_group, key=lambda x:  x.id)
+    meals_per_group = sorted(meals_per_group, key=lambda x: x.id)
     return list_to_json(meals_per_group)
 
 
@@ -255,20 +255,13 @@ def edit_recipe():
 def ingredient_edit():
     received_data = request.json
 
-    dish_ingr_id = received_data['dish_id_ingredient']
-    dish_id = received_data['dish_id']
-    if dish_ingr_id:
-        if dish_id == dish_ingr_id:
-            return 'Cannot add dish into the same dish', 400
+    current_ingredient = received_data
+    new_ingredient = dish_change(current_ingredient['dish_id_ingredient'],
+                                 current_ingredient['dish_id'],
+                                 current_ingredient['food_id_ingredient'],
+                                 current_ingredient['amount'])
 
-    new_ingredient = DishIngredient(
-        food_id_ingredient=received_data['food_id_ingredient'],
-        dish_id_ingredient=dish_ingr_id,
-        dish_id=dish_id,
-        amount=received_data['amount'],
-    )
-    new_ingredient.save()
-    return new_ingredient.json()
+    return jsonify(new_ingredient)
 
 
 @app.route('/api/dish_ingredient/new_many', methods=['POST'])
@@ -278,16 +271,18 @@ def ingredients_edit():
     new_ingredients = []
     for i in range(len(received_data)):
         current_ingredient = received_data[i]
-        new_ingredients.append(dish_change(current_ingredient['dish_id_ingredient'],
-                                           current_ingredient['dish_id'],
-                                           current_ingredient['food_id_ingredient'],
-                                           current_ingredient['amount']))
+        value = dish_change(current_ingredient['dish_id_ingredient'],
+                            current_ingredient['dish_id'],
+                            current_ingredient['food_id_ingredient'],
+                            current_ingredient['amount'])
+        if type(value) == tuple:
+            return value
+        new_ingredients.append(value)
 
     return jsonify(new_ingredients)
 
 
 def dish_change(dish_id_ingr: int, dish_id: int, food_id_ingr: int, amount: float):
-
     if dish_id_ingr:
         if dish_id == dish_id_ingr:
             return 'Cannot add dish into the same dish', 400
@@ -299,7 +294,7 @@ def dish_change(dish_id_ingr: int, dish_id: int, food_id_ingr: int, amount: floa
         amount=amount,
     )
     new_ingredient.save()
-    return new_ingredient
+    return new_ingredient.dict()
 
 
 @app.route('/api/dish_ingredient/delete', methods=['DELETE'])
@@ -340,7 +335,6 @@ def add_dish():
 
 @app.route('/api/get_average')
 def calculate_weekly_average():
-
     user_id = get_argument('user_id')
     view_date = get_argument('date')
     days = int(get_argument('days'))
