@@ -986,10 +986,9 @@
 
             let dishIngredients = ``;
             let position = 0;
-            for (let dishIngredient of Object.values(allDishIngredients)) {
-                if (dishIngredient.dish_id !== dishId) {
-                    continue;
-                }
+            let currDishIngredients = Object.values(allDishIngredients).filter(e => e.dish_id === dishId);
+
+            for (let dishIngredient of currDishIngredients) {
                 position++;
 
                 let di = dishIngredient;
@@ -1036,6 +1035,13 @@
                 parentDishName = parentDish.name;
             }
 
+            let totalWeightId = generateUUID();
+            let totalWeightChangeId = generateUUID();
+            let totalWeightChangeSelectTypeId = generateUUID();
+            let totalWeightChangeSelectAmountId = generateUUID();
+            let totalWeightChangeInputId = generateUUID();
+            let totalWeightChangeOkId = generateUUID();
+
             byId(editDishFoodListId).innerHTML = `
 
             <div class="d-flex align-items-start">
@@ -1068,9 +1074,34 @@
 
             ${dishIngredients ? '<hr class="mt-3 mb-1">' : ''}
 
-            <div class="mt-2 mb-2 fs-5 d-flex justify-content-end align-items-baseline">
-                <span>Вес блюда: </span><span class='fs-5 mx-1'>${totalWeight}</span><span>гр.</span></div>
+            <div id=${totalWeightId} class="mt-2 mb-2 fs-5 d-flex justify-content-end align-items-baseline">
+                <span>Вес блюда: </span>
+                <span class='fs-5 mx-1'>${totalWeight}</span>
+                <span>гр.</span>
+            </div>
 
+            <div id=${totalWeightChangeId} class="mt-2 mb-2 fs-5 d-flex flex-column align-items-center d-none">
+                <div class="d-flex gap-2 justify-content-end align-items-baseline">
+                    <span>Убрать</span>
+                    ${HtmlPresets.select(totalWeightChangeSelectTypeId, true, `
+                        <option value="WATER" selected>Воду</option>
+                        <option value="SELF">Себя</option>
+                    `)}
+                    ${HtmlPresets.select(totalWeightChangeSelectAmountId, true, `
+                        <option value="FULL" selected>Полный вес</option>
+                        <option value="LEFTOVER">Излишки</option>
+                    `)}
+                    <input id="${totalWeightChangeInputId}" type="text"
+                        class="form-control py-0" placeholder="0"
+                        style="min-width: 4rem;max-width: 4rem;">
+                    <span>гр.</span>
+                </div>
+                <div class="w-100">
+                    <button id=${totalWeightChangeOkId} class="btn btn-sm btn-secondary w-100">Подтвердить</button>
+                </div>
+
+                <hr class="my-1">
+            </div>
 
             <div>${dishIngredients}</div>
 
@@ -1180,7 +1211,7 @@
                     return;
                 }
 
-                let result = await _post("/api/dish_ingredient/new" ,{
+                let result = await _post("/api/dish_ingredient/new", {
                     food_id_ingredient: foodIdIngredient,
                     dish_id_ingredient: dishIdIngredient,
                     dish_id: dishId,
@@ -1221,6 +1252,81 @@
                     autoSelectDish(dish);
                     byId(editDishAmountInputId).value = totalWeight;
                 }
+            });
+
+            onClick(totalWeightId, () => {
+                showElem(totalWeightChangeId);
+                hideElem(totalWeightId);
+                byId(totalWeightChangeInputId).focus();
+            });
+
+            onInput(totalWeightChangeInputId, () => {
+                handleNumberField(totalWeightChangeInputId, 1, 9999, true, null, false);
+            });
+
+            onClick(totalWeightChangeOkId , async () => {
+                let chosenWeightType = byId(totalWeightChangeSelectTypeId).value;
+                let chosenWeightAmount = byId(totalWeightChangeSelectAmountId).value;
+                let chosenAmount = handleNumberField(totalWeightChangeInputId, 1, 9999, true, null, true);
+                if (chosenAmount == null) {
+                    if (chosenWeightAmount === "FULL") {
+                        chosenAmount = totalWeight;
+                    } else {
+                        chosenAmount = 0;
+                    }
+                }
+
+                let newIngredients = [];
+
+                let changed = chosenWeightAmount === "FULL"
+                        ? chosenAmount - totalWeight
+                        : -chosenAmount;
+
+                if (chosenWeightType === "WATER") {
+                    let water = Object.values(allFoods).filter(e => e.name === "Вода")[0];
+                    if (changed !== 0) {
+                        newIngredients.push({
+                            food_id_ingredient: water.id,
+                            dish_id_ingredient: null,
+                            dish_id: dishId,
+                            amount: changed,
+                        });
+                    }
+
+                } else if (chosenWeightType === "SELF") {
+                    for (let ingr of currDishIngredients) {
+                        let percentOfTotalAmount = ingr.amount / totalWeight;
+                        let changeAmount = Math.round(changed * percentOfTotalAmount);
+                        if (changeAmount !== 0) {
+                            newIngredients.push({
+                                food_id_ingredient: ingr.food_id_ingredient,
+                                dish_id_ingredient: ingr.dish_id_ingredient,
+                                dish_id: dishId,
+                                amount: changeAmount,
+                            });
+                        }
+                    }
+                }
+
+                if (newIngredients.length) {
+                    let results = await _post("/api/dish_ingredient/new_many", newIngredients);
+                    if (results) {
+                        for (let result of results) {
+                            if (result.id) {
+                                allDishIngredients[result.id] = result;
+                            }
+                        }
+                    }
+                }
+
+                hideElem(totalWeightChangeId);
+                showElem(totalWeightId);
+
+                byId(totalWeightChangeSelectTypeId).value = "WATER";
+                byId(totalWeightChangeSelectAmountId).value = "FULL";
+                byId(totalWeightChangeInputId).value = "";
+
+                renderEditDish();
             });
 
         };
