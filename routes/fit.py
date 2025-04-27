@@ -271,6 +271,37 @@ def ingredient_edit():
     return new_ingredient.json()
 
 
+@app.route('/api/dish_ingredient/new_many', methods=['POST'])
+def ingredients_edit():
+    received_data = request.json
+
+    new_ingredients = []
+    for i in range(len(received_data)):
+        current_ingredient = received_data[i]
+        new_ingredients.append(dish_change(current_ingredient['dish_id_ingredient'],
+                                           current_ingredient['dish_id'],
+                                           current_ingredient['food_id_ingredient'],
+                                           current_ingredient['amount']))
+
+    return jsonify(new_ingredients)
+
+
+def dish_change(dish_id_ingr: int, dish_id: int, food_id_ingr: int, amount: float):
+
+    if dish_id_ingr:
+        if dish_id == dish_id_ingr:
+            return 'Cannot add dish into the same dish', 400
+
+    new_ingredient = DishIngredient(
+        food_id_ingredient=food_id_ingr,
+        dish_id_ingredient=dish_id_ingr,
+        dish_id=dish_id,
+        amount=amount,
+    )
+    new_ingredient.save()
+    return new_ingredient
+
+
 @app.route('/api/dish_ingredient/delete', methods=['DELETE'])
 def del_dish_ingredient():
     received_data = request.json
