@@ -67,7 +67,7 @@
         if (result) {
             delete mealMap[mealId];
         }
-        await setEditMealGroupHtml();
+        await renderMeals();
     };
 
     const deleteMealGroup = async (mealGroupId) => {
@@ -84,16 +84,6 @@
     const setEditMealGroupHtml = async () => {
         if (!editMealGroupModal.isOpen()) {
             return;
-        }
-
-        const mealsForMealGroup = await _fetch(`/api/get_meals_for_meal_group?id=${currEditingMealGroup.id}`);
-        mealGroupMap[currEditingMealGroup.id].api_meals = mealsForMealGroup;
-        renderMealGroups();
-
-        if (mealsForMealGroup.length > 0) {
-            hideElem(editMealGroupModal.deleteButton.id);
-        } else {
-            showElem(editMealGroupModal.deleteButton.id);
         }
 
         let options = '';
@@ -153,51 +143,7 @@
             `;
         }
 
-        const autoSelectMealFood = (meal) => {
-            let val = '';
-            if (meal.dish_id) {
-                val = `DISH_${meal.dish_id}`;
-            } else if (meal.food_id) {
-                val = `FOOD_${meal.food_id}`;
-            }
-            $('#editMealGroupModal-select').val(val).trigger('change');
-        };
-
-        const renderMeal = (m) => {
-            let name = '';
-            if (m.dish_id) {
-                name = getDishFullName(m.dish_id);
-            } else if (m.food_id) {
-                name = allFoods[m.food_id].name;
-            }
-            return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
-                    <span>${name}</span>
-                    <span>${m.amount}&nbsp;гр.</span>
-                    </div>`
-        };
-
-        let meals = ``;
-        for (let meal of mealsForMealGroup) {
-
-            let mealId = meal.dish_id ? `MEAL_DISH_${meal.dish_id}` : `MEAL_FOOD_${meal.food_id}`;
-            setTimeout(() => {
-                let obj = byId(mealId);
-                onClick(obj, () => {
-                    autoSelectMealFood(meal);
-                });
-            });
-
-            meals = `
-            ${
-               HtmlPresets.makeRow(`
-                ${renderMeal(meal)}
-                <button class="btn btn-sm btn-danger"
-                    onclick="deleteMealFromMealGroup(event, ${meal.id})">Удалить</button>`,
-                {fs: 6, ps: 2, id: mealId})
-            }
-            ` + meals;
-        }
-
+        let meals = await renderMealsHtml();
 
         editMealGroupModal.setHtml(`
 
@@ -219,11 +165,9 @@
                         onclick="addMealToMealGroup()">Добавить</button>
             </div>
 
-            ${meals ? '<hr class="my-3">' : ''}
+            <div id="all-meals-list">${meals}</div>
 
-            <div>${meals}</div>
-
-        `);
+        `)
 
         const match = (params, data) => {
             let query = params?.term ?? '';
@@ -264,6 +208,74 @@
             }
 
         });
+    };
+
+    const renderMealsHtml = async () => {
+        const mealsForMealGroup = await _fetch(`/api/get_meals_for_meal_group?id=${currEditingMealGroup.id}`);
+        mealGroupMap[currEditingMealGroup.id].api_meals = mealsForMealGroup;
+
+        if (mealsForMealGroup.length > 0) {
+            hideElem(editMealGroupModal.deleteButton.id);
+        } else {
+            showElem(editMealGroupModal.deleteButton.id);
+        }
+
+        renderMealGroups();
+
+        const autoSelectMealFood = (meal) => {
+            let val = '';
+            if (meal.dish_id) {
+                val = `DISH_${meal.dish_id}`;
+            } else if (meal.food_id) {
+                val = `FOOD_${meal.food_id}`;
+            }
+            $('#editMealGroupModal-select').val(val).trigger('change');
+        };
+
+       const renderMeal = (m) => {
+            let name = '';
+            if (m.dish_id) {
+                name = getDishFullName(m.dish_id);
+            } else if (m.food_id) {
+                name = allFoods[m.food_id].name;
+            }
+            return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
+                    <span>${name}</span>
+                    <span>${m.amount}&nbsp;гр.</span>
+                    </div>`
+        };
+
+        let meals = ``;
+        for (let meal of mealsForMealGroup) {
+
+            let mealId = meal.dish_id ? `MEAL_DISH_${meal.dish_id}` : `MEAL_FOOD_${meal.food_id}`;
+            setTimeout(() => {
+                let obj = byId(mealId);
+                onClick(obj, () => {
+                    autoSelectMealFood(meal);
+                });
+            });
+
+            meals = `
+            ${
+               HtmlPresets.makeRow(`
+                ${renderMeal(meal)}
+                <button class="btn btn-sm btn-danger"
+                    onclick="deleteMealFromMealGroup(event, ${meal.id})">Удалить</button>`,
+                {fs: 6, ps: 2, id: mealId})
+            }
+            ` + meals;
+        }
+
+        if (meals) {
+            meals = `<hr class="my-3">` + meals;
+        }
+
+        return meals;
+    };
+
+    const renderMeals = async () => {
+        byId('all-meals-list').innerHTML = await renderMealsHtml();
     };
 
     const startEditMealGroupById = async (mealGroupId) => {
