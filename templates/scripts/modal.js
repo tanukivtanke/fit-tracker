@@ -4,11 +4,15 @@ class Modal {
     #oldDeleteText;
     #oldOkDisabled;
     #oldDeleteDisabled;
+    #titleId;
+    #titleBtnsId;
     #closeCrossId;
 
     constructor(modalId, title='', okHidden=true, deleteHidden=true, cancelHidden=false, allowOutsideClick=false) {
         this.modalId = `${modalId}-modal`;
         this.bodyId = `${this.modalId}-body`;
+        this.#titleId = `${this.modalId}-titleId`;
+        this.#titleBtnsId = `${this.modalId}-titleBtnsId`;
         let button =  byId(`button-${this.modalId}`);
         if (button) {
             if (!title) {
@@ -36,8 +40,22 @@ class Modal {
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="${this.modalId}-title">${title}</h1>
-                            <button id="${this.#closeCrossId}" tabindex="-1" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <div id="${this.#titleId}">
+                                <h1 class="modal-title fs-5" id="${this.modalId}-title">${title}</h1>
+                            </div>
+                            <div id="${this.#titleBtnsId}" class="d-none w-100">
+                                <div class="d-flex gap-2 justify-content-between w-100">
+                                    <div class="d-flex gap-2">
+                                        <button id="${this.#titleBtnsId}-move-button" class="btn btn-sm btn-secondary">${Icons.move} Переместить</button>
+                                        <button  id="${this.#titleBtnsId}-copy-button" class="btn btn-sm btn-secondary">${Icons.copy} Дублировать</button>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button  id="${this.#titleBtnsId}-delete-button" class="btn btn-sm btn-danger">${Icons.delete} Удалить</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                           <button id="${this.#closeCrossId}" tabindex="-1" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div id="${this.bodyId}" class="modal-body">
                         </div>
@@ -56,6 +74,10 @@ class Modal {
         this.okButton = byId(`${this.modalId}-ok-button`);
         this.deleteButton = byId(`${this.modalId}-delete-button`);
         this.cancelButton = byId(`${this.modalId}-cancel-button`);
+
+        this.titleMoveButton = byId(`${this.#titleBtnsId}-move-button`);
+        this.titleCopyButton = byId(`${this.#titleBtnsId}-copy-button`);
+        this.titleDeleteButton = byId(`${this.#titleBtnsId}-delete-button`);
 
         this.modalOpened = false;
 
@@ -153,5 +175,17 @@ class Modal {
 
     onDeleteClick(func) {
         this.onDeleteListeners.push(func);
+    }
+
+    setupTitle(type) {
+        if (isSelectionActive(type)) {
+            hideElem(this.#titleId);
+            hideElem(this.#closeCrossId);
+            showElem(this.#titleBtnsId);
+        } else {
+            showElem(this.#titleId);
+            showElem(this.#closeCrossId);
+            hideElem(this.#titleBtnsId);
+        }
     }
 }

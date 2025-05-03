@@ -217,7 +217,7 @@ let showStat = stat => {
 
 let averageData = null;
 
-const fetchData = async () => {
+const fetchAndRenderMealGroups = async () => {
     if (allStatic == null) {
         allStatic = await _fetch('/api/all_static');
         if (allStatic.meal_orders) {
@@ -487,7 +487,7 @@ function setupDate() {
 
 const setupWindow = () => {
     setupDate();
-    fetchData();
+    fetchAndRenderMealGroups();
 }
 
 // Call the fetchMeals function when the page loads or when needed

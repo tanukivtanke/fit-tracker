@@ -9,13 +9,29 @@
     editMealGroupModal.hideCrossOnMobile();
     editMealGroupModal.cancelButton.innerText = "Назад";
 
-    editMealGroupModal.onClose(renderMealGroups);
+    editMealGroupModal.onClose(() => {
+        currEditingMealGroup = null;
+        renderMealGroups();
+    });
 
     editMealGroupModal.deleteButton.addEventListener("click", () => {
         deleteMealGroup(currEditingMealGroup.id);
     });
 
+    onClick(editMealGroupModal.titleMoveButton, () => {
+        moveMealsToMealGroup();
+    });
 
+    onClick(editMealGroupModal.titleCopyButton, () => {
+        copyMealsToMealGroup();
+    });
+
+    onClick(editMealGroupModal.titleDeleteButton, () => {
+        deleteMealGroupFromMeal();
+    });
+
+
+    /** @type {MealGroup} */
     let currEditingMealGroup = null;
 
     const addMealToMealGroup = async () => {
@@ -43,7 +59,7 @@
             return;
         }
 
-        let result = await _post("/api/meal/new" ,{
+        let result = await _post("/api/meal/new", {
             food_id: foodId,
             dish_id: dishId,
             amount: chosenAmount,
@@ -80,6 +96,86 @@
         currentMealsGroups = currentMealsGroups.filter(e => e.id !== mealGroupId);
         editMealGroupModal.hide();
     };
+
+    const moveMealsToMealGroup = async () => {
+        if (currEditingMealGroup == null) {
+            return;
+        }
+
+        let items = getSelectedItems(SelectionType.MEAL);
+        if (items.length === 0) {
+            return;
+        }
+
+        let result = await _post("/api/meal/move", {
+            move_to_meal_group: currEditingMealGroup.id,
+            meal_ids: items
+        });
+
+        if (result) {
+            for (let meal of result) {
+                mealMap[meal.id] = meal;
+            }
+        }
+
+        clearSelection(SelectionType.MEAL);
+        editMealGroupModal.setupTitle(SelectionType.MEAL);
+        await renderMeals()
+        await fetchAndRenderMealGroups();
+    }
+
+    const copyMealsToMealGroup = async () => {
+        if (currEditingMealGroup == null) {
+            return;
+        }
+
+        let items = getSelectedItems(SelectionType.MEAL);
+        if (items.length === 0) {
+            return;
+        }
+
+        let result = await _post("/api/meal/duplicate", {
+            move_to_meal_group: currEditingMealGroup.id,
+            meal_ids: items
+        });
+
+        if (result) {
+            for (let meal of result) {
+                mealMap[meal.id] = meal;
+            }
+        }
+
+        clearSelection(SelectionType.MEAL);
+        editMealGroupModal.setupTitle(SelectionType.MEAL);
+        await renderMeals()
+        await fetchAndRenderMealGroups();
+    }
+
+    const deleteMealGroupFromMeal = async () => {
+        if (currEditingMealGroup == null) {
+            return;
+        }
+
+        let items = getSelectedItems(SelectionType.MEAL);
+        if (items.length === 0) {
+            return;
+        }
+
+        let result = await _delete("/api/meal/delete_many", {
+            meal_ids: items
+        });
+
+        if (result) {
+            for (let meal of result) {
+                delete mealMap[meal.id];
+            }
+        }
+
+        clearSelection(SelectionType.MEAL);
+        editMealGroupModal.setupTitle(SelectionType.MEAL);
+        await renderMeals()
+        await fetchAndRenderMealGroups();
+    }
 
     const setEditMealGroupHtml = async () => {
         if (!editMealGroupModal.isOpen()) {
@@ -211,6 +307,7 @@
     };
 
     const renderMealsHtml = async () => {
+        /** @type {Meal[]} */
         const mealsForMealGroup = await _fetch(`/api/get_meals_for_meal_group?id=${currEditingMealGroup.id}`);
         mealGroupMap[currEditingMealGroup.id].api_meals = mealsForMealGroup;
 
@@ -249,20 +346,55 @@
         for (let meal of mealsForMealGroup) {
 
             let mealId = meal.dish_id ? `MEAL_DISH_${meal.dish_id}` : `MEAL_FOOD_${meal.food_id}`;
+            let mealIdInner = mealId + '_inner';
             setTimeout(() => {
                 let obj = byId(mealId);
+
+                let longPressed = false;
+
                 onClick(obj, () => {
-                    autoSelectMealFood(meal);
+                    if (longPressed) {
+                        longPressed = false;
+                        return;
+                    }
+                    if (isSelectionActive(SelectionType.MEAL)) {
+                        selectItem(SelectionType.MEAL, meal.id);
+                        setupSelection();
+                    } else {
+                        autoSelectMealFood(meal);
+                    }
                 });
+
+                setupLongPress(obj, () => {
+                    longPressed = true;
+                    selectItem(SelectionType.MEAL, meal.id);
+                    setupSelection();
+                });
+
+                const setupSelection = () => {
+                    if (isItemSelected(SelectionType.MEAL, meal.id)) {
+                        byId(mealIdInner).classList.add('user-selected');
+                    } else {
+                        byId(mealIdInner).classList.remove('user-selected');
+                    }
+                    editMealGroupModal.setupTitle(SelectionType.MEAL);
+                };
+
+                setupSelection();
             });
 
+            const showDeleteButton = false;
             meals = `
             ${
                HtmlPresets.makeRow(`
                 ${renderMeal(meal)}
+
+                ${showDeleteButton ? `
                 <button class="btn btn-sm btn-danger"
-                    onclick="deleteMealFromMealGroup(event, ${meal.id})">Удалить</button>`,
-                {fs: 6, ps: 2, id: mealId})
+                    onclick="deleteMealFromMealGroup(event, ${meal.id})">Удалить</button>
+                ` : ''}
+                `,
+                {fs: 6, ps: 2, id: mealId, innerId: mealIdInner})
             }
             ` + meals;
         }

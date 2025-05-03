@@ -162,6 +162,11 @@ input.py-025 {
     opacity: 0.75;
 }
 
+.user-selected, .user-selected:hover {
+    background-color: rgba(13, 110, 253, 0.2) !important;
+    border-radius: 0.25rem !important;
+}
+
 
 html {
     font-size: calc(min(12px, 5px + max(0px, (100vw - 200px) / 40)));

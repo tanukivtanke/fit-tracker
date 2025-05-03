@@ -281,11 +281,11 @@ class HtmlPresets {
 
     static newTabLink = `target="_blank" rel="noopener noreferrer"`;
 
-    static makeRow(inside, {fs = 5, py = 2, ps = 3, pe = 2, id=''} = {}) {
+    static makeRow(inside, {fs = 5, py = 2, ps = 3, pe = 2, id='', innerId=''} = {}) {
         return `
         <div ${id ? `id="${id}"` : ''} class="row mb-2">
             <div class="col">
-                <div class="py-${py} ps-${ps} pe-${pe} fs-${fs} border border-dark rounded-2 d-flex justify-content-between align-items-center div-hover">
+                <div ${innerId ? `id="${innerId}"` : ''} class="py-${py} ps-${ps} pe-${pe} fs-${fs} border border-dark rounded-2 d-flex justify-content-between align-items-center div-hover">
                     ${inside}
                 </div>
             </div>
