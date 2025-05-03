@@ -677,7 +677,7 @@
             if (nameField.value !== undefined) {
                 name = nameField.value.trim();
             } else {
-                name = nameField.innerText.trim();
+                name = allDishes[dishId].name.trim();
             }
             let outOfStock = !outOfStockField.checked;
 
