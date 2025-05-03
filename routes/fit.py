@@ -342,7 +342,7 @@ def move_meal():
     for i in received_data['meal_ids']:
         meal_to_move = Meal.find(id=i)
         meal_to_move.meal_group_id = destination
-        meal_to_move.save()
+        meal_to_move.update()
         res.append(meal_to_move.dict())
 
     return jsonify(res)
