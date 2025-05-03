@@ -12,6 +12,8 @@
     editMealGroupModal.onClose(() => {
         //currEditingMealGroup = null;
         renderMealGroups();
+        editMealGroupModal.titleMoveButton.disabled = false;
+        editMealGroupModal.titleCopyButton.disabled = false;
     });
 
     editMealGroupModal.deleteButton.addEventListener("click", () => {

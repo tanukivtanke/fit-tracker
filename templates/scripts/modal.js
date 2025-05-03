@@ -47,10 +47,10 @@ class Modal {
                                 <div class="d-flex gap-2 justify-content-between w-100">
                                     <div class="d-flex gap-2">
                                         <button id="${this.#titleBtnsId}-move-button" class="btn btn-sm btn-secondary">${Icons.move} Переместить</button>
-                                        <button  id="${this.#titleBtnsId}-copy-button" class="btn btn-sm btn-secondary">${Icons.copy} Дублировать</button>
+                                        <button id="${this.#titleBtnsId}-copy-button" class="btn btn-sm btn-secondary">${Icons.copy} Дублировать</button>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <button  id="${this.#titleBtnsId}-delete-button" class="btn btn-sm btn-danger">${Icons.delete} Удалить</button>
+                                        <button id="${this.#titleBtnsId}-delete-button" class="btn btn-sm btn-danger">${Icons.delete} Удалить</button>
                                     </div>
                                 </div>
                             </div>
