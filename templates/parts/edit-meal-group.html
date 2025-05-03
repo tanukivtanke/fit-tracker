@@ -346,6 +346,7 @@
         for (let meal of mealsForMealGroup) {
 
             let mealId = meal.dish_id ? `MEAL_DISH_${meal.dish_id}` : `MEAL_FOOD_${meal.food_id}`;
+            mealId += `_${meal.id}`;
             let mealIdInner = mealId + '_inner';
             setTimeout(() => {
                 let obj = byId(mealId);
@@ -377,7 +378,27 @@
                     } else {
                         byId(mealIdInner).classList.remove('user-selected');
                     }
+
                     editMealGroupModal.setupTitle(SelectionType.MEAL);
+
+                    if (isSelectionActive(SelectionType.MEAL)) {
+                        let isAllInCurrentGroup = true;
+                        for (let mealId of getSelectedItems(SelectionType.MEAL)) {
+                            console.log(mealMap[mealId])
+                            console.log(currEditingMealGroup.id)
+                            if (mealMap[mealId].meal_group_id !== currEditingMealGroup.id) {
+                                isAllInCurrentGroup = false;
+                                break;
+                            }
+                        }
+                        if (isAllInCurrentGroup) {
+                            editMealGroupModal.titleMoveButton.disabled = true;
+                            editMealGroupModal.titleCopyButton.disabled = true;
+                        } else {
+                            editMealGroupModal.titleMoveButton.disabled = false;
+                            editMealGroupModal.titleCopyButton.disabled = false;
+                        }
+                    }
                 };
 
                 setupSelection();
