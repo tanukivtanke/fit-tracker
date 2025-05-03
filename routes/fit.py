@@ -360,7 +360,7 @@ def duplicate_meal():
     destination = received_data['move_to_meal_group']
 
     with app.app_context():
-        for i in received_data['meal_ids']:
+        for i in received_data['meal_ids'][::-1]:
             meal_to_copy = Meal.find(id=i)
             new_meal_ing = Meal(
                 dish_id=meal_to_copy.dish_id,
