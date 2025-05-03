@@ -333,6 +333,55 @@ def add_dish():
     return new_dish.json()
 
 
+@app.route('/api/meal/move', methods=['POST'])
+def move_meal():
+    received_data = request.json
+
+    res = []
+    destination = received_data['move_to_meal_group']
+    for i in received_data['meal_ids']:
+        meal_to_move = Meal.find(id=i)
+        meal_to_move.meal_group_id = destination
+        meal_to_move.save()
+        res.append(meal_to_move.dict())
+
+    return jsonify(res)
+
+
+@app.route('/api/meal/duplicate', methods=['POST'])
+def duplicate_meal():
+    received_data = request.json
+
+    res = []
+    destination = received_data['move_to_meal_group']
+    for i in received_data['meal_ids']:
+        meal_to_copy = Meal.find(id=i)
+        new_meal_ing = Meal(
+            dish_id=meal_to_copy.dish_id,
+            food_id=meal_to_copy.food_id,
+            meal_group_id=destination,
+            amount=meal_to_copy.amount,
+            calc_proteins=meal_to_copy.calc_proteins,
+            calc_fats=meal_to_copy.calc_fats,
+            calc_carbs=meal_to_copy.calc_carbs,
+            calc_kcal=meal_to_copy.calc_kcal,
+        )
+        new_meal_ing.save()
+
+        res.append(meal_to_copy.dict())
+
+    return jsonify(res)
+
+
+@app.route('/api/meal/delete_many', methods=['DELETE'])
+def del_meal_many():
+    received_data = request.json
+    res = []
+    for i in received_data['meal_ids']:
+        res.append(Meal.delete_by_id(i))
+    return jsonify(res)
+
+
 @app.route('/api/get_average')
 def calculate_weekly_average():
     user_id = get_argument('user_id')
