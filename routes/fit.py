@@ -339,11 +339,15 @@ def move_meal():
 
     res = []
     destination = received_data['move_to_meal_group']
-    for i in received_data['meal_ids']:
-        meal_to_move = Meal.find(id=i)
-        meal_to_move.meal_group_id = destination
-        # meal_to_move.update()
-        res.append(meal_to_move.dict())
+
+    with app.app_context():
+        for i in received_data['meal_ids']:
+            meal_to_move = Meal.find(id=i)
+            meal_to_move.meal_group_id = destination
+            db.session.merge(meal_to_move)
+            res.append(meal_to_move.dict())
+
+        db.session.commit()
 
     return jsonify(res)
 
@@ -354,21 +358,24 @@ def duplicate_meal():
 
     res = []
     destination = received_data['move_to_meal_group']
-    for i in received_data['meal_ids']:
-        meal_to_copy = Meal.find(id=i)
-        new_meal_ing = Meal(
-            dish_id=meal_to_copy.dish_id,
-            food_id=meal_to_copy.food_id,
-            meal_group_id=destination,
-            amount=meal_to_copy.amount,
-            calc_proteins=meal_to_copy.calc_proteins,
-            calc_fats=meal_to_copy.calc_fats,
-            calc_carbs=meal_to_copy.calc_carbs,
-            calc_kcal=meal_to_copy.calc_kcal,
-        )
-        new_meal_ing.save()
 
-        res.append(meal_to_copy.dict())
+    with app.app_context():
+        for i in received_data['meal_ids']:
+            meal_to_copy = Meal.find(id=i)
+            new_meal_ing = Meal(
+                dish_id=meal_to_copy.dish_id,
+                food_id=meal_to_copy.food_id,
+                meal_group_id=destination,
+                amount=meal_to_copy.amount,
+                calc_proteins=meal_to_copy.calc_proteins,
+                calc_fats=meal_to_copy.calc_fats,
+                calc_carbs=meal_to_copy.calc_carbs,
+                calc_kcal=meal_to_copy.calc_kcal,
+            )
+            db.session.add(new_meal_ing)
+            res.append(meal_to_copy.dict())
+
+        db.session.commit()
 
     return jsonify(res)
 
@@ -377,8 +384,18 @@ def duplicate_meal():
 def del_meal_many():
     received_data = request.json
     res = []
-    for i in received_data['meal_ids']:
-        res.append(Meal.delete_by_id(i))
+
+    with app.app_context():
+        for i in received_data['meal_ids']:
+            obj = Meal.find(id=i)
+            if obj:
+                db.session.delete(obj)
+                res.append(True)
+            else:
+                res.append(False)
+
+        db.session.commit()
+
     return jsonify(res)
 
 
