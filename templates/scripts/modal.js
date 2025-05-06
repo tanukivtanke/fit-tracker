@@ -178,7 +178,7 @@ class Modal {
     }
 
     setupTitle(type) {
-        if (isSelectionActive(type)) {
+        if (type && isSelectionActive(type)) {
             hideElem(this.#titleId);
             hideElem(this.#closeCrossId);
             showElem(this.#titleBtnsId);

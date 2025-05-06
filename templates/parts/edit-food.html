@@ -75,7 +75,101 @@
             searchAllFoodMode = false;
             searchAllDishesMode = false;
             editDishPreviousDishHistory.length = 0;
+            editFoodModal.titleMoveButton.disabled = false;
+            editFoodModal.titleCopyButton.disabled = false;
         });
+
+        onClick(editFoodModal.titleMoveButton, () => {
+            moveDishIngredientsToDish();
+        });
+
+        onClick(editFoodModal.titleCopyButton, () => {
+            copyDishIngredientsToDish();
+        });
+
+        onClick(editFoodModal.titleDeleteButton, () => {
+            deleteDishIngredientsFromDish();
+        });
+
+        const moveDishIngredientsToDish = async () => {
+            if (currentEditingDishId == null) {
+                return;
+            }
+
+            let items = getSelectedItems(SelectionType.DISH_INGREDIENT);
+            if (items.length === 0) {
+                return;
+            }
+
+            let result = await _post("/api/dish_ingredient/move", {
+                move_to_dish: currentEditingDishId,
+                dish_ingredient_ids: items
+            });
+
+            if (result) {
+                for (let di of result) {
+                    allDishIngredients[di.id] = di;
+                }
+            }
+
+            clearSelection(SelectionType.DISH_INGREDIENT);
+            editFoodModal.setupTitle(SelectionType.DISH_INGREDIENT);
+
+            renderEditDish();
+        }
+
+        const copyDishIngredientsToDish = async () => {
+            if (currentEditingDishId == null) {
+                return;
+            }
+
+            let items = getSelectedItems(SelectionType.DISH_INGREDIENT);
+            if (items.length === 0) {
+                return;
+            }
+
+            let result = await _post("/api/dish_ingredient/duplicate", {
+                move_to_dish: currentEditingDishId,
+                dish_ingredient_ids: items
+            });
+
+            if (result) {
+                for (let di of result) {
+                    allDishIngredients[di.id] = di;
+                }
+            }
+
+            clearSelection(SelectionType.DISH_INGREDIENT);
+            editFoodModal.setupTitle(SelectionType.DISH_INGREDIENT);
+
+            renderEditDish();
+        }
+
+        const deleteDishIngredientsFromDish = async () => {
+            if (currentEditingDishId == null) {
+                return;
+            }
+
+            let items = getSelectedItems(SelectionType.DISH_INGREDIENT);
+            if (items.length === 0) {
+                return;
+            }
+
+            let result = await _delete("/api/dish_ingredient/delete_many", {
+                dish_ingredient_ids: items
+            });
+
+            if (result) {
+                for (let diId of result) {
+                    delete allDishIngredients[diId];
+                }
+            }
+
+            clearSelection(SelectionType.DISH_INGREDIENT);
+            editFoodModal.setupTitle(SelectionType.DISH_INGREDIENT);
+
+            renderEditDish();
+        }
 
         let searchFoodMode = true;
         let addingFoodMode = false;
@@ -791,12 +885,14 @@
 
                     renderEditDish();
 
-                    document.getElementById(editFoodModal.bodyId).scrollTop = 0;
+                    byId(editFoodModal.bodyId).scrollTop = 0;
                 });
             });
         };
 
         const renderDishes = () => {
+            editFoodModal.setupTitle();
+
             renderDishSearchIcon();
 
             let search = byId(addSearchDishNameId).value;
@@ -861,6 +957,9 @@
                 return;
             }
 
+            editFoodModal.titleMoveButton.disabled = false;
+            editFoodModal.titleCopyButton.disabled = false;
+
             let dishId = currentEditingDishId;
 
             let currDish = allDishes[dishId];
@@ -876,10 +975,11 @@
                 } else {
                     name = getDishFullName(di.dish_id_ingredient);
                 }
-                return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
-                        <span>${name}</span>
-                        <span>${di.amount}&nbsp;гр.</span>
-                        </div>`
+                return `
+                <div class='me-2 w-100 d-flex justify-content-between align-items-center'>
+                    <span>${name}</span>
+                    <span>${di.amount}&nbsp;гр.</span>
+                </div>`
             };
 
 
@@ -998,20 +1098,75 @@
                 let ingrId = di.dish_id_ingredient
                     ? `INGREDIENT_DISH_${di.dish_id_ingredient}-${position}`
                     : `INGREDIENT_FOOD_${di.food_id_ingredient}-${position}`;
+                let innerId = ingrId + "-inner";
+
                 setTimeout(() => {
                     let obj = byId(ingrId);
+
+                    let longPressed = false;
+
                     onClick(obj, () => {
-                        autoSelectDishIngredient(di);
+                        if (longPressed) {
+                            longPressed = false;
+                            return;
+                        }
+                        if (isSelectionActive(SelectionType.DISH_INGREDIENT)) {
+                            selectItem(SelectionType.DISH_INGREDIENT, di.id);
+                            setupSelection();
+                        } else {
+                            autoSelectDishIngredient(di);
+                        }
                     });
+
+                    setupLongPress(obj, () => {
+                        longPressed = true;
+                        selectItem(SelectionType.DISH_INGREDIENT, di.id);
+                        setupSelection();
+                    });
+
+                    const setupSelection = () => {
+                        if (isItemSelected(SelectionType.DISH_INGREDIENT, di.id)) {
+                            byId(innerId).classList.add('user-selected');
+                        } else {
+                            byId(innerId).classList.remove('user-selected');
+                        }
+
+                        editFoodModal.setupTitle(SelectionType.DISH_INGREDIENT);
+
+                        if (isSelectionActive(SelectionType.DISH_INGREDIENT)) {
+                            let isAllInCurrentGroup = true;
+                            for (let diId of getSelectedItems(SelectionType.DISH_INGREDIENT)) {
+                                if (allDishIngredients[diId].dish_id !== currentEditingDishId) {
+                                    isAllInCurrentGroup = false;
+                                    break;
+                                }
+                            }
+                            if (isAllInCurrentGroup) {
+                                editFoodModal.titleMoveButton.disabled = true;
+                                editFoodModal.titleCopyButton.disabled = true;
+                            } else {
+                                editFoodModal.titleMoveButton.disabled = false;
+                                editFoodModal.titleCopyButton.disabled = false;
+                            }
+                        }
+                    };
+
+                    setupSelection();
                 });
+
+
+               let showDeleteBtn = false;
 
                 dishIngredients = `
                 ${
                    HtmlPresets.makeRow(`
                     ${renderDishIngr(dishIngredient)}
+                    ${ showDeleteBtn ? `
                     <button class="btn btn-sm btn-danger"
-                        onclick="deleteDishIngredientFromDish(${dishIngredient.id})">Удалить</button>`,
-                    {fs: 6, ps: 2, id: ingrId})
+                        onclick="deleteDishIngredientFromDish(${dishIngredient.id})">Удалить</button>
+                    ` : '' }
+                    `,
+                    {fs: 6, ps: 2, id: ingrId, innerId: innerId})
                 }
                 ` + dishIngredients;
             }

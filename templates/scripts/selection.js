@@ -30,6 +30,7 @@ const clearSelection = (type) => {
 
 class SelectionType {
     static MEAL = 'MEAL';
+    static DISH_INGREDIENT = 'DISH_INGREDIENT';
 }
 
 const setupLongPress = (element, callback, duration = 250) => {
