@@ -399,6 +399,68 @@ def del_meal_many():
     return jsonify(res)
 
 
+@app.route('/api/dish_ingredient/move', methods=['POST'])
+def move_dish_ingredient():
+    received_data = request.json
+
+    res = []
+    destination = received_data['move_to_dish']
+
+    with app.app_context():
+        for i in received_data['dish_ingredient_ids']:
+            dish_ing_to_move = DishIngredient.find(id=i)
+            dish_ing_to_move.dish_id = destination
+            db.session.merge(dish_ing_to_move)
+            res.append(dish_ing_to_move.dict())
+
+        db.session.commit()
+
+    return jsonify(res)
+
+
+@app.route('/api/dish_ingredient/duplicate', methods=['POST'])
+def duplicate_dish_ingredient():
+    received_data = request.json
+
+    res = []
+    destination = received_data['move_to_dish']
+
+    with app.app_context():
+        for i in received_data['dish_ingredient_ids'][::-1]:
+            dish_ing_to_copy = DishIngredient.find(id=i)
+            new_dish_ing = DishIngredient(
+                dish_id=destination,
+                dish_id_ingredient=dish_ing_to_copy.dish_id_ingredient,
+                food_id_ingredient=dish_ing_to_copy.food_id_ingredient,
+                amount=dish_ing_to_copy.amount,
+            )
+            db.session.add(new_dish_ing)
+            res.append(dish_ing_to_copy.dict())
+
+        db.session.commit()
+
+    return jsonify(res)
+
+
+@app.route('/api/dish_ingredient/delete_many', methods=['DELETE'])
+def del_dish_ingredient_many():
+    received_data = request.json
+    res = []
+
+    with app.app_context():
+        for i in received_data['dish_ingredient_ids']:
+            obj = DishIngredient.find(id=i)
+            if obj:
+                db.session.delete(obj)
+                res.append(True)
+            else:
+                res.append(False)
+
+        db.session.commit()
+
+    return jsonify(res)
+
+
 @app.route('/api/get_average')
 def calculate_weekly_average():
     user_id = get_argument('user_id')
