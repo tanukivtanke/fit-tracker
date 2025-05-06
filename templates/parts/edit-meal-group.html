@@ -189,7 +189,7 @@
 
         // Collect all valid foods
         for (let food of Object.values(allFoods)) {
-            if (!food.is_deleted) {
+            if (!food.is_deleted && !food.ingredient_only) {
                 elems.push({
                     type: 'FOOD',
                     id: food.id,

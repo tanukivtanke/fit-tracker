@@ -17,6 +17,7 @@
         const addCarbsId = `${rootId}-add-food-carbs`;
         const addKcalId = `${rootId}-add-food-kcal`;
         const addFoodPortionSizeId = `${rootId}-add-food-addFoodPortionSizeId`;
+        const addFoodIngredientOnlyId = `${rootId}-add-food-addFoodIngredientOnlyId`;
         const addFoodButtonId = `${rootId}-add-food-button`;
 
         const addSearchDishNameId = `${rootId}-addSearchDishNameId`;
@@ -212,10 +213,14 @@
                 <div id="${foodAddSectionId}" class="d-none add-highlight">
                     <div class="opacity-50" >Новая еда</div>
 
-                    <div class="input-group mb-2-5">
+                    <div class="input-group mb-2">
                          <input id="${addFoodNameId}" type="text" class="form-control" placeholder="Название">
                          <span class="input-group-text py-025">1шт</span>
                          <input id="${addFoodPortionSizeId}" type="text" class="form-control portion-input text-center" placeholder="Вес">
+                    </div>
+
+                    <div class="mb-2">
+                        ${HtmlPresets.switch(addFoodIngredientOnlyId, '', 'Для блюд', false, true, 6)}
                     </div>
 
                     <div class="d-flex">
@@ -396,7 +401,8 @@
                 addFatsId,
                 addCarbsId,
                 addKcalId,
-                addFoodPortionSizeId
+                addFoodPortionSizeId,
+                addFoodIngredientOnlyId,
             ];
 
             let autoCalcKcalOnFields = [
@@ -417,6 +423,7 @@
                 let carbs = handleFloatField(addCarbsId, 0, 100, true);
                 let kcal = handleNumberField(addKcalId, 0, 999);
                 let portion = handleNumberField(addFoodPortionSizeId, 0, 9999);
+                let ingredientOnly = byId(addFoodIngredientOnlyId).checked;
 
                 byId(addFoodButtonId).disabled = true;
 
@@ -427,6 +434,7 @@
                     carbs: carbs,
                     kcal: kcal,
                     portion_size: portion,
+                    ingredient_only: ingredientOnly,
                 });
 
                 if (result.id) {
@@ -506,6 +514,7 @@
             let foodDeleteButtonKey = `data-ft-food-foodDeleteButtonKey`;
             let foodNameIdKey = `data-ft-food-name-id`;
             let foodPortionSizeIdKey = `data-ft-food-foodPortionSizeIdKey-id`;
+            let foodIngredientOnlyIdKey = `data-ft-food-foodIngredientOnlyIdKey-id`;
             let foodProteinsIdKey = `data-ft-food-proteins-id`;
             let foodFatsIdKey = `data-ft-food-fats-id`;
             let foodCarbsIdKey = `data-ft-food-carbs-id`;
@@ -528,11 +537,14 @@
                 foodsHtml += `
                 <hr>
                 <div class="${food.is_deleted ? 'deleted-highlight' : ''}">
-                    <div class="input-group mb-2-5">
+                    <div class="input-group mb-2">
                         <input ${foodNameIdKey}=${food.id} type="text" class="form-control" value="${food.name.replace(/"/g, '&quot;')}" ${editable}>
                         <span class="input-group-text py-025">1шт</span>
                         <input ${foodPortionSizeIdKey}=${food.id} type="text" class="form-control portion-input text-center"
                                 placeholder="Вес" value="${food.portion_size ?? ''}" ${editable}>
+                    </div>
+                    <div class="mb-2">
+                        ${HtmlPresets.switch(generateUUID(), '', 'Для блюд', food.ingredient_only, true, 6, `${foodIngredientOnlyIdKey}=${food.id}`)}
                     </div>
                     <div class="d-flex">
                         <div class="input-group">
@@ -563,6 +575,7 @@
                 let carbsField = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`);
                 let kcalField = document.querySelector(`[${foodKcalIdKey}="${foodId}"]`);
                 let portionSizeField = document.querySelector(`[${foodPortionSizeIdKey}="${foodId}"]`);
+                let ingredientOnlyField = document.querySelector(`[${foodIngredientOnlyIdKey}="${foodId}"]`);
                 let buttonField = document.querySelector(`[${foodButtonKey}="${foodId}"]`);
 
                 let name = nameField.value.trim();
@@ -571,6 +584,7 @@
                 let carbs = handleFloatField(carbsField, 0, 100, true);
                 let kcal = handleNumberField(kcalField, 0, 999);
                 let portionSize = handleNumberField(portionSizeField, 0, 9999);
+                let ingredientOnly = ingredientOnlyField.checked;
 
                 let currFood = allFoods[foodId];
                 let currName = currFood.name;
@@ -579,6 +593,7 @@
                 let currCarbs = currFood.carbs;
                 let currKcal = currFood.kcal;
                 let currPortionSize = currFood.portion_size;
+                let currIngredientOnly = currFood.ingredient_only;
 
                 let allFieldsFilled = name.length && proteins != null && fats != null && carbs != null && kcal != null;
                 if (!allFieldsFilled) {
@@ -591,14 +606,17 @@
                     || currFats !== fats
                     || currCarbs !== carbs
                     || currKcal !== kcal
-                    || currPortionSize !== portionSize;
+                    || currPortionSize !== portionSize
+                    || currIngredientOnly !== ingredientOnly
+                    ;
 
                 buttonField.disabled = !anyFieldChanged;
             };
 
             for (let field of [foodNameIdKey, foodProteinsIdKey,
                                 foodFatsIdKey, foodCarbsIdKey,
-                                foodKcalIdKey, foodPortionSizeIdKey]) {
+                                foodKcalIdKey, foodPortionSizeIdKey,
+                                foodIngredientOnlyIdKey]) {
                 query(`[${field}]`, e => {
                     let value = e.getAttribute(field);
                     let foodId = parseInt(value);
@@ -626,6 +644,7 @@
                     let carbs = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`).value;
                     let kcal = document.querySelector(`[${foodKcalIdKey}="${foodId}"]`).value;
                     let portionSize = document.querySelector(`[${foodPortionSizeIdKey}="${foodId}"]`).value;
+                    let ingredientOnly = document.querySelector(`[${foodIngredientOnlyIdKey}="${foodId}"]`).checked;
 
                     let result = await _post("/api/food/edit", {
                         id: foodId,
@@ -635,6 +654,7 @@
                         carbs: parseFloat(carbs),
                         kcal: parseInt(kcal),
                         portion_size: parseInt(portionSize),
+                        ingredient_only: ingredientOnly,
                     });
 
                     if (result.id) {
