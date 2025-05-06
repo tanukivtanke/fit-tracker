@@ -22,6 +22,7 @@ class Food(AbstractObject):
     is_deleted = db.Column(db.Boolean, nullable=False)
     portion_size = db.Column(db.Integer)
     last_used = db.Column(db.Date)
+    ingredient_only = db.Column(db.Boolean, nullable=False)
 
 
 class Dish(AbstractObject):

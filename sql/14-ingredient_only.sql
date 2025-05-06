@@ -1,0 +1,1 @@
+ALTER TABLE fit_food add column ingredient_only boolean default false;

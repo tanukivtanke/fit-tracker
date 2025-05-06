@@ -200,7 +200,8 @@ def add_food():
         kcal=received_data['kcal'],
         is_deleted=False,
         portion_size=received_data['portion_size'],
-        last_used=date.today()
+        last_used=date.today(),
+        ingredient_only=received_data['ingredient_only']
     )
     new_food.save()
     return new_food.json()
@@ -218,6 +219,7 @@ def edit_food():
         food_to_change.carbs = received_data['carbs']
         food_to_change.kcal = received_data['kcal']
         food_to_change.portion_size = received_data['portion_size']
+        food_to_change.ingredient_only = received_data['ingredient_only']
         food_to_change.update()
         return food_to_change.json()
     else:
