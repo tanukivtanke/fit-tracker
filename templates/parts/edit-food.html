@@ -529,7 +529,7 @@
                 <hr>
                 <div class="${food.is_deleted ? 'deleted-highlight' : ''}">
                     <div class="input-group mb-2-5">
-                        <input ${foodNameIdKey}=${food.id} type="text" class="form-control" value="${food.name}" ${editable}>
+                        <input ${foodNameIdKey}=${food.id} type="text" class="form-control" value="${food.name.replace(/"/g, '&quot;')}" ${editable}>
                         <span class="input-group-text py-025">1шт</span>
                         <input ${foodPortionSizeIdKey}=${food.id} type="text" class="form-control portion-input text-center"
                                 placeholder="Вес" value="${food.portion_size ?? ''}" ${editable}>
@@ -802,7 +802,7 @@
                     <div class="input-group mb-2-5 me-2">
                         ${
                             nameEditable ? `
-                            <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name}">
+                            <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name.replace(/"/g, '&quot;')}">
                             ` : `
                             <div ${dishNameIdKey}=${dish.id} class="form-control div-hover">${getDishFullName(dish.id)}</div>
                             `
