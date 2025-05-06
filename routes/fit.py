@@ -373,7 +373,7 @@ def duplicate_meal():
                 calc_kcal=meal_to_copy.calc_kcal,
             )
             db.session.add(new_meal_ing)
-            res.append(meal_to_copy.dict())
+            res.append(new_meal_ing.dict())
 
         db.session.commit()
 
@@ -435,7 +435,7 @@ def duplicate_dish_ingredient():
                 amount=dish_ing_to_copy.amount,
             )
             db.session.add(new_dish_ing)
-            res.append(dish_ing_to_copy.dict())
+            res.append(new_dish_ing.dict())
 
         db.session.commit()
 
