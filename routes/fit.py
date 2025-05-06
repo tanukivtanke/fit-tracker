@@ -390,9 +390,7 @@ def del_meal_many():
             obj = Meal.find(id=i)
             if obj:
                 db.session.delete(obj)
-                res.append(True)
-            else:
-                res.append(False)
+                res.append(i)
 
         db.session.commit()
 
@@ -452,9 +450,7 @@ def del_dish_ingredient_many():
             obj = DishIngredient.find(id=i)
             if obj:
                 db.session.delete(obj)
-                res.append(True)
-            else:
-                res.append(False)
+                res.append(i)
 
         db.session.commit()
 
