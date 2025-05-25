@@ -223,7 +223,7 @@ def edit_food():
         food_to_change.update()
         return food_to_change.json()
     else:
-        return ''
+        return 'Cannot edit non-existent food', 400
 
 
 @app.route('/api/dish/edit', methods=['POST'])
@@ -237,7 +237,7 @@ def edit_dish():
         dish_to_change.update()
         return dish_to_change.json()
     else:
-        return ''
+        return 'Cannot edit non-existent meal', 400
 
 
 @app.route('/api/dish_recipe/edit', methods=['POST'])
@@ -250,7 +250,7 @@ def edit_recipe():
         dish_to_change.update()
         return dish_to_change.json()
     else:
-        return ''
+        return 'Cannot change the recipe of non-existent dish', 400
 
 
 @app.route('/api/dish_ingredient/new', methods=['POST'])
@@ -471,7 +471,7 @@ def reparent_dish():
         dish_to_reparent.update()
         return dish_to_reparent.json()
     else:
-        return ''
+        return 'Cannot reparent non-existing dish or parent to non-existent dish', 400
 
 
 @app.route('/api/get_average')
