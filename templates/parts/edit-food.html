@@ -71,8 +71,6 @@
         const newDishTab = `${rootId}-newDishTab`;
         const editDishTab = `${rootId}-editDishTab`;
 
-        const editDishPreviousDishHistory = [];
-
         editFoodModal.onClose(() => {
             startEditMealGroup(currEditingMealGroup);
             searchFoodMode = true;
@@ -80,7 +78,6 @@
             deletingFoodMode = false;
             searchAllFoodMode = false;
             searchAllDishesMode = false;
-            editDishPreviousDishHistory.length = 0;
             editFoodModal.titleMoveButton.disabled = false;
             editFoodModal.titleCopyButton.disabled = false;
         });
@@ -314,13 +311,14 @@
             });
 
             onClick(editDishGetBackId, e => {
-                if (editDishPreviousDishHistory.length === 0) {
+                let currDish = allDishes[currentEditingDishId];
+                if (currDish.for_dish === null) {
                     currentEditingDishId = null;
                     showElem(newDishTab);
                     hideElem(editDishTab);
                     renderDishes();
                 } else {
-                    currentEditingDishId = editDishPreviousDishHistory.pop();
+                    currentEditingDishId = currDish.for_dish;
                     renderEditDish();
                 }
             });
@@ -902,10 +900,6 @@
                     hideElem(newDishTab);
                     showElem(editDishTab);
 
-                    let dish = allDishes[dishId];
-                    if (dish.for_dish !== null) {
-                        editDishPreviousDishHistory.push(currentEditingDishId);
-                    }
                     currentEditingDishId = dishId;
 
                     renderEditDish();
@@ -1470,12 +1464,7 @@
                 `;
                 let elems = getItemsList({
                     foodFilter: ALWAYS_FALSE,
-                    dishFilter: (dish, dishParents) => {
-                        if (dishParents.includes(dish.id)) {
-                            return false;
-                        }
-                        return !dish.out_of_stock || dishParents.includes(dish.for_dish);
-                    }
+                    dishFilter: ALWAYS_TRUE,
                 });
 
                 // Build the options string

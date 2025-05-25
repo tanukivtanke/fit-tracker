@@ -89,6 +89,7 @@ class SearchFilter {
 }
 
 const ALWAYS_FALSE = () => false;
+const ALWAYS_TRUE = () => true;
 
 const getItemsList = (
     {
