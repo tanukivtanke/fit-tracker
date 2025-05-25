@@ -37,6 +37,11 @@
         const editDishAddRecipeBtnId = `${rootId}-editDishAddRecipeBtnId`;
         const editDishAllDishRecipesId = `${rootId}-editDishAllDishRecipesId`;
         const addDishButtonId = `${rootId}-addDishButtonId`;
+        const editDishEditButtonsId = `${rootId}-editDishEditButtonsId`;
+        const editDishEditSettingsId = `${rootId}-editDishEditSettingsId`;
+        const editDishEditParentId = `${rootId}-editDishEditParentId`;
+        const editDishEditParentSelectId = `${rootId}-editDishEditParentSelectId`;
+        const editDishEditParentConfirmId = `${rootId}-editDishEditParentConfirmId`;
 
         const dishButtonKey = `data-ft-dish-btn-id`;
         const dishNameIdKey = `data-ft-dish-name-id`;
@@ -1005,72 +1010,12 @@
 
 
             let options = '';
-            let elems = [];
-            // Collect all valid foods
-            for (let food of Object.values(allFoods)) {
-                if (!food.is_deleted) {
-                    elems.push({
-                        type: 'FOOD',
-                        id: food.id,
-                        name: food.name,
-                        last_used: food.last_used || null
-                    });
-                }
-            }
-
-            let dishParents = [currDish.id];
-            {
-                let dish = currDish;
-                while (dish.for_dish) {
-                    dishParents.push(dish.for_dish);
-                    dish = allDishes[dish.for_dish];
-                }
-            }
-
-            // Collect all valid dishes
-            for (let dish of Object.values(allDishes)) {
-                if (dishParents.includes(dish.id)) {
-                    continue;
-                }
-                if (!dish.out_of_stock || dishParents.includes(dish.for_dish)) {
-                    elems.push({
-                        type: 'DISH',
-                        id: dish.id,
-                        name: getDishFullName(dish.id),
-                        last_used: dish.last_used || null,
-                        for_dish: dish.for_dish || null
-                    });
-                }
-            }
-
-            // Sort the elements based on your criteria
-            elems.sort((a, b) => {
-                if (a.for_dish && !b.for_dish || !a.for_dish && b.for_dish) {
-                    if (a.for_dish) {
-                        return -1;
-                    } else {
-                        return 1;
+            let elems = getItemsList({
+                dishFilter: (dish, dishParents) => {
+                    if (dishParents.includes(dish.id)) {
+                        return false;
                     }
-                }
-
-                if (a.last_used && b.last_used) {
-                    // Both have last_used; sort by most recent date first
-                    const dateDiff = new Date(b.last_used) - new Date(a.last_used);
-                    if (dateDiff !== 0) {
-                        return dateDiff;
-                    } else {
-                        // Dates are the same; compare ids in decreasing order
-                        return b.id - a.id;
-                    }
-                } else if (a.last_used) {
-                    // Only 'a' has last_used; it comes before 'b'
-                    return -1;
-                } else if (b.last_used) {
-                    // Only 'b' has last_used; it comes before 'a'
-                    return 1;
-                } else {
-                    // Neither has last_used; sort by id in decreasing order
-                    return b.id - a.id;
+                    return !dish.out_of_stock || dishParents.includes(dish.for_dish);
                 }
             });
 
@@ -1297,6 +1242,14 @@
                 ${HtmlPresets.textarea(editDishRecipeInputId, 'Рецепт')}
             </div>
 
+            <div class="mt-2">
+                <div id="${editDishEditButtonsId}">
+                    <button id="${editDishEditParentId}" class="btn btn-outline-secondary">Изменить связь</button>
+                </div>
+                <div id="${editDishEditSettingsId}">
+                </div>
+            </div>
+
 
             `;
 
@@ -1503,6 +1456,85 @@
                 byId(totalWeightChangeInputId).value = "";
 
                 renderEditDish();
+            });
+
+
+
+            onClick(editDishEditParentId, () => {
+                showElem(editDishEditSettingsId);
+                hideElem(editDishEditButtonsId);
+
+                let NO_PARENT = 'NO-PARENT';
+                let options = `
+                <option value="${NO_PARENT}_0">Без связи</option>
+                `;
+                let elems = getItemsList({
+                    foodFilter: ALWAYS_FALSE,
+                    dishFilter: (dish, dishParents) => {
+                        if (dishParents.includes(dish.id)) {
+                            return false;
+                        }
+                        return !dish.out_of_stock || dishParents.includes(dish.for_dish);
+                    }
+                });
+
+                // Build the options string
+                for (let elem of elems) {
+                    options += `
+                    <option value="${elem.type}_${elem.id}">${elem.name}</option>
+                    `;
+                }
+
+                byId(editDishEditSettingsId).innerHTML = `
+                <div class="d-flex">
+                    <div class="input-group input-group-sm h-100 flex-fill">
+                        <select class="form-select" id="${editDishEditParentSelectId}">
+                            <option value="" selected disabled></option>
+                            ${options}
+                        </select>
+                    </div>
+                    <button id=${editDishEditParentConfirmId} class="btn btn-primary">Подтвердить</button>
+                </div>
+                `;
+
+                $(`#${editDishEditParentSelectId}`).select2({
+                    theme: 'bootstrap-5',
+                    placeholder: "Выберите блюдо",
+                    dropdownParent: $(`#${editFoodModal.modalId}`),
+                    matcher: match,
+                });
+
+                fixSelect2(true);
+
+                onClick(editDishEditParentConfirmId, async () => {
+                    let chosenParent = byId(editDishEditParentSelectId).value;
+                    if (!chosenParent) {
+                        return;
+                    }
+
+                    let [type, id] = chosenParent.split("_");
+                    let newParentId;
+                    if (type === "FOOD") {
+                        return;
+                    } else if (type === "DISH") {
+                        newParentId = allDishes[id].id;
+                    } else if (type === NO_PARENT) {
+                        newParentId = null;
+                    } else {
+                        throw Error("Unknown type");
+                    }
+
+                    let result = await _post("/api/dish/reparent", {
+                        dish_id: dishId,
+                        new_parent_id: newParentId,
+                    });
+
+                    if (result) {
+                        allDishes[result.id] = result;
+                        renderEditDish();
+                    }
+                });
+
             });
 
         };

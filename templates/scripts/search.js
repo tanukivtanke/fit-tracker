@@ -87,3 +87,89 @@ class SearchFilter {
     }
 
 }
+
+const ALWAYS_FALSE = () => false;
+
+const getItemsList = (
+    {
+        currDish = null,
+        foodFilter = food => !food.is_deleted,
+        dishFilter = (dish, parents) => !dish.out_of_stock,
+    } = {}) => {
+
+    let elems = [];
+    // Collect all valid foods
+    if (foodFilter !== ALWAYS_FALSE) {
+        for (let food of Object.values(allFoods)) {
+            if (foodFilter(food)) {
+                elems.push({
+                    type: 'FOOD',
+                    id: food.id,
+                    name: food.name,
+                    last_used: food.last_used || null
+                });
+            }
+        }
+    } else {
+        console.log("Skipped foods");
+    }
+
+
+    let dishParents = currDish ? [currDish.id] : [];
+    {
+        let dish = currDish;
+        while (dish && dish.for_dish) {
+            dishParents.push(dish.for_dish);
+            dish = allDishes[dish.for_dish];
+        }
+    }
+
+    // Collect all valid dishes
+    for (let dish of Object.values(allDishes)) {
+        if (dishParents.includes(dish.id)) {
+            continue;
+        }
+        if (dishFilter(dish, dishParents)) {
+            elems.push({
+                type: 'DISH',
+                id: dish.id,
+                name: getDishFullName(dish.id),
+                last_used: dish.last_used || null,
+                for_dish: dish.for_dish || null
+            });
+        }
+    }
+
+    // Sort the elements based on your criteria
+    elems.sort((a, b) => {
+        if (a.for_dish && !b.for_dish || !a.for_dish && b.for_dish) {
+            if (a.for_dish) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
+        if (a.last_used && b.last_used) {
+            // Both have last_used; sort by most recent date first
+            const dateDiff = new Date(b.last_used) - new Date(a.last_used);
+            if (dateDiff !== 0) {
+                return dateDiff;
+            } else {
+                // Dates are the same; compare ids in decreasing order
+                return b.id - a.id;
+            }
+        } else if (a.last_used) {
+            // Only 'a' has last_used; it comes before 'b'
+            return -1;
+        } else if (b.last_used) {
+            // Only 'b' has last_used; it comes before 'a'
+            return 1;
+        } else {
+            // Neither has last_used; sort by id in decreasing order
+            return b.id - a.id;
+        }
+    });
+
+    return elems;
+}
