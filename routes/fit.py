@@ -464,8 +464,9 @@ def reparent_dish():
     received_data = request.json
 
     new_parent = received_data["new_parent_id"]
+    parent_dish = Dish.find(id=received_data["new_parent_id"])
     dish_to_reparent = Dish.find(id=received_data["dish_id"])
-    if dish_to_reparent is not None and new_parent is not None:
+    if dish_to_reparent is not None and parent_dish is not None:
         dish_to_reparent.for_dish = new_parent
         dish_to_reparent.update()
         return dish_to_reparent.json()
