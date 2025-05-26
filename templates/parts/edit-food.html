@@ -1005,6 +1005,7 @@
 
             let options = '';
             let elems = getItemsList({
+                currDish: currDish,
                 dishFilter: (dish, dishParents) => {
                     if (dishParents.includes(dish.id)) {
                         return false;
