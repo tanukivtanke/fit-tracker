@@ -232,6 +232,8 @@ def edit_dish():
 
     dish_to_change = Dish.find(id=received_data['id'])
     if dish_to_change is not None:
+        if received_data['out_of_stock'] < dish_to_change.out_of_stock:
+            dish_to_change.last_used = date.today()
         dish_to_change.name = received_data['name']
         dish_to_change.out_of_stock = received_data['out_of_stock']
         dish_to_change.update()
