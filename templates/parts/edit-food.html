@@ -448,6 +448,9 @@
                     byId(field).value = "";
                 }
 
+                // Reset the "Для блюд" switch to unchecked state
+                byId(addFoodIngredientOnlyId).checked = false;
+            
                 renderFoods();
                 renderEditDish();
             });
