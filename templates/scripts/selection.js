@@ -72,7 +72,7 @@ const setupLongPress = (element, callback, duration = 250) => {
             isLongPressActive = true;
             skipContextMenu = true;
             callback(e);
-        }, duration * 2);
+        }, duration * 1.7);
     });
 
     element.addEventListener('touchmove', (e) => {
