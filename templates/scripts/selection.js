@@ -63,7 +63,7 @@ const setupLongPress = (element, callback, duration = 250) => {
 
     // Handle touch events for mobile
     element.addEventListener('touchstart', (e) => {
-        console.log('touchstart');
+        //console.log('touchstart');
         // Store the initial touch position
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
@@ -76,7 +76,7 @@ const setupLongPress = (element, callback, duration = 250) => {
     });
 
     element.addEventListener('touchmove', (e) => {
-        console.log('touchmove');
+        //console.log('touchmove');
         
         // Get current touch position
         const currentX = e.touches[0].clientX;
@@ -95,20 +95,20 @@ const setupLongPress = (element, callback, duration = 250) => {
     });
     
     element.addEventListener('touchend', () => {
-        console.log('touchend')
+        //console.log('touchend')
         clearTimeout(timer);
         isLongPressActive = false;
     });
 
     element.addEventListener('touchcancel', () => {
-        console.log('touchcancel')
+        //console.log('touchcancel')
         clearTimeout(timer);
         isLongPressActive = false;
     });
 
     // Prevent context menu on long press
     element.addEventListener('contextmenu', (e) => {
-        console.log('contextmenu')
+        //console.log('contextmenu')
         if (isLongPressActive || skipContextMenu) {
             skipContextMenu = false;
             e.stopPropagation();
