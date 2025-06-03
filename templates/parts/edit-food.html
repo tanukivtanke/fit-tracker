@@ -71,6 +71,25 @@
         const newDishTab = `${rootId}-newDishTab`;
         const editDishTab = `${rootId}-editDishTab`;
 
+        // Function to handle food operations with error indication
+        const handleFoodOperation = async (inputGroup, operationFn) => {
+            try {
+                const result = await operationFn();
+                
+                // Remove error indication classes on success
+                if (inputGroup.classList.contains('border-danger')) {
+                    inputGroup.classList.remove('border', 'border-danger', 'rounded-2');
+                }
+                
+                return result;
+            } catch (error) {
+                // Add error indication classes on failure
+                inputGroup.classList.add('border', 'border-danger', 'rounded-2');
+                console.error('Error in food operation:', error);
+                return null;
+            }
+        };
+        
         editFoodModal.onClose(() => {
             startEditMealGroup(currEditingMealGroup);
             searchFoodMode = true;
@@ -420,39 +439,49 @@
             }
 
             onClick(addFoodButtonId, async () => {
-                let name = byId(addFoodNameId).value.trim();
+                let nameField = byId(addFoodNameId);
+                let name = nameField.value.trim();
                 let proteins = handleFloatField(addProteinsId, 0, 100, true);
                 let fats = handleFloatField(addFatsId, 0, 100, true);
                 let carbs = handleFloatField(addCarbsId, 0, 100, true);
                 let kcal = handleNumberField(addKcalId, 0, 999);
                 let portion = handleNumberField(addFoodPortionSizeId, 0, 9999);
                 let ingredientOnly = byId(addFoodIngredientOnlyId).checked;
-
-                byId(addFoodButtonId).disabled = true;
-
-                let result = await _post("/api/food/new" ,{
-                    name: name,
-                    proteins: proteins,
-                    fats: fats,
-                    carbs: carbs,
-                    kcal: kcal,
-                    portion_size: portion,
-                    ingredient_only: ingredientOnly,
-                });
-
-                if (result.id) {
-                    allFoods[result.id] = result;
-                }
-
-                for (let field of fields) {
-                    byId(field).value = "";
-                }
-
-                // Reset the "Для блюд" switch to unchecked state
-                byId(addFoodIngredientOnlyId).checked = false;
+                
+                // Get the input group for error indication
+                let inputGroup = nameField.closest('.input-group');
             
-                renderFoods();
-                renderEditDish();
+                byId(addFoodButtonId).disabled = true;
+            
+                const result = await handleFoodOperation(inputGroup, async () => {
+                    return await _post("/api/food/new", {
+                        name: name,
+                        proteins: proteins,
+                        fats: fats,
+                        carbs: carbs,
+                        kcal: kcal,
+                        portion_size: portion,
+                        ingredient_only: ingredientOnly,
+                    });
+                });
+            
+                if (result && result.id) {
+                    allFoods[result.id] = result;
+                    
+                    // Clear form fields only on success
+                    for (let field of fields) {
+                        byId(field).value = "";
+                    }
+                    
+                    // Reset the "Для блюд" switch to unchecked state
+                    byId(addFoodIngredientOnlyId).checked = false;
+                    
+                    renderFoods();
+                    renderEditDish();
+                } else {
+                    // Re-enable button if operation failed
+                    byId(addFoodButtonId).disabled = false;
+                }
             });
 
             const checkAddDishButton = () => {
@@ -642,29 +671,52 @@
                 }
 
                 onClick(e, async () => {
-                    let name = document.querySelector(`[${foodNameIdKey}="${foodId}"]`).value.trim();
-                    document.querySelector(`[${foodNameIdKey}="${foodId}"]`).value = name;
-
-                    let proteins = document.querySelector(`[${foodProteinsIdKey}="${foodId}"]`).value;
-                    let fats = document.querySelector(`[${foodFatsIdKey}="${foodId}"]`).value;
-                    let carbs = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`).value;
-                    let kcal = document.querySelector(`[${foodKcalIdKey}="${foodId}"]`).value;
-                    let portionSize = document.querySelector(`[${foodPortionSizeIdKey}="${foodId}"]`).value;
-                    let ingredientOnly = document.querySelector(`[${foodIngredientOnlyIdKey}="${foodId}"]`).checked;
-
-                    let result = await _post("/api/food/edit", {
-                        id: foodId,
-                        name: name,
-                        proteins: parseFloat(proteins),
-                        fats: parseFloat(fats),
-                        carbs: parseFloat(carbs),
-                        kcal: parseInt(kcal),
-                        portion_size: parseInt(portionSize),
-                        ingredient_only: ingredientOnly,
-                    });
-
-                    if (result.id) {
-                        allFoods[result.id] = result;
+                    let nameField = document.querySelector(`[${foodNameIdKey}="${foodId}"]`);
+                    let proteinsField = document.querySelector(`[${foodProteinsIdKey}="${foodId}"]`);
+                    let fatsField = document.querySelector(`[${foodFatsIdKey}="${foodId}"]`);
+                    let carbsField = document.querySelector(`[${foodCarbsIdKey}="${foodId}"]`);
+                    let kcalField = document.querySelector(`[${foodKcalIdKey}="${foodId}"]`);
+                    let portionSizeField = document.querySelector(`[${foodPortionSizeIdKey}="${foodId}"]`);
+                    let ingredientOnlyField = document.querySelector(`[${foodIngredientOnlyIdKey}="${foodId}"]`);
+                    
+                    // Get the parent input group to add/remove error indication
+                    let inputGroup = nameField.closest('.input-group');
+                    
+                    // Trim the name and update the field
+                    let name = nameField.value.trim();
+                    nameField.value = name;
+            
+                    let proteins = proteinsField.value;
+                    let fats = fatsField.value;
+                    let carbs = carbsField.value;
+                    let kcal = kcalField.value;
+                    let portionSize = portionSizeField.value;
+                    let ingredientOnly = ingredientOnlyField.checked;
+            
+                    try {
+                        let result = await _post("/api/food/edit", {
+                            id: foodId,
+                            name: name,
+                            proteins: parseFloat(proteins),
+                            fats: parseFloat(fats),
+                            carbs: parseFloat(carbs),
+                            kcal: parseInt(kcal),
+                            portion_size: parseInt(portionSize),
+                            ingredient_only: ingredientOnly,
+                        });
+            
+                        if (result.id) {
+                            allFoods[result.id] = result;
+                            
+                            // Remove error indication classes on success
+                            if (inputGroup.classList.contains('border-danger')) {
+                                inputGroup.classList.remove('border', 'border-danger', 'rounded-2');
+                            }
+                        }
+                    } catch (error) {
+                        // Add error indication classes on failure
+                        inputGroup.classList.add('border', 'border-danger', 'rounded-2');
+                        console.error('Error editing food:', error);
                     }
 
                     checkEditButton(foodId);
