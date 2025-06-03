@@ -242,6 +242,32 @@ def edit_dish():
         return 'Cannot edit non-existent meal', 400
 
 
+@app.route('/api/out_of_dish', methods=['POST'])
+def dish_eaten():
+    received_data = request.json
+
+    dish_to_change = Dish.find(id=received_data['id'])
+    if dish_to_change is not None:
+        dish_to_change.out_of_stock = True
+        dish_to_change.update()
+        return dish_to_change.json()
+    else:
+        return 'Cannot eat non-existent meal', 400
+
+
+@app.route('/api/out_of_dish/undo', methods=['POST'])
+def dish_actually_not_eaten():
+    received_data = request.json
+
+    dish_to_change = Dish.find(id=received_data['id'])
+    if dish_to_change is not None:
+        dish_to_change.out_of_stock = False
+        dish_to_change.update()
+        return dish_to_change.json()
+    else:
+        return 'Cannot eat non-existent meal', 400
+
+
 @app.route('/api/dish_recipe/edit', methods=['POST'])
 def edit_recipe():
     received_data = request.json
