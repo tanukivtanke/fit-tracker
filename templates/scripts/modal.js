@@ -51,6 +51,7 @@ class Modal {
                                     </div>
                                     <div class="d-flex gap-2">
                                         <button id="${this.#titleBtnsId}-delete-button" class="btn btn-sm btn-danger">${Icons.delete} Удалить</button>
+                                        <button id="${this.#titleBtnsId}-cancel-button" class="btn btn-sm btn-secondary">${Icons.undo} Отменить</button>
                                     </div>
                                 </div>
                             </div>
@@ -78,6 +79,7 @@ class Modal {
         this.titleMoveButton = byId(`${this.#titleBtnsId}-move-button`);
         this.titleCopyButton = byId(`${this.#titleBtnsId}-copy-button`);
         this.titleDeleteButton = byId(`${this.#titleBtnsId}-delete-button`);
+        this.titleCancelButton = byId(`${this.#titleBtnsId}-cancel-button`);
 
         this.modalOpened = false;
 

@@ -32,6 +32,10 @@
         deleteMealGroupFromMeal();
     });
 
+    onClick(editMealGroupModal.titleCancelButton, () => {
+        cancelMealSelection();
+    });
+
 
     /** @type {MealGroup} */
     let currEditingMealGroup = null;
@@ -120,10 +124,7 @@
             }
         }
 
-        clearSelection(SelectionType.MEAL);
-        editMealGroupModal.setupTitle(SelectionType.MEAL);
-        await renderMeals()
-        await fetchAndRenderMealGroups();
+        await cancelMealSelection();
     }
 
     const copyMealsToMealGroup = async () => {
@@ -147,10 +148,7 @@
             }
         }
 
-        clearSelection(SelectionType.MEAL);
-        editMealGroupModal.setupTitle(SelectionType.MEAL);
-        await renderMeals()
-        await fetchAndRenderMealGroups();
+        await cancelMealSelection();
     }
 
     const deleteMealGroupFromMeal = async () => {
@@ -173,11 +171,15 @@
             }
         }
 
+        await cancelMealSelection();
+    }
+
+    const cancelMealSelection = async () => {
         clearSelection(SelectionType.MEAL);
         editMealGroupModal.setupTitle(SelectionType.MEAL);
         await renderMeals()
         await fetchAndRenderMealGroups();
-    }
+    };
 
     const setEditMealGroupHtml = async () => {
         if (!editMealGroupModal.isOpen()) {
@@ -344,6 +346,34 @@
                     </div>`
         };
 
+       const checkSelectionTitle = () => {
+           editMealGroupModal.setupTitle(SelectionType.MEAL);
+
+            if (isSelectionActive(SelectionType.MEAL)) {
+                let isAllInCurrentGroup = true;
+                for (let mealId of getSelectedItems(SelectionType.MEAL)) {
+                    console.log(mealMap[mealId])
+                    console.log(currEditingMealGroup.id)
+                    if (mealMap[mealId].meal_group_id !== currEditingMealGroup.id) {
+                        isAllInCurrentGroup = false;
+                        break;
+                    }
+                }
+                console.log('isAllInCurrentGroup ' + isAllInCurrentGroup)
+                if (isAllInCurrentGroup) {
+                    editMealGroupModal.titleMoveButton.disabled = true;
+                    editMealGroupModal.titleCopyButton.disabled = true;
+                    showElem(editMealGroupModal.titleDeleteButton);
+                    hideElem(editMealGroupModal.titleCancelButton);
+                } else {
+                    editMealGroupModal.titleMoveButton.disabled = false;
+                    editMealGroupModal.titleCopyButton.disabled = false;
+                    hideElem(editMealGroupModal.titleDeleteButton);
+                    showElem(editMealGroupModal.titleCancelButton);
+                }
+            }
+       };
+
         let meals = ``;
         for (let meal of mealsForMealGroup) {
 
@@ -381,26 +411,7 @@
                         byId(mealIdInner).classList.remove('user-selected');
                     }
 
-                    editMealGroupModal.setupTitle(SelectionType.MEAL);
-
-                    if (isSelectionActive(SelectionType.MEAL)) {
-                        let isAllInCurrentGroup = true;
-                        for (let mealId of getSelectedItems(SelectionType.MEAL)) {
-                            console.log(mealMap[mealId])
-                            console.log(currEditingMealGroup.id)
-                            if (mealMap[mealId].meal_group_id !== currEditingMealGroup.id) {
-                                isAllInCurrentGroup = false;
-                                break;
-                            }
-                        }
-                        if (isAllInCurrentGroup) {
-                            editMealGroupModal.titleMoveButton.disabled = true;
-                            editMealGroupModal.titleCopyButton.disabled = true;
-                        } else {
-                            editMealGroupModal.titleMoveButton.disabled = false;
-                            editMealGroupModal.titleCopyButton.disabled = false;
-                        }
-                    }
+                    checkSelectionTitle();
                 };
 
                 setupSelection();
@@ -421,6 +432,9 @@
             }
             ` + meals;
         }
+
+        // in case 0 meals in group
+        setTimeout(checkSelectionTitle);
 
         if (meals) {
             meals = `<hr class="my-3">` + meals;

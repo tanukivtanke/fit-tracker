@@ -9,6 +9,7 @@ class Icons {
 
     static pencil = `<i class="fa-solid fa-pencil"></i>`;
     static delete = `<i class="fa-solid fa-trash-can"></i>`;
+    static undo = `<i class="fa-solid fa-rotate-left"></i>`;
 
     static warning = `<i class="fa-solid fa-circle-exclamation text-warning-darker"></i>`;
 
