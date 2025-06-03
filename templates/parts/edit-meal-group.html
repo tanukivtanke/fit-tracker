@@ -14,6 +14,9 @@
         renderMealGroups();
         editMealGroupModal.titleMoveButton.disabled = false;
         editMealGroupModal.titleCopyButton.disabled = false;
+
+        lastAddedMealId = null;
+        lastDishChangedMealId = null;
     });
 
     onClick(editMealGroupModal.deleteButton, () => {
@@ -39,6 +42,8 @@
 
     /** @type {MealGroup} */
     let currEditingMealGroup = null;
+    let lastAddedMealId = null;
+    let lastDishChangedMealId = null;
 
     const addMealToMealGroup = async () => {
 
@@ -74,6 +79,13 @@
 
         if (result.id) {
             mealMap[result.id] = result;
+
+            if (dishId !== null) {
+                lastAddedMealId = result.id;
+            } else {
+                lastAddedMealId = null;
+            }
+            lastDishChangedMealId = null;
         }
 
         await setEditMealGroupHtml();
@@ -340,10 +352,12 @@
             } else if (m.food_id) {
                 name = allFoods[m.food_id].name;
             }
-            return `<div class='me-2 w-100 d-flex justify-content-between align-items-center'>
-                    <span>${name}</span>
-                    <span>${m.amount}&nbsp;гр.</span>
-                    </div>`
+            return `
+            <div class='me-2 w-100 d-flex justify-content-between align-items-center'>
+                <span>${name}</span>
+                <span>${m.amount}&nbsp;гр.</span>
+            </div>
+            `;
         };
 
        const checkSelectionTitle = () => {
@@ -359,7 +373,6 @@
                         break;
                     }
                 }
-                console.log('isAllInCurrentGroup ' + isAllInCurrentGroup)
                 if (isAllInCurrentGroup) {
                     editMealGroupModal.titleMoveButton.disabled = true;
                     editMealGroupModal.titleCopyButton.disabled = true;
@@ -418,19 +431,73 @@
             });
 
             const showDeleteButton = false;
-            meals = `
-            ${
-               HtmlPresets.makeRow(`
-                ${renderMeal(meal)}
+            const showOutOfStock = meal.id === lastAddedMealId;
+            const outOfStockId = generateUUID();
+            const showOutOfStockUndo = meal.id === lastDishChangedMealId;
+            const outOfStockUndoId = generateUUID();
 
-                ${showDeleteButton ? `
-                <button class="btn btn-sm btn-danger"
-                    onclick="deleteMealFromMealGroup(event, ${meal.id})">Удалить</button>
-                ` : ''}
-                `,
-                {fs: 6, ps: 2, id: mealId, innerId: mealIdInner})
-            }
+            meals = `
+            <div class="d-flex align-items-center w-100 gap-2">
+                <div class="w-100">
+                ${
+                   HtmlPresets.makeRow(`
+                   ${renderMeal(meal)}
+
+
+                    ${showDeleteButton ? `
+                    <button class="btn btn-sm btn-danger"
+                        onclick="deleteMealFromMealGroup(event, ${meal.id})">Удалить</button>
+                    ` : ''}
+                    `,
+                    {fs: 6, ps: 2, id: mealId, innerId: mealIdInner})
+                }
+                </div>
+                <div class="pb-2 ${showOutOfStock ? '' : 'd-none'}">
+                    <div id="${outOfStockId}" class="btn btn-outline-primary p-2">Не&nbsp;осталось</div>
+                </div>
+                <div class="pb-2 ${showOutOfStockUndo ? '' : 'd-none'}">
+                    <div id="${outOfStockUndoId}" class="btn btn-outline-secondary p-2">Отменить</div>
+                </div>
+            </div>
             ` + meals;
+
+            if (showOutOfStock) {
+                setTimeout(() => {
+                    onClick(outOfStockId, async () => {
+                        let result = await _post("/api/out_of_dish", {
+                            id: meal.dish_id,
+                        });
+
+                        if (result.id) {
+                            allDishes[result.id] = result;
+
+                            lastDishChangedMealId = lastAddedMealId;
+                            lastAddedMealId = null;
+                        }
+
+                        await setEditMealGroupHtml();
+                    });
+                });
+            }
+
+            if (showOutOfStockUndo) {
+                setTimeout(() => {
+                    onClick(outOfStockUndoId, async () => {
+                        let result = await _post("/api/out_of_dish/undo", {
+                            id: meal.dish_id,
+                        });
+
+                        if (result.id) {
+                            allDishes[result.id] = result;
+
+                            lastAddedMealId = lastDishChangedMealId;
+                            lastDishChangedMealId = null;
+                        }
+
+                        await setEditMealGroupHtml();
+                    })
+                })
+            }
         }
 
         // in case 0 meals in group
