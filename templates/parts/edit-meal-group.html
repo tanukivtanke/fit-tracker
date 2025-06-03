@@ -16,7 +16,7 @@
         editMealGroupModal.titleCopyButton.disabled = false;
     });
 
-    editMealGroupModal.deleteButton.addEventListener("click", () => {
+    onClick(editMealGroupModal.deleteButton, () => {
         deleteMealGroup(currEditingMealGroup.id);
     });
 
