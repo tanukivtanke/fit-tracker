@@ -403,11 +403,13 @@ def duplicate_meal():
                 calc_kcal=meal_to_copy.calc_kcal,
             )
             db.session.add(new_meal_ing)
-            res.append(new_meal_ing.dict())
+            res.append(new_meal_ing)
 
         db.session.commit()
 
-    return jsonify(res)
+        for ingredient in res:
+            db.session.refresh(ingredient)
+        return jsonify([i.dict() for i in res])
 
 
 @app.route('/api/meal/delete_many', methods=['DELETE'])
@@ -463,11 +465,13 @@ def duplicate_dish_ingredient():
                 amount=dish_ing_to_copy.amount,
             )
             db.session.add(new_dish_ing)
-            res.append(new_dish_ing.dict())
+            res.append(new_dish_ing)
 
         db.session.commit()
 
-    return jsonify(res)
+        for ingredient in res:
+            db.session.refresh(ingredient)
+        return jsonify([i.dict() for i in res])
 
 
 @app.route('/api/dish_ingredient/delete_many', methods=['DELETE'])
