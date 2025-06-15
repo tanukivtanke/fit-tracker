@@ -886,7 +886,14 @@
             } else {
                 name = allDishes[dishId].name.trim();
             }
-            let outOfStock = !outOfStockField.checked;
+            
+            let outOfStock = false;
+            if (!isDishFolder(dishId) && outOfStockField) {
+                outOfStock = !outOfStockField.checked;
+            } else {
+                // For folders, maintain existing out_of_stock value
+                outOfStock = allDishes[dishId].out_of_stock;
+            }
 
             if (!name.length) {
                 return;
@@ -904,40 +911,67 @@
         };
 
         const getDishHtml = (dish, nameEditable=true) => {
-            let nutrients = calcNutrientsFromDish(dish.id);
-            nutrients.round();
-
-            return `
-            <hr>
-            <div class="">
-                <div class="d-flex align-items-start">
-                    <div class="input-group mb-2-5 me-2">
-                        ${
-                            nameEditable ? `
+            const isFolder = isDishFolder(dish.id);
+            let nutrients = null;
+            
+            if (!isFolder) {
+                nutrients = calcNutrientsFromDish(dish.id);
+                nutrients.round();
+            }
+        
+            if (isFolder) {
+                return `
+                <hr>
+                <div class="">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </span>
+                            ${
+                                nameEditable ? `
                             <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name.replace(/"/g, '&quot;')}">
                             ` : `
                             <div ${dishNameIdKey}=${dish.id} class="form-control div-hover">${getDishFullName(dish.id)}</div>
                             `
-                        }
-
+                            }
+                            <button ${dishButtonKey}=${dish.id} class="btn btn-primary">Открыть</button>
+                        </div>
                     </div>
-                    ${HtmlPresets.switch('',  '', '', !dish.out_of_stock, true, 6, `${dishOutOfStockIdKey}=${dish.id}`)}
                 </div>
-                <div class="d-flex justify-content-end">
-                    <div class="input-group">
-                      <span class="input-group-text py-025 proteins-bg">Б</span>
-                      <input type="text" class="form-control py-025 bg-white" value="${nutrients.proteins}" disabled>
-                      <span class="input-group-text py-025 fats-bg">Ж</span>
-                      <input type="text" class="form-control py-025 bg-white" value="${nutrients.fats}" disabled>
-                      <span class="input-group-text py-025 carbs-bg">У</span>
-                      <input type="text" class="form-control py-025 bg-white" value="${nutrients.carbs}" disabled>
-                      <span class="input-group-text py-025 kcal-bg">Кк</span>
-                      <input type="text" class="form-control py-025 bg-white" value="${nutrients.kcal}" disabled>
+                `;
+            } else {
+                return `
+                <hr>
+                <div class="">
+                    <div class="d-flex align-items-start">
+                        <div class="input-group mb-2-5 me-2">
+                            ${
+                                nameEditable ? `
+                                <input ${dishNameIdKey}=${dish.id} type="text" class="form-control" value="${dish.name.replace(/"/g, '&quot;')}">
+                                ` : `
+                                <div ${dishNameIdKey}=${dish.id} class="form-control div-hover">${getDishFullName(dish.id)}</div>
+                                `
+                            }
+                        </div>
+                        ${HtmlPresets.switch('',  '', '', !dish.out_of_stock, true, 6, `${dishOutOfStockIdKey}=${dish.id}`)}
                     </div>
-                    <button ${dishButtonKey}=${dish.id} class="btn btn-primary ms-2 py-025">Изменить</button>
+                    <div class="d-flex justify-content-end">
+                        <div class="input-group">
+                          <span class="input-group-text py-025 proteins-bg">Б</span>
+                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.proteins}" disabled>
+                          <span class="input-group-text py-025 fats-bg">Ж</span>
+                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.fats}" disabled>
+                          <span class="input-group-text py-025 carbs-bg">У</span>
+                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.carbs}" disabled>
+                          <span class="input-group-text py-025 kcal-bg">Кк</span>
+                          <input type="text" class="form-control py-025 bg-white" value="${nutrients.kcal}" disabled>
+                        </div>
+                        <button ${dishButtonKey}=${dish.id} class="btn btn-primary ms-2 py-025">Открыть</button>
+                    </div>
                 </div>
-            </div>
-            `;
+                `;
+            }
         };
 
         const setDishesCallbacks = (nameCallback=null) => {
@@ -1029,8 +1063,11 @@
                         continue;
                     }
 
-                    // Filter based on folder status if showFoldersOnly is true
-                    if (showFoldersOnly && !isDishFolder(dish.id)) {
+                    const isFolder = isDishFolder(dish.id);
+                    
+                    // Don't show folders if folder mode is off
+                    // Show only folders if folder mode is on
+                    if ((showFoldersOnly && !isFolder) || (!showFoldersOnly && isFolder)) {
                         continue;
                     }
                 
