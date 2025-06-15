@@ -70,6 +70,20 @@
 
         const newDishTab = `${rootId}-newDishTab`;
         const editDishTab = `${rootId}-editDishTab`;
+        const showFoldersButtonId = `${rootId}-showFoldersButtonId`;
+        
+        let showFoldersOnly = false;
+        
+        const isDishFolder = (dishId) => {
+            // Check if there are any dish ingredients inside this dish
+            const hasIngredients = Object.values(allDishIngredients).some(ingredient => ingredient.dish_id === dishId);
+            
+            // Check if there are any recipes (dishes with for_dish pointing to this dish)
+            const hasRecipes = Object.values(allDishes).some(dish => dish.for_dish === dishId);
+            
+            // Dish is considered folder if it has no ingredients but has recipes
+            return !hasIngredients && hasRecipes;
+        };
 
         // Function to handle food operations with error indication
         const handleFoodOperation = async (inputGroup, operationFn) => {
@@ -295,7 +309,13 @@
 
                     <hr>
 
-                    <div class="opacity-50" style="margin-bottom: -1rem;" >Добавленные блюда</div>
+                    <div class="d-flex justify-content-between align-items-end">
+                        <div class="opacity-50" style="margin-bottom: -1rem;" >Добавленные блюда</div>
+                        <button id="${showFoldersButtonId}" class="btn btn-sm btn-outline-secondary px-4 py-2 fs-3 w-50"
+                            style="margin-top: -1rem;margin-bottom: -1rem;">
+                            <i class="fa-regular fa-folder-open"></i>
+                        </button>
+                    </div>
 
                     <div id="${allDishesId}"></div>
 
@@ -382,6 +402,19 @@
 
             onClick(dishSearchIconDiv, () => {
                 searchAllDishesMode = !searchAllDishesMode;
+                renderDishes();
+            });
+            
+            onClick(showFoldersButtonId, () => {
+                showFoldersOnly = !showFoldersOnly;
+                const folderBtn = byId(showFoldersButtonId);
+                if (showFoldersOnly) {
+                    folderBtn.classList.remove('btn-outline-secondary');
+                    folderBtn.classList.add('btn-secondary');
+                } else {
+                    folderBtn.classList.remove('btn-secondary');
+                    folderBtn.classList.add('btn-outline-secondary');
+                }
                 renderDishes();
             });
 
@@ -996,6 +1029,11 @@
                         continue;
                     }
 
+                    // Filter based on folder status if showFoldersOnly is true
+                    if (showFoldersOnly && !isDishFolder(dish.id)) {
+                        continue;
+                    }
+                
                     dishesCount++;
                     if (dishesCount > MAX_ENTRIES_IN_LIST && dish.out_of_stock && !searchAllDishesMode) {
                         break;
